@@ -1,31 +1,41 @@
-##### GIT AND GITHUB #####
+##### GITHUB RSTUDIO CONNECT #####
+#################################################
+
 
 ## install if needed (do this exactly once):
 ## install.packages("usethis")
 
+## STEP 1
 library(usethis)
 use_git_config(
   user.name = "helenesandsten", 
   user.email = "sandstenhelene@gmail.com"
 )
 
-
-## connect Rstudio and github
-create_github_token()
+## STEP 2
+## to connect Rstudio and github to new project
+create_github_token() # create token and copy the PAT
 gitcreds::gitcreds_set()
-git_vaccinate()
+git_vaccinate() # always vaccinate
 
-## 
-use_git()
-use_github()
-usethis::git_sitrep()
+## STEP 3
+usethis::use_git() 
+usethis::use_github()  
+usethis::git_sitrep() 
 
-# trying to commit
-# trying to commit after lunch
+#################################################
+#################################################
 
-usethis::create_github_token()
-gitcreds::gitcreds_set()
-usethis::edit_r_environ()
+## IF CERTAIN ERROR MESSAGE
+## https://community.rstudio.com/t/troubleshooting-github-tokens/115489
 
+## STEP 4
+# delete the line GITHUB_PAT=xxx in R-environment
+usethis::edit_r_environ() 
 
+## STEP 5
+# restart R 
+
+## STEP 6
+# go back to STEP 2
 
