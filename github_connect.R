@@ -18,12 +18,14 @@ git_vaccinate()
 ## 
 use_git()
 use_github()
+usethis::git_sitrep()
 
 # trying to commit
 # trying to commit after lunch
 
-
-
+usethis::create_github_token()
+gitcreds::gitcreds_set()
+usethis::edit_r_environ()
 
 
 
