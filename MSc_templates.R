@@ -15,3 +15,18 @@ plotname <- ggplot(data = DF, aes(x = , y = )) +
 xlab(label)
 
 ylab(label)
+
+
+### FILTERS
+# # only warming 
+#   filter(grazing == "C") %>% 
+#   filter(Nlevel == "1" & "2" & "3") %>% 
+# 
+# # only nitrogen
+#   filter(warming == "A") %>% 
+#   filter(grazing == "C") %>% 
+# 
+# # only grazing 
+#   filter(warming == "A") %>% 
+#   filter(Nlevel == "1" & "2" & "3") %>% 
+    
