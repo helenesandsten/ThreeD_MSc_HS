@@ -6,11 +6,6 @@ source("ThreeD_load_packages.R")
 ## import data (excel) --------------------------------------------------
 
 roots.df1 <- read_excel("Data/ThreeD_rootingrowthcores_2021.xlsx") 
-names(roots.df1)
-str(roots.df1)
-
-View(roots.df1)
-
 
 ## clean data ----------------------------------------------------------
 # fixing dates
