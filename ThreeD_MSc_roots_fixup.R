@@ -18,8 +18,7 @@ roots.df <- roots.df1 %>%
   mutate(dateRIC_washed = ymd(dateRIC_washed)) %>% # change format to date
   mutate(date_roots_dried = ymd(date_roots_dried)) %>% # change format to date
   mutate(root_mass_g = total_mass_g - alutray_mass_g) %>% # new column with root mass 
-  mutate_if(is.character, as.factor) %>% # change to factor 
-  mutate(Nlevel = as.factor(Nlevel))
+  mutate_if(is.character, as.factor)  # change to factor 
 
 
 ### CSV FILES ----------------------------------------------------------
