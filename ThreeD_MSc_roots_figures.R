@@ -2,9 +2,6 @@
 
 source("ThreeD_MSc_roots_fixup.R")
 
-names(roots.df)
-str(roots.df)
-
 # plot of rootmass and RIC depth
 roots_plot1 <- ggplot(data = roots.df, 
                       aes(x = root_mass_g, y = RIC_length_cm), 
@@ -19,22 +16,62 @@ roots_plot1
 
 # plot root biomass - warming 
 plot_roots_w <- roots.df %>% 
-  filter(grazing == "C") %>% # only non-grazed pltos
-  filter(Nlevel == 1 & 4 & 10) %>% # zero N 
+  filter(grazing == "C") %>% 
+  filter(Nlevel == 1 & 2 & 3) %>% 
   ggplot(data = roots.df, mapping = aes(x = warming, y = root_mass_g, fill = warming)) +
   geom_boxplot(fill = c("#fecc5c", "#fd8d3c")) +
   theme_bw(base_size = 20) +
   labs(title = "Effect of warming on root growth", x = "warming", y = "Root mass (g)") 
 plot_roots_w
 
-# plot root biomass - nitrogen
-plot_roots_n <- roots.df %>% 
-  filter(warming == "A") %>% # only non-grazed pltos
-  filter(grazing == "C") %>% # zero N 
-  ggplot(data = roots.df, mapping = aes(x = Nlevel, y = root_mass_g, fill = Nlevel)) +
-  geom_point(fill = Nlevel) +
+# plot root biomass - nitrogen (kg)
+labels_nlevel <- c("0", "0", "0", "0.5", "1", "5", "10", "50", "100", "150")
+
+plot_roots_nkg <- roots.df %>% 
+  filter(warming == "A") %>% 
+  filter(grazing == "C") %>% 
+  ggplot(data = roots.df, 
+         mapping = aes(x = Nlevel, y = root_mass_g, 
+                       group = Nlevel, fill = Nlevel)) +
+  geom_boxplot(fill = "cornflowerblue") +
+  theme_bw(base_size = 20) +
+  labs(title = "Effect of Nitrogen on root growth", 
+       x = "N kg/ha/y", 
+       y = "Root mass (g)") +
+  scale_x_discrete(labels = labels_nlevel)
+plot_roots_nkg
+
+# plot root biomass - nitrogen (levels)
+plot_roots_nlvl <- roots.df %>% 
+  filter(warming == "A") %>% 
+  filter(grazing == "C") %>% 
+  ggplot(data = roots.df, 
+         mapping = aes(x = Nlevel, y = root_mass_g,
+                       group = Nlevel, fill = Nlevel)) +
+  geom_boxplot(fill = "cornflowerblue") +
   theme_bw(base_size = 20) +
   labs(title = "Effect of Nitrogen on root growth", x = "N level", y = "Root mass (g)") 
-plot_roots_n
+plot_roots_nlvl
 
 
+
+# plot root biomass - grazing 
+labels_grz <- c("control", "intensive", "medium", "natural")
+
+plot_roots_grz <- roots.df %>% 
+  filter(warming == "A") %>% 
+  filter(Nlevel == 1 & 2 & 3) %>% 
+  ggplot(data = roots.df, mapping = aes(x = grazing, y = root_mass_g, fill = grazing)) +
+  geom_boxplot() +
+  theme_bw(base_size = 20) +
+  labs(title = "Effect of grazing on root growth", x = "Grazing", y = "Root mass (g)") +
+  scale_x_discrete(labels = labels_grz) +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c("steelblue2","tan1","khaki1","springgreen3")) 
+plot_roots_grz
+
+  
+  
+
+  
+  
