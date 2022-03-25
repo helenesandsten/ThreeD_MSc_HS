@@ -54,7 +54,6 @@ plot_roots_nlvl <- roots.df %>%
 plot_roots_nlvl
 
 
-
 # plot root biomass - grazing 
 labels_grz <- c("control", "intensive", "medium", "natural")
 
