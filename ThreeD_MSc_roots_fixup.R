@@ -14,32 +14,12 @@ View(roots.df1)
 
 ## clean data ----------------------------------------------------------
 # fixing dates
-roots.df1 %>% 
-  ymd("dateRIC_washed") %>% 
-  str()
-
-
-
-# roots.df1 %>% 
-#   
-#   separate(col = dateRIC_washed, # separate column into several
-#            into = c("year", "month", "day"), ".") %>% 
-#   str(roots.df1)
-  
-# calculating root biomass
-roots.df2 <- roots.df1 %>% 
+roots.df <- roots.df1 %>% 
+  mutate(dateRIC_washed = ymd(dateRIC_washed)) %>% # change format to date
+  mutate(date_roots_dried = ymd(date_roots_dried)) %>% # change format to date
   mutate(root_mass_g = total_mass_g - alutray_mass_g) %>% # new column with root mass 
-  #mutate(dateRIC_washed1 = str_remove(dateRIC_washed, "\\.$")) %>% # remove last dot from date
-  #mutate(date_roots_dried1 = str_remove(date_roots_dried, "\\.$")) %>% 
-  #select(-c(dateRIC_washed, date_roots_dried))  # deleting columns 
-  #mutate_if(is.character, as.factor) %>% # change to factor
-
-str(roots.df2)
-
-roots.df2 <- ymd(dateRIC_washed1)
-
-#mutate(dateRIC_washed = as.numeric(str_remove(dateRIC_washed, ".")), dateRIC_washed)
-
+  mutate_if(is.character, as.factor) %>% # change to factor 
+  mutate(Nlevel = as.factor(Nlevel))
 
 
 ### CSV FILES ----------------------------------------------------------
