@@ -60,10 +60,12 @@ labels_grz <- c("control", "intensive", "medium", "natural")
 plot_roots_grz <- roots.df %>% 
   filter(warming == "A") %>% 
   filter(Nlevel == 1 & 2 & 3) %>% 
-  ggplot(data = roots.df, mapping = aes(x = grazing, y = root_mass_g, fill = grazing)) +
+  ggplot(data = roots.df, 
+         mapping = aes(x = grazing, y = root_mass_g, fill = grazing)) +
   geom_boxplot() +
   theme_bw(base_size = 20) +
-  labs(title = "Effect of grazing on root growth", x = "Grazing", y = "Root mass (g)") +
+  labs(title = "Effect of grazing on root growth", 
+       x = "Grazing", y = "Root mass (g)") +
   scale_x_discrete(labels = labels_grz) +
   theme(legend.position = "none") +
   scale_fill_manual(values = c("steelblue2","tan1","khaki1","springgreen3")) 
