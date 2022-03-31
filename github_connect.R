@@ -31,7 +31,7 @@ usethis::git_sitrep()
 
 ## STEP 4
 # delete the line GITHUB_PAT=xxx in R-environment
-usethis::edit_r_environ() 
+#usethis::edit_r_environ() 
 
 ## STEP 5
 # restart R 
