@@ -96,23 +96,23 @@ View()
 
 
 
-
-## VISUALIZING DATA
-soil_plot_1 <- ggplot(data = soil.df, aes(x = burn_mass1, y = burn_mass2)) +
-       geom_point(color = "blue", size = 3, alpha = 0.5) 
-soil_plot_1
-
-
-## FILTER OUT OUTLIERS FROM PLOT
-## INVESTIGATING WHY THEY ARE OUTLIERS
-soil.df %>% 
-  filter(burn_mass1>12, burn_mass2<11.5) %>% # bottom outlier
-  select(alutray_ID) # VIK W B7 C
-
-soil.df %>% 
-  filter(burn_mass1<12, burn_mass2>12) %>% # top outlier
-  select(alutray_ID) # VIK W B5 I 
-  
+# 
+# ## VISUALIZING DATA
+# soil_plot_1 <- ggplot(data = soil.df, aes(x = burn_mass1, y = burn_mass2)) +
+#        geom_point(color = "blue", size = 3, alpha = 0.5) 
+# soil_plot_1
+# 
+# 
+# ## FILTER OUT OUTLIERS FROM PLOT
+# ## INVESTIGATING WHY THEY ARE OUTLIERS
+# soil.df %>% 
+#   filter(burn_mass1>12, burn_mass2<11.5) %>% # bottom outlier
+#   select(alutray_ID) # VIK W B7 C
+# 
+# soil.df %>% 
+#   filter(burn_mass1<12, burn_mass2>12) %>% # top outlier
+#   select(alutray_ID) # VIK W B5 I 
+#   
 
 
 
