@@ -63,23 +63,24 @@ source("R scripts/transformation_plan.R")
 # 
 # 
 # 
-# # plot root biomass - grazing 
-# labels_grz <- c("control", "intensive", "medium", "natural")
-# 
-# plot_roots_grz <- roots.df %>% 
-#   filter(warming == "A") %>% 
-#   filter(Nlevel == 1 & 2 & 3) %>% 
-#   ggplot(mapping = aes(x = grazing, y = root_mass_g, fill = grazing)) +
-#   geom_boxplot() +
-#   theme_bw(base_size = 20) +
-#   labs(title = "Effect of grazing on root growth", 
-#        x = "Grazing", y = "Root mass (g)") +
-#   scale_x_discrete(labels = labels_grz) +
-#   theme(legend.position = "none") +
-#   scale_fill_manual(values = c("steelblue2","tan1","khaki1","springgreen3")) 
-# plot_roots_grz
+# plot root biomass - grazing
+labels_grz <- c("control", "intensive", "medium", "natural")
 
-## megaplot roots
+plot_roots_grz <- roots.df %>%
+  filter(warming == "A") %>%
+  filter(Nlevel == 1 & 2 & 3) %>%
+  ggplot(mapping = aes(x = grazing, y = root_mass_g, fill = grazing)) +
+  geom_boxplot() +
+  theme_bw(base_size = 20) +
+  labs(title = "Effect of grazing on root growth",
+       x = "Grazing", y = "Root mass (g)") +
+  scale_x_discrete(labels = labels_grz) +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = colors_g)
+plot_roots_grz
+
+## megaplot roots 
+## plot for simple model 
 plot_roots_mega <- roots.df %>% 
   group_by(Namount_kg_ha_y, origSiteID, warming, grazing) %>% 
   summarise(root_mass_cm3 = mean(root_mass_cm3)) %>% 
