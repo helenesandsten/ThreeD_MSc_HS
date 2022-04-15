@@ -9,8 +9,10 @@ library("readr")
 #devtools::install_github("Between-the-Fjords/dataDownloader")
 library("dataDownloader")
 #library(validate)
-library(usethis)
-
+library("usethis")
+library("broom")
+#library("RColorBrewer")
+library("performance") 
 
 # Stuff
 pn <- . %>% print(n = Inf)
