@@ -7,16 +7,13 @@
 # MSc_HS_Manuscript_YYYY.MM.DD.Rmd
 
 ### SIGNLE SCRIPTS
-# ThreeD_MSc_DATASET_import.R
-# ThreeD_MSc_DATASET_fixup.R
-# ThreeD_MSc_DATASET_figures.R
-# ThreeD_MSc_DATASET_analysis.R
+# import_data.R ---> fixup_data.R ---> analysis_data.R ---> figures_data.R
 
-#   eks: ThreeD_MSc_roots_figures.R
-#   eks: ThreeD_MSc_soil_analysis.R 
+# all scripts go into their respective _plans
+# import_plan.R ---> transformation_plan.R ---> analysis_plan.R ---> figures_plan.R 
 
-
-
+# all plans go into combined_plan.R 
+# combined_plan.R goes into manuscript_plan (?)
 
 
 ### FIGURES ---------------------------------------------------------
