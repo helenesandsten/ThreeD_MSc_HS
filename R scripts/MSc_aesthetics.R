@@ -16,5 +16,6 @@ colors_w <- c("Ambient" = "orange", "Warmed" = "red")
 # colors_n 
 #scale_fill_viridis(option = "mako") 
 
-
+# colors for teabags
+colors_tea <- c("olivedrab4", "orangered3")
 
