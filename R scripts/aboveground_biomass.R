@@ -14,7 +14,13 @@ agb.df <- agb.raw.df %>%
          destBlockID = as.factor(destBlockID),
          destPlotID = as.factor(destPlotID)) %>% 
   mutate(Namount_kg_ha_y = log(Namount_kg_ha_y +1)) %>% 
-  filter(year == 2021) 
+  filter(year == 2021) %>% 
+  mutate(origSiteID = factor(origSiteID, levels = c("Lia", "Joa"))) %>% 
+  mutate(grazing = recode(grazing, 
+                          "C" = "Control", "I" = "Intensive", 
+                          "M" = "Medium", "N" = "Natural"),
+         warming = recode(warming, 
+                          "A" = "Ambient", "W" = "Warmed"))
 
 ## analysis agb ----------------------------------------
 ## writes numbers out instead of on exponential form 
@@ -85,6 +91,25 @@ agb.df %>%
   filter(warming == "W", biomass > 35) %>% # top W outlier
   select(turfID) 
 
-
+## plot aboveground biomass ~ w, n, g
+plot_agb_wng <- agb.df %>% 
+  group_by(Namount_kg_ha_y, origSiteID, warming, grazing) %>% 
+  summarise(biomass = mean(biomass)) %>% 
+  ggplot(mapping = aes(x = log(Namount_kg_ha_y +1), 
+                       y = biomass, 
+                       color = warming,
+                       linetype = warming,
+                       shape = warming)) +
+  geom_point() + 
+  theme_minimal(base_size = 20) + 
+  scale_color_manual(values = colors_w) + 
+  scale_linetype_manual(values = c("longdash", "solid")) + 
+  scale_shape_manual(values = c(1, 16)) + 
+  labs(title = "Effect of warming, nitrogen and grazing on aboveground biomass", 
+       x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)), 
+       y = bquote(Biomass~(g))) + 
+  facet_grid(origSiteID ~ grazing) +
+  geom_smooth(method = "lm")
+plot_agb_wng
 
 
