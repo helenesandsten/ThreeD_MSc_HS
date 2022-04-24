@@ -28,21 +28,11 @@ mutate(dateRIC_washed = ymd(dateRIC_washed),
 ## writes numbers out instead of on exponential form 
 options(scipen = 100, digits = 4)
 
-### model: roots ~ warming x nitrogen 
-roots.df %>%
-  group_by(origSiteID, grazing) %>% # 
-  nest() %>% # makes little dataframes inside my data, closed
-  mutate( # makes column - do we want that?
-    model.roots.wn = map(data, # runs model in each litte dataset
-                         ~ lm(root_mass_cm3 ~ Namount_kg_ha_y * warming, 
-                              data = .)), 
-    result.roots.wn = map(model.roots.wn, tidy)) %>%
-  unnest(result.roots.wn) %>% # opens the nested dataframes 
-  View() 
 
+## AUDS WAY OF MODELLING ---------------------------------------
 
-### model: roots ~ warming x nitrogen x grazing 
-roots.df %>%
+### model: roots ~ warming * nitrogen * grazing 
+model.roots.wng <- roots.df %>%
   group_by(origSiteID) %>% # 
   nest() %>% # makes little dataframes inside my data, closed
   mutate( # makes column - do we want that?
@@ -50,10 +40,10 @@ roots.df %>%
                           ~ lm(root_mass_cm3 ~ Namount_kg_ha_y * warming * grazing, 
                                data = .)),
     result.roots.wng = map(model.roots.wng, tidy)) %>%
-  unnest(result.roots.wng) %>% # opens the nested dataframes 
-  View() 
+  unnest(result.roots.wng) #%>% # opens the nested dataframes 
+  #View() 
 
-## making dataframe with model output 
+## making dataframe with model output of roots ~ w * n * g
 output.roots.wng <- roots.df %>%
   group_by(origSiteID) %>% # 
   nest() %>% # makes little dataframes inside my data, closed
@@ -67,6 +57,58 @@ output.roots.wng <- roots.df %>%
 
 View(output.roots.wng)
 
+
+### model: roots ~ warming * nitrogen 
+roots.df %>%
+  group_by(origSiteID, grazing) %>% # 
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate( # makes column - do we want that?
+    model.roots.wn = map(data, # runs model in each litte dataset
+                         ~ lm(root_mass_cm3 ~ Namount_kg_ha_y * warming, 
+                              data = .)), 
+    result.roots.wn = map(model.roots.wn, tidy)) %>%
+  unnest(result.roots.wn) %>% # opens the nested dataframes 
+  View() 
+
+## making dataframe with model output 
+output.roots.wn <- roots.df %>%
+  group_by(origSiteID) %>% # 
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate( # makes column - do we want that?
+    model.roots.wn = map(data, # runs model in each litte dataset
+                          ~ lm(root_mass_cm3 ~ Namount_kg_ha_y * warming, 
+                               data = .)),
+    result.roots.wn = map(model.roots.wn, tidy)) %>%
+  unnest(result.roots.wn) %>% # opens the nested dataframes 
+  select(origSiteID, term, estimate, std.error, statistic, p.value)
+
+View(output.roots.wn)
+
+
+## checking model performance 
+model_performance(model.roots.wng)
+
+## HELENES WAY OF MODELLING ---------------------------------------
+## root model 1: roots ~ w * n * g
+model_roots_wng <- 
+  lm(root_mass_cm3 ~ Namount_kg_ha_y * warming * grazing, data = roots.df)
+
+## checking model performance
+model_performance(model_roots_wng) # performs badly?
+
+## root model 2: roots ~ w * n 
+model_roots_wn <- 
+  lm(root_mass_cm3 ~ Namount_kg_ha_y * warming, data = roots.df)
+
+## checking model performance
+model_performance(model_roots_wn) # performs badly?
+
+## root model 3: roots ~ n 
+model_roots_n <- 
+  lm(root_mass_cm3 ~ Namount_kg_ha_y, data = roots.df)
+
+## checking model performance
+model_performance(model_roots_n) # performs badly?
 
 ## figures  ------------------------------------------------------
 
