@@ -121,9 +121,9 @@ plot_soil_wng <- soil.df %>%
   scale_color_manual(values = colors_w) + 
   scale_linetype_manual(values = c("longdash", "solid")) + 
   scale_shape_manual(values = c(1, 16)) + 
-  labs(title = "", 
+  labs(title = "(ikke helt korrekt plot)", 
        x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)), 
-       y = bquote(Mass~after~550~C~burn)) + 
+       y = bquote(Soil~mass~after~550~C~burn)) + 
   facet_grid(origSiteID ~ grazing) +
   geom_smooth(method = "lm")
 plot_soil_wng
