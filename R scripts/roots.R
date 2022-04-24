@@ -126,7 +126,7 @@ plot_roots_wng <- roots.df %>%
   scale_color_manual(values = colors_w) + 
   scale_linetype_manual(values = c("longdash", "solid")) + 
   scale_shape_manual(values = c(1, 16)) + 
-  labs(title = "", 
+  labs(title = "Effect of warming, nitrogen and grazing on root growth", 
        x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)), 
        y = bquote(Root~mass~(g/cm^3))) + 
   facet_grid(origSiteID ~ grazing) +
