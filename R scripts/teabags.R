@@ -31,7 +31,8 @@ teabag.df <- teabag.raw.df %>%
                           "C" = "Control", "I" = "Intensive", 
                           "M" = "Medium", "N" = "Natural"),
          warming = recode(warming, 
-                          "A" = "Ambient", "W" = "Warmed")) 
+                          "A" = "Ambient", "W" = "Warmed")) %>% 
+  mutate(mass_loss_proportion = post_burial_weight_g / preburial_weight_g)
 
 
 ## analysis ---> analysis_plan ---------------------------------------
@@ -63,15 +64,20 @@ teabag.df <- teabag.raw.df %>%
 plot_teabags <- teabag.df %>% 
   group_by(tea_type, origSiteID, warming, Namount_kg_ha_y, grazing) %>% 
   ggplot(mapping = aes(x = log(Namount_kg_ha_y +1), 
-                       y = weight_loss_g,
-                       #color = tea_type,
-                       fill = tea_type)) +
+                       y = mass_loss_proportion,
+                       color = tea_type,
+                       fill = tea_type,
+                       shape = warming, 
+                       size = 10, alpha = 0.7)) +
   geom_point() + 
   theme_minimal(base_size = 20) +
-  scale_fill_manual(values = colors_tea) + 
-  labs(title = "Mass loss of tebags", 
-       x = bquote(Origin~site), 
-       y = bquote(Mass~loss~(g))) +
+  scale_color_manual(values = colors_tea) + 
+  scale_shape_manual(values = c(1, 16)) +
+  #scale_size_manual(values = 10) +
+  labs(title = "Mass loss of teabags",
+       x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)),
+       y = bquote(Mass~loss~proportion)) +
+  #legend(horiz = TRUE) +
   facet_grid(origSiteID ~ grazing) 
   #geom_smooth(method = "lm")
 plot_teabags
