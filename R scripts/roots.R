@@ -17,8 +17,8 @@ mutate(dateRIC_washed = ymd(dateRIC_washed),
   # deciding order of origSiteID, 1. Lia 2. Joa
   mutate(origSiteID = factor(origSiteID, levels = c("Lia", "Joa"))) %>% 
   mutate(grazing = recode(grazing, 
-                          "C" = "Control", "I" = "Intensive", 
-                          "M" = "Medium", "N" = "Natural"),
+                          "C" = "Control", "M" = "Medium",
+                          "I" = "Intensive","N" = "Natural"),
          warming = recode(warming, 
                           "A" = "Ambient", "W" = "Warmed")) %>% 
   left_join(NitrogenDictionary, by = "Nlevel") %>% 
@@ -56,19 +56,22 @@ output.roots.wng <- roots.df %>%
   select(origSiteID, term, estimate, std.error, statistic, p.value)
 
 View(output.roots.wng)
+## none of the terms are significantly different from intercept
 
+## checking model performance 
+model_performance(model.roots.wng)
 
 ### model: roots ~ warming * nitrogen 
-roots.df %>%
+model.roots.wn <- roots.df %>%
   group_by(origSiteID, grazing) %>% # 
   nest() %>% # makes little dataframes inside my data, closed
-  mutate( # makes column - do we want that?
+  mutate( 
     model.roots.wn = map(data, # runs model in each litte dataset
                          ~ lm(root_mass_cm3 ~ Namount_kg_ha_y * warming, 
                               data = .)), 
     result.roots.wn = map(model.roots.wn, tidy)) %>%
-  unnest(result.roots.wn) %>% # opens the nested dataframes 
-  View() 
+  unnest(result.roots.wn) # opens the nested dataframes 
+  #View() 
 
 ## making dataframe with model output 
 output.roots.wn <- roots.df %>%
@@ -81,12 +84,12 @@ output.roots.wn <- roots.df %>%
     result.roots.wn = map(model.roots.wn, tidy)) %>%
   unnest(result.roots.wn) %>% # opens the nested dataframes 
   select(origSiteID, term, estimate, std.error, statistic, p.value)
-
-View(output.roots.wn)
-
+View(output.roots.wn) 
+## warming sat Lia ignificantly different from intercept
+## warming has an affect on plots at Lia
 
 ## checking model performance 
-model_performance(model.roots.wng)
+model_performance(model.roots.all)
 
 ## HELENES WAY OF MODELLING ---------------------------------------
 ## root model 1: roots ~ w * n * g
