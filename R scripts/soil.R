@@ -3,14 +3,14 @@
 source("R scripts/ThreeD_load_packages.R")
 source("R scripts/ThreeD_create_metadata.R")
 
-
 ## importing  ........-------------------------------------------
 soil.raw.df <- read_csv2(file = "Data/ThreeD_soilcores_2021.csv")
 add.inf.df <- read_excel("Data/additional_info.xlsx", 
                          sheet = "coffeefilter_binder_mass")
 
 ## fixup -------------------------------------------------------
-mean_cf_mass <- 1.9196
+# mean mass of coffee filter + binder
+# mean_cf_mass <- 1.9196
 
 soil.df <- soil.raw.df %>% 
   # removing unwanted columns and fixing weird ones 
@@ -25,38 +25,10 @@ soil.df <- soil.raw.df %>%
   mutate(destBlockID = as.numeric(str_remove(destBlockID, "B")), # remove letter B
          destSiteID) %>% 
   select(-turfID) %>% # remove column 'turfID' because it is empty
-  mutate_if(is.character, as.factor) %>% # change to factor
+  mutate_if(is.character, as.factor) %>% 
   mutate(#destPlotID = as.numeric(destPlotID),
          destBlockID = as.numeric(destBlockID),
          destSiteID = as.character(destSiteID)) %>% 
-  # change column names to informative names
-  rename(alutray_mass = alutray_weight, # new name = old name
-         wetmass = wet_mass_g,
-         drymass_1_55 = dry_mass1, 
-         drymass_2_sieved = dry_mass2, 
-         drymass_3_sieved_105 = dry_mass3, 
-         drymass_4_87 = dry_mass4, 
-         porcelain_mass = porcelain_weight,
-         burnmass_1_550 = burn_mass1, 
-         burnmass_2_950 = burn_mass2,
-         root_stone_mass = total_cf_mass) %>%
-  # removing excessvalues to avoid negative values in later calculations
-  mutate(root_stone_mass2 = root_stone_mass - mean_cf_mass)
-  # removing container weight from mass weights 
-  # mutate(wetmass = wetmass - alutray_mass,
-  #        drymass_1_55 = drymass_1_55 - alutray_mass,
-  #        drymass_2_sieved = drymass_2_sieved - alutray_mass,
-  #        drymass_3_sieved_105 = drymass_3_sieved_105 - alutray_mass,
-  #        drymass_4_87 = drymass_4_87 - porcelain_mass,
-  #        burnmass_1_550 = burnmass_1_550 - porcelain_mass,
-  #        burnmass_2_950 = burnmass_2_950 - porcelain_mass) %>% 
-  # # removing root and stone weight from mass weights pre-sieving
-  # mutate(wetmass = wetmass - root_stone_mass,
-  #        drymass_1_55 = drymass_1_55 - root_stone_mass) %>% 
-  # # calculating percentage organic material left after 1st burn
-  # mutate(org_mat_percent = drymass_4_87 / burnmass_1_550) %>% 
-  # # removing impossible values from dataset
-  # filter(!(burnmass_1_550 > drymass_4_87)) %>% 
   # adding nitrogen levels to blocks 
   mutate(Nlevel = case_when(destBlockID == 1 ~ 1, # new_col = (case_when(old_c == old, ~new))
                             destBlockID == 2 ~ 6, 
@@ -76,24 +48,34 @@ soil.df <- soil.raw.df %>%
                                 (destSiteID == "Joa" & warming == "W") ~ "Lia", 
                                 (destSiteID == "Joa" & warming == "A") ~ "Joa",
                                 (destSiteID == "Vik" & warming == "W") ~ "Joa")) %>% 
-  # removing last row with only NA-values
   filter(!destSiteID == 'NA') %>% 
-  # reordering Lia and Joa
+  # reordering factors 
   mutate(origSiteID = factor(origSiteID, levels = c("Lia", "Joa"))) %>% 
   mutate(grazing = recode(grazing, 
                           "C" = "Control", "M" = "Medium",
                           "I" = "Intensive","N" = "Natural"),
          warming = recode(warming, 
-                          "A" = "Ambient", "W" = "Warmed")) 
-
-## CHECKING FOR WRONG VALUES 
-soil.df.check <- soil.df %>% 
-  select(alutray_mass, root_stone_mass, porcelain_mass, 
-         drymass_1_55, drymass_4_87, burnmass_1_550, burnmass_2_950) %>% 
-  #mutate(drymass_1_NEW = dry_mass1 - (alutray_weight + total_cf_mass)) %>%
-  filter(drymass_4_87 < burnmass_1_550) 
-  
-#   filter(!(burnmass_1_550 > drymass_4_87))
+                          "A" = "Ambient", "W" = "Warmed")) %>% 
+  # change column names to informative names
+  rename(alutray_mass = alutray_weight, # new name = old name
+         wetmass = wet_mass_g,
+         drymass_1_55 = dry_mass1, 
+         drymass_2_sieved = dry_mass2, 
+         drymass_3_sieved_105 = dry_mass3, 
+         drymass_4_87 = dry_mass4, 
+         porcelain_mass = porcelain_weight,
+         burnmass_1_550 = burn_mass1, 
+         burnmass_2_950 = burn_mass2,
+         root_stone_mass = total_cf_mass) %>%
+  # removing container weight from mass weights 
+  mutate(drymass_4_87 = drymass_4_87 - porcelain_mass,
+         burnmass_1_550 = burnmass_1_550 - porcelain_mass,
+         burnmass_2_950 = burnmass_2_950 - porcelain_mass) %>% 
+  # removing impossible values i.e. typos from dataset 
+  filter(!drymass_4_87 < burnmass_1_550,
+         !burnmass_1_550 < burnmass_2_950) %>% 
+  mutate(prop_sample_left = burnmass_1_550 / drymass_4_87) %>% 
+  mutate(prop_org_mat = 1 - prop_sample_left)
 
 
 ## analysis -------------------------------------------------------
@@ -127,12 +109,12 @@ View(output.soil.wng)
 ## figures--------------------------------------------------------
 source("R scripts/MSc_aesthetics.R")
 
-## plot: soil___ ~ warming x nitrogen x grazing 
+## plot: soil C ~ warming * nitrogen * grazing 
 plot_soil_wng <- soil.df %>% 
   group_by(Namount_kg_ha_y, origSiteID, warming, grazing) %>% 
-  summarise(org_mat_percent = mean(org_mat_percent)) %>% 
+  summarise(prop_org_mat = mean(prop_org_mat)) %>% 
   ggplot(mapping = aes(x = log(Namount_kg_ha_y +1), 
-                       y = org_mat_percent, 
+                       y = prop_org_mat, 
                        color = warming,
                        linetype = warming,
                        shape = warming)) +
@@ -141,9 +123,9 @@ plot_soil_wng <- soil.df %>%
   scale_color_manual(values = colors_w) + 
   scale_linetype_manual(values = c("longdash", "solid")) + 
   scale_shape_manual(values = c(1, 16)) + 
-  labs(title = "(ikke helt korrekt plot)", 
+  labs(title = "Proportion organic matter\nMass loss after burning at 550 *C", 
        x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)), 
        y = bquote(Proportion~organic~material)) + 
   facet_grid(origSiteID ~ grazing) +
-  geom_smooth(method = "lm")
-plot_soil_wng
+  geom_smooth(method = "lm") 
+plot_soil_wng 
