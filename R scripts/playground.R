@@ -1,5 +1,8 @@
 ### PLAYGROUND SCRIPT ###
 
+
+knitr::kable(output.roots.wng[,], format="markdown")
+
 ## import data (excel)
 roots.raw.df <- read_excel("Data/ThreeD_rootingrowthcores_2021.xlsx")
 ## clean data
@@ -24,3 +27,15 @@ mutate(Nlevel = case_when(destBlockID == 1 ~ 1, # new_col = (case_when(old_c == 
                           destBlockID == 8 ~ 8, 
                           destBlockID == 9 ~ 9, 
                           destBlockID == 10~ 2))
+
+mutate(column1 = case_when((column2 == "value_x") ~ "new_value_col1"))
+mutate(column1 = case_when((column2 == "value_x" & column3 == "value_y") ~ "new_value_col1"))
+       
+mutate(origSiteID = case_when((destSiteID == "Lia" & warming == "A") ~ "Lia",
+                              (destSiteID == "Joa" & warming == "W") ~ "Lia", 
+                              (destSiteID == "Joa" & warming == "A") ~ "Joa",
+                              (destSiteID == "Vik" & warming == "W") ~ "Joa"))
+
+
+
+
