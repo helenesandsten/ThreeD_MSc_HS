@@ -1,7 +1,7 @@
 ### ANALYSIS AND MODELS ROOTS
 
 source("R scripts/ThreeD_load_packages.R")
-source("R scripts/ThreeD_create_metadata.R")
+source("R scripts/ThreeD_create_metadata.R") 
 source("R scripts/MSc_aesthetics.R")
 
 ## import - roots data -----------------------------------------------
@@ -32,25 +32,152 @@ mutate(dateRIC_washed = ymd(dateRIC_washed),
 
 ## analysis - roots data --------------------------------------------
 
-
+###############################################################
 ### MODEL: roots ~ w * n * g ---------------------------------------
-model.roots.wng <- roots.df %>%
+model.roots.wng.int <- roots.df %>%
   group_by(origSiteID) %>% #
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
-    model.roots.wng = map(data, # runs model in each litte dataset
+    model.roots.wng.int = map(data, # runs model in each litte dataset
                           ~ lm(root_mass_cm3 ~
-                                 Namount_kg_ha_y * warming * grazing,
+                                 warming * Namount_kg_ha_y * grazing,
                                data = .)))#,
-    #result.roots.wng = map(model.roots.wng, tidy)) #%>%
-  #unnest(result.roots.wng) #%>% # opens the nested dataframes
+    #result.roots.wng.int = map(model.roots.wng.int, tidy)) #%>%
+  #unnest(result.roots.wng.int) #%>% # opens the nested dataframes
  # View()
-hist(roots.df$root_mass_cm3)
 
-hist(log(roots.df$root_mass_cm3))
+## checking if reponse variable is normally distributed 
+# hist(roots.df$root_mass_cm3)
+# hist(log(roots.df$root_mass_cm3))
+
+### MODEL: roots ~ w * n * g - check model --------------------
+## must run model code without result- and unnest-line for this to be useful
+## check performance 
+model_performance(model.roots.wng.int $ model.roots.wng.int[[1]])
+## check assumptions 
+check_model(model.roots.wng.int $ model.roots.wng.int[[1]])
+
+## check plots that are off 
+## exspected as the model has interaction terms
+check_collinearity(model.roots.wng.int $ model.roots.wng.int[[1]])
 
 
-### MODEL: roots ~ w * n * g - create table of model outupt ----------
+
+###############################################################
+### MODEL: roots ~ w + n + g ---------------------------------------
+model.roots.wng.add <- roots.df %>%
+  group_by(origSiteID) %>% #
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.roots.wng.add = map(data, # runs model in each litte dataset
+                          ~ lm(root_mass_cm3 ~
+                                 warming + Namount_kg_ha_y + grazing,
+                               data = .)))#,
+#result.roots.wng.add = map(model.roots.wng.add, tidy)) #%>%
+#unnest(result.roots.wng.add) #%>% # opens the nested dataframes
+# View()
+
+### MODEL: roots ~ w + n + g - check model --------------------
+## must run model code without result- and unnest-line for this to be useful
+## check performance 
+model_performance(model.roots.wng.add$model.roots.wng.add[[1]]) 
+## check assumtions 
+check_model(model.roots.wng.add$model.roots.wng.add[[1]]) 
+# all diagnostic plots looks good
+
+
+
+###############################################################
+### MODEL: roots ~ w * n + g ----------------------------------
+model.roots.wng.intadd <- roots.df %>%
+  group_by(origSiteID) %>% #
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.roots.wng.intadd = map(data, # runs model in each litte dataset
+                              ~ lm(root_mass_cm3 ~
+                                     warming * Namount_kg_ha_y + grazing,
+                                   data = .)))#,
+#result.roots.wng.intadd = map(model.roots.wng.intadd, tidy)) #%>%
+#unnest(result.roots.wng.intadd) #%>% # opens the nested dataframes
+# View()
+
+### MODEL: roots ~ w * n + g - check model --------------------
+## check performance 
+model_performance(model.roots.wng.intadd $ model.roots.wng.intadd[[1]])
+## check assumptions 
+check_model(model.roots.wng.intadd $ model.roots.wng.intadd[[1]])
+## all assumptions looks good 
+
+
+
+###############################################################
+### MODEL: roots ~ w + n * g ----------------------------------
+model.roots.wng.addint <- roots.df %>%
+  group_by(origSiteID) %>% #
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.roots.wng.intadd = map(data, # runs model in each litte dataset
+                                 ~ lm(root_mass_cm3 ~
+                                        warming + Namount_kg_ha_y * grazing,
+                                      data = .)))#,
+#result.roots.wng.intadd = map(model.roots.wng.intadd, tidy)) #%>%
+#unnest(result.roots.wng.intadd) #%>% # opens the nested dataframes
+# View()
+
+### MODEL: roots ~ w + n * g - check model --------------------
+## check performance 
+model_performance(model.roots.wng.intadd $ model.roots.wng.intadd[[1]])
+## check assumptions 
+check_model(model.roots.wng.intadd $ model.roots.wng.intadd[[1]])
+
+
+
+###############################################################
+### MODEL: roots ~ w * g + n ----------------------------------
+model.roots.wgn.intadd <- roots.df %>%
+  group_by(origSiteID) %>% #
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.roots.wgn.intadd = map(data, # runs model in each litte dataset
+                                 ~ lm(root_mass_cm3 ~
+                                        warming * grazing + Namount_kg_ha_y,
+                                      data = .)))#,
+#result.roots.wgn.intadd = map(model.roots.wgn.intadd, tidy)) #%>%
+#unnest(result.roots.wgn.intadd) #%>% # opens the nested dataframes
+# View()
+
+### MODEL: roots ~ w * g + n - check model --------------------
+## check performance 
+model_performance(model.roots.wgn.intadd $ model.roots.wgn.intadd[[1]])
+## check assumptions 
+check_model(model.roots.wgn.intadd $ model.roots.wgn.intadd[[1]])
+
+
+###############################################################
+### MODEL: roots ~ w * n ---------------------------------
+model.roots.wn.int <- roots.df %>%
+  group_by(origSiteID, grazing) %>% #
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.roots.wn.int = map(data, # runs model in each litte dataset
+                             ~ lm(root_mass_cm3 ~ Namount_kg_ha_y * warming,
+                                  data = .)))
+#    result.roots.wn.int = map(model.roots.wn.int, tidy) %>%
+#  unnest(result.roots.wn.int) # opens the nested dataframes
+#  #View()
+
+### MODEL: roots ~ w * n - check model ------------
+## must run model code without result- and unnest-line for this to be useful
+## check performance 
+model_performance(model.roots.wn.int$model.roots.wn.int[[1]])
+## check assumptions 
+check_model(model.roots.wn.int$model.roots.wn.int[[1]]) # looks alright 
+## cannot check homogeneity - need 2 obs in each group 
+#check_homogeneity(model.roots.wn.int$model.roots.wn.int[[1]])
+
+
+###############################################################
+### MODEL: XXX - create table of model outupt ----------
 # writes numbers out instead of on exponential form
 options(scipen = 100, digits = 4)
 ## running model with result and unnest to create output 
@@ -68,7 +195,7 @@ output.roots.wng <- roots.df %>%
 #View(output.roots.wng)
 ## none of the terms are significantly different from intercept
 
-### MODEL: roots ~ w * n * g - make neat table for pdf ------------
+### MODEL: XXX - make neat table for pdf ------------
 
 # writes numbers out instead of on exponential form
 options(scipen = 100, digits = 5)
@@ -94,67 +221,7 @@ clean_output.roots.wng <- output.roots.wng %>%
       "Nitrogen : Warmed : Medium grazing",
     (term == "Namount_kg_ha_y:warmingWarmed:grazingNatural") ~ 
       "Nitrogen : Warmed : Natural grazing"
-    ))
-
-### MODEL: roots ~ w * n * g - check model performance ------------
-## must run model code without result- and unnest-line for this to be useful
-model_performance(model.roots.wng$model.roots.wng[[1]])
-check_model(model.roots.wng$model.roots.wng[[1]])
-
-library("see")
-qqplot(model.roots.wng)
-###############################################################
-### MODEL: roots ~ w * n ---------------------------------
-model.roots.wn <- roots.df %>%
-  group_by(origSiteID, grazing) %>% #
-  nest() %>% # makes little dataframes inside my data, closed
-  mutate(
-    model.roots.wn = map(data, # runs model in each litte dataset
-                         ~ lm(root_mass_cm3 ~ Namount_kg_ha_y * warming,
-                              data = .)))
-#    result.roots.wn = map(model.roots.wn, tidy) %>%
-#  unnest(result.roots.wn) # opens the nested dataframes
-#  #View()
-
-### MODEL: roots ~ w * n - create table of model outupt ----------
-## making dataframe with model output
-
-# writes numbers out instead of on exponential form
-options(scipen = 100, digits = 5)
-
-output.roots.wn <- roots.df %>%
-  group_by(origSiteID) %>% #
-  nest() %>% # makes little dataframes inside my data, closed
-  mutate( # makes column - do we want that?
-    model.roots.wn = map(data, # runs model in each litte dataset
-                          ~ lm(root_mass_cm3 ~ Namount_kg_ha_y * warming,
-                               data = .)),
-    result.roots.wn = map(model.roots.wn, tidy)) %>%
-  unnest(result.roots.wn) %>% # opens the nested dataframes
-  select(origSiteID, term, estimate, std.error, statistic, p.value)
-## View(output.roots.wn)
-
-## warming sat Lia ignificantly different from intercept
-## warming has an affect on plots at Lia
-
-### MODEL: roots ~ w * n - make neat table for pdf ------------
-
-# writes numbers out instead of on exponential form
-options(scipen = 100, digits = 5)
-
-clean_output.roots.wn <- output.roots.wn %>%
-  mutate(term = case_when(
-    (term == "(Intercept)") ~ "Intercept (no N, not warmed)",
-    (term == "Namount_kg_ha_y") ~ "Nitrogen",
-    (term == "warmingWarmed") ~ "Warmed",
-    (term == "Namount_kg_ha_y:warmingWarmed") ~ "Nitrogen : Warmed"
-    ))
-
-### MODEL: roots ~ w * n - check model performance ------------
-## checking model performance: model.roots.wn ----------------------
-## must run model code without result- and unnest-line for this to be useful
-model_performance(model.roots.wn$model.roots.wn[[1]])
-
+  ))
 
 
 ## figures - roots --------------------------------------------------
@@ -198,3 +265,7 @@ plot_roots_wng
 #   theme(legend.position = "none") +
 #   scale_fill_manual(values = colors_g)
 # plot_roots_g
+
+
+
+
