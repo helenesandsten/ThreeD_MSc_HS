@@ -13,4 +13,14 @@ roots.clean.df <- roots.raw.df %>%
   # make log(Namount_kg_ha_y +1) into factor
 
 
-
+# adding nitrogen levels to blocks 
+mutate(Nlevel = case_when(destBlockID == 1 ~ 1, # new_col = (case_when(old_c == old, ~new))
+                          destBlockID == 2 ~ 6, 
+                          destBlockID == 3 ~ 5, 
+                          destBlockID == 4 ~ 3,
+                          destBlockID == 5 ~ 10,
+                          destBlockID == 6 ~ 7, 
+                          destBlockID == 7 ~ 4, 
+                          destBlockID == 8 ~ 8, 
+                          destBlockID == 9 ~ 9, 
+                          destBlockID == 10~ 2))
