@@ -11,8 +11,7 @@ string.bag.weight.df <- read_excel("Data/additional_info.xlsx",
                                    sheet = "string_bag_weight") 
 
 tb.reweighed.df <- read_excel("Data/additional_info.xlsx", 
-                         sheet = "teabags_reweighed") %>% 
-                         mean(.)
+                         sheet = "teabags_reweighed") 
 
 ###############################################################
 ## fixup ######################################################
@@ -57,27 +56,8 @@ teabag.df <- teabag.raw.df %>%
 
 ## analysis ---> analysis_plan ---------------------------------------
 ## TEABAG INDEX -----------------------------------------------------
-## Equations and numbers from Keuskamp et al. 2013
-## calculating decomposition rates
+## additional weightloss of re-dried teabags 
 
-# h_g <- 0.842 # hydrolyzable fraction green tea 
-# h_r <- 0.552 # hydrolyzable fraction rooibos/red tea 
-# 
-# # dataset with green tea 
-# tbi.g.df <- teabag.df %>% 
-#   filter(tea_type == "green") %>% 
-#   # calculating s from a_g with eqn: S = 1 - (a_g/h_g) 
-#   # a_g = post_burial_weight_g 
-#   mutate(s = 1 - post_burial_weight_g/h_g) 
-# 
-# ## NEGATIVE S-VALUES --> NOT GREAT 
-# ## perhaps not possible to calculate decomposition rate?
-# 
-# # dataset with red tea 
-# tbi.r.df <- teabag.df %>% 
-#   filter(tea_type == "red") %>% 
-#   # calculating a_r from S with eqn: a_r = h_r (1 - S) 
-#   mutate(a_r = h_r (1 - S))
 
 ## ALTERNATIVE ANALYSIS OF TEABAG WEIGHTLOSS -------------------
 # calculating 
