@@ -327,7 +327,16 @@ check_model(model.roots.g$model.roots.g[[1]])
 ###############################################################
 ### compare models -------------------------------------------
 ### warming & nitrogen & grazing 
+compare_performance(model.roots.wng.int$model.roots.wng.int[[1]], 
+                    model.roots.wng.add$model.roots.wng.add[[1]],
+                    model.roots.wng.intadd$model.roots.wng.intadd[[1]],
+                    model.roots.wgn.intadd$model.roots.wgn.intadd[[1]])
 
+plot.models.roots.wng <-
+  plot(compare_performance(model.roots.wng.int$model.roots.wng.int[[1]], 
+                         model.roots.wng.add$model.roots.wng.add[[1]],
+                         model.roots.wng.intadd$model.roots.wng.intadd[[1]],
+                         model.roots.wgn.intadd$model.roots.wgn.intadd[[1]]))
 ###############################################################
 ### MODEL: XXX - create table of model outupt ----------
 # writes numbers out instead of on exponential form
