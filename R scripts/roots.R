@@ -15,12 +15,17 @@ mutate(dateRIC_washed = ymd(dateRIC_washed),
        root_mass_cm3 = (root_mass_g/(pi*(1.6)^2*RIC_length_cm))) %>% # calculate volume
   mutate_if(is.character, as.factor) %>%
   # deciding order of origSiteID, 1. Lia 2. Joa
-  mutate(origSiteID = factor(origSiteID, levels = c("Lia", "Joa"))) %>% 
   mutate(grazing = recode(grazing, 
                           "C" = "Control", "M" = "Medium",
                           "I" = "Intensive","N" = "Natural"),
          warming = recode(warming, 
                           "A" = "Ambient", "W" = "Warmed")) %>% 
+  mutate(origSiteID = factor(origSiteID, levels = c("Lia", "Joa")),
+         grazing = factor(grazing, 
+                          levels = c("C" = "Control", 
+                                     "M" = "Medium",
+                                     "I" = "Intensive",
+                                     "N" = "Natural"))) %>% 
   left_join(NitrogenDictionary, by = "Nlevel") %>% 
   mutate(Namount_kg_ha_y = log(Namount_kg_ha_y +1))
 
@@ -147,45 +152,11 @@ model_performance(model.roots.wn$model.roots.wn[[1]])
 
 
 
+## figures - roots --------------------------------------------------
 
-## HELENES WAY OF MODELLING ---------------------------------------
-###############################################################
-## root model 1: roots ~ w * n * g
-model_roots_wng <-
-  lm(root_mass_cm3 ~ Namount_kg_ha_y * warming * grazing, data = roots.df)
+## plot - roots ~ w n g
+#labels_site_type <- c("alpine", "sub-alpine")
 
-## checking model performance
-model_performance(model_roots_wng) # performs badly?
-
-###############################################################
-## root model 2: roots ~ w * n
-model_roots_wn <-
-  lm(root_mass_cm3 ~ Namount_kg_ha_y * warming, data = roots.df)
-
-## checking model performance
-model_performance(model_roots_wn) # performs badly?
-
-###############################################################
-## root model 3: roots ~ w
-model_roots_w <-
-  lm(root_mass_cm3 ~ warming, data = roots.df)
-
-## checking model performance
-model_performance(model_roots_w) # performs badly?
-
-###############################################################
-## root model 4: roots ~ n
-model_roots_n <-
-  lm(root_mass_cm3 ~ Namount_kg_ha_y, data = roots.df)
-
-## checking model performance
-model_performance(model_roots_n) # performs badly?
-
-###############################################################
-###############################################################
-## figures  ------------------------------------------------------
-
-# megaplot - roots and warming x N x grazing
 plot_roots_wng <- roots.df %>%
   group_by(Namount_kg_ha_y, origSiteID, warming, grazing) %>%
   summarise(root_mass_cm3 = mean(root_mass_cm3)) %>%
@@ -207,19 +178,18 @@ plot_roots_wng <- roots.df %>%
 plot_roots_wng
 
 
-
-# plot roots ~ grazing
-labels_g <- c("Control", "Intensive", "Medium", "Natural")
-
-plot_roots_g <- roots.df %>%
-  filter(warming == "Ambient") %>%
-  filter(Nlevel == 1 & 2 & 3) %>%
-  ggplot(mapping = aes(x = grazing, y = root_mass_g, fill = grazing)) +
-  geom_boxplot() +
-  theme_minimal(base_size = 20) +
-  labs(title = "Effect of grazing on root growth",
-       x = "Grazing", y = "Root mass (g)") +
-  scale_x_discrete(labels = labels_g) +
-  theme(legend.position = "none") +
-  scale_fill_manual(values = colors_g)
-plot_roots_g
+# # plot roots ~ grazing
+# labels_g <- c("Control", "Intensive", "Medium", "Natural")
+# 
+# plot_roots_g <- roots.df %>%
+#   filter(warming == "Ambient") %>%
+#   filter(Nlevel == 1 & 2 & 3) %>%
+#   ggplot(mapping = aes(x = grazing, y = root_mass_g, fill = grazing)) +
+#   geom_boxplot() +
+#   theme_minimal(base_size = 20) +
+#   labs(title = "Effect of grazing on root growth",
+#        x = "Grazing", y = "Root mass (g)") +
+#   scale_x_discrete(labels = labels_g) +
+#   theme(legend.position = "none") +
+#   scale_fill_manual(values = colors_g)
+# plot_roots_g
