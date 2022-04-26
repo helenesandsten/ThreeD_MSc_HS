@@ -35,7 +35,7 @@ options(scipen = 100, digits = 4)
 model.roots.wng <- roots.df %>%
   group_by(origSiteID) %>% # 
   nest() %>% # makes little dataframes inside my data, closed
-  mutate( # makes column - do we want that?
+  mutate( 
     model.roots.wng = map(data, # runs model in each litte dataset
                           ~ lm(root_mass_cm3 ~ Namount_kg_ha_y * warming * grazing, 
                                data = .)),
@@ -89,7 +89,9 @@ View(output.roots.wn)
 ## warming has an affect on plots at Lia
 
 ## checking model performance 
-model_performance(model.roots.all)
+model_performance(model.roots.wn)
+
+lapply(model_performance, model.roots.wng)
 
 ## HELENES WAY OF MODELLING ---------------------------------------
 ## root model 1: roots ~ w * n * g
@@ -106,7 +108,14 @@ model_roots_wn <-
 ## checking model performance
 model_performance(model_roots_wn) # performs badly?
 
-## root model 3: roots ~ n 
+## root model 3: roots ~ w 
+model_roots_w <- 
+  lm(root_mass_cm3 ~ warming, data = roots.df)
+
+## checking model performance
+model_performance(model_roots_w) # performs badly?
+
+## root model 4: roots ~ n 
 model_roots_n <- 
   lm(root_mass_cm3 ~ Namount_kg_ha_y, data = roots.df)
 
