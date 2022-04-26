@@ -4,10 +4,10 @@ source("R scripts/ThreeD_load_packages.R")
 source("R scripts/ThreeD_create_metadata.R")
 source("R scripts/MSc_aesthetics.R")
 
-## import ------------------------------------------------------
+## import - roots data -----------------------------------------------
 roots.raw.df <- read_excel("Data/ThreeD_rootingrowthcores_2021.xlsx") 
 
-## fixup ------------------------------------------------------
+## fixup - roots data ----------------------------------------------
 roots.df <- roots.raw.df %>%
 mutate(dateRIC_washed = ymd(dateRIC_washed),  
        date_roots_dried = ymd(date_roots_dried), # change format to date
@@ -24,130 +24,191 @@ mutate(dateRIC_washed = ymd(dateRIC_washed),
   left_join(NitrogenDictionary, by = "Nlevel") %>% 
   mutate(Namount_kg_ha_y = log(Namount_kg_ha_y +1))
 
-## analysis ------------------------------------------------------
-## writes numbers out instead of on exponential form 
-options(scipen = 100, digits = 4)
+
+## analysis - roots data --------------------------------------------
 
 
-## AUDS WAY OF MODELLING ---------------------------------------
-
-### model: roots ~ warming * nitrogen * grazing 
+### MODEL: roots ~ w * n * g ---------------------------------------
 model.roots.wng <- roots.df %>%
-  group_by(origSiteID) %>% # 
+  group_by(origSiteID) %>% #
   nest() %>% # makes little dataframes inside my data, closed
-  mutate( 
+  mutate(
     model.roots.wng = map(data, # runs model in each litte dataset
-                          ~ lm(root_mass_cm3 ~ Namount_kg_ha_y * warming * grazing, 
-                               data = .)),
-    result.roots.wng = map(model.roots.wng, tidy)) %>%
-  unnest(result.roots.wng) #%>% # opens the nested dataframes 
-  #View() 
+                          ~ lm(root_mass_cm3 ~
+                                 Namount_kg_ha_y * warming * grazing,
+                               data = .)))#,
+    #result.roots.wng = map(model.roots.wng, tidy)) #%>%
+  #unnest(result.roots.wng) #%>% # opens the nested dataframes
+ # View()
 
-## making dataframe with model output of roots ~ w * n * g
+
+### MODEL: roots ~ w * n * g - create table of model outupt ----------
+# writes numbers out instead of on exponential form
+options(scipen = 100, digits = 4)
+## running model with result and unnest to create output 
 output.roots.wng <- roots.df %>%
-  group_by(origSiteID) %>% # 
+  group_by(origSiteID) %>% #
   nest() %>% # makes little dataframes inside my data, closed
   mutate( # makes column - do we want that?
     model.roots.wng = map(data, # runs model in each litte dataset
-                          ~ lm(root_mass_cm3 ~ Namount_kg_ha_y * warming * grazing, 
+                          ~ lm(root_mass_cm3 ~
+                                 Namount_kg_ha_y * warming * grazing,
                                data = .)),
     result.roots.wng = map(model.roots.wng, tidy)) %>%
-  unnest(result.roots.wng) %>% # opens the nested dataframes 
+  unnest(result.roots.wng) %>% # opens the nested dataframes
   select(origSiteID, term, estimate, std.error, statistic, p.value)
-
-View(output.roots.wng)
+#View(output.roots.wng)
 ## none of the terms are significantly different from intercept
 
-## checking model performance 
-model_performance(model.roots.wng)
+### MODEL: roots ~ w * n * g - make neat table for pdf ------------
 
-### model: roots ~ warming * nitrogen 
+# writes numbers out instead of on exponential form
+options(scipen = 100, digits = 5)
+
+clean_output.roots.wng <- output.roots.wng %>%
+  mutate(term = case_when(
+    (term == "(Intercept)") ~ "Intercept (no N, not warmed, not grazed)",
+    (term == "Namount_kg_ha_y") ~ "Nitrogen",
+    (term == "warmingWarmed") ~ "Warmed",
+    (term == "grazingIntensive") ~ "Intensive grazing",
+    (term == "grazingMedium") ~ "Medium grazing",
+    (term == "grazingNatural") ~ "Natural grazing",
+    (term == "Namount_kg_ha_y:warmingWarmed") ~ "Nitrogen : Warmed",
+    (term == "Namount_kg_ha_y:grazingIntensive") ~ "Nitrogen : Intensive grazing",
+    (term == "Namount_kg_ha_y:grazingMedium") ~ "Nitrogen : Medium grazing",
+    (term == "Namount_kg_ha_y:grazingNatural") ~ "Nitrogen : Natural grazing",
+    (term == "warmingWarmed:grazingIntensive") ~ "Warmed : Intensive grazing",
+    (term == "warmingWarmed:grazingMedium") ~ "Warmed : Medium grzing",
+    (term == "warmingWarmed:grazingNatural") ~ "Warmed : Natural grazing",
+    (term == "Namount_kg_ha_y:warmingWarmed:grazingIntensive") ~ 
+      "Nitrogen : Warmed : Intensive grazing",
+    (term == "Namount_kg_ha_y:warmingWarmed:grazingMedium") ~ 
+      "Nitrogen : Warmed : Medium grazing",
+    (term == "Namount_kg_ha_y:warmingWarmed:grazingNatural") ~ 
+      "Nitrogen : Warmed : Natural grazing"
+    ))
+
+### MODEL: roots ~ w * n * g - check model performance ------------
+## must run model code without result- and unnest-line for this to be useful
+model_performance(model.roots.wng$model.roots.wng[[1]])
+
+
+###############################################################
+### MODEL: roots ~ w * n ---------------------------------
 model.roots.wn <- roots.df %>%
-  group_by(origSiteID, grazing) %>% # 
+  group_by(origSiteID, grazing) %>% #
   nest() %>% # makes little dataframes inside my data, closed
-  mutate( 
+  mutate(
     model.roots.wn = map(data, # runs model in each litte dataset
-                         ~ lm(root_mass_cm3 ~ Namount_kg_ha_y * warming, 
-                              data = .)), 
-    result.roots.wn = map(model.roots.wn, tidy)) %>%
-  unnest(result.roots.wn) # opens the nested dataframes 
-  #View() 
+                         ~ lm(root_mass_cm3 ~ Namount_kg_ha_y * warming,
+                              data = .)))
+#    result.roots.wn = map(model.roots.wn, tidy) %>%
+#  unnest(result.roots.wn) # opens the nested dataframes
+#  #View()
 
-## making dataframe with model output 
+### MODEL: roots ~ w * n - create table of model outupt ----------
+## making dataframe with model output
+
+# writes numbers out instead of on exponential form
+options(scipen = 100, digits = 5)
+
 output.roots.wn <- roots.df %>%
-  group_by(origSiteID) %>% # 
+  group_by(origSiteID) %>% #
   nest() %>% # makes little dataframes inside my data, closed
   mutate( # makes column - do we want that?
     model.roots.wn = map(data, # runs model in each litte dataset
-                          ~ lm(root_mass_cm3 ~ Namount_kg_ha_y * warming, 
+                          ~ lm(root_mass_cm3 ~ Namount_kg_ha_y * warming,
                                data = .)),
     result.roots.wn = map(model.roots.wn, tidy)) %>%
-  unnest(result.roots.wn) %>% # opens the nested dataframes 
+  unnest(result.roots.wn) %>% # opens the nested dataframes
   select(origSiteID, term, estimate, std.error, statistic, p.value)
-View(output.roots.wn) 
+## View(output.roots.wn)
+
 ## warming sat Lia ignificantly different from intercept
 ## warming has an affect on plots at Lia
 
-## checking model performance 
-model_performance(model.roots.wn)
+### MODEL: roots ~ w * n - make neat table for pdf ------------
 
-lapply(model_performance, model.roots.wng)
+# writes numbers out instead of on exponential form
+options(scipen = 100, digits = 5)
+
+clean_output.roots.wn <- output.roots.wn %>%
+  mutate(term = case_when(
+    (term == "(Intercept)") ~ "Intercept (no N, not warmed)",
+    (term == "Namount_kg_ha_y") ~ "Nitrogen",
+    (term == "warmingWarmed") ~ "Warmed",
+    (term == "Namount_kg_ha_y:warmingWarmed") ~ "Nitrogen : Warmed"
+    ))
+
+### MODEL: roots ~ w * n - check model performance ------------
+## checking model performance: model.roots.wn ----------------------
+## must run model code without result- and unnest-line for this to be useful
+model_performance(model.roots.wn$model.roots.wn[[1]])
+
+
+
 
 ## HELENES WAY OF MODELLING ---------------------------------------
+###############################################################
 ## root model 1: roots ~ w * n * g
-model_roots_wng <- 
+model_roots_wng <-
   lm(root_mass_cm3 ~ Namount_kg_ha_y * warming * grazing, data = roots.df)
 
 ## checking model performance
 model_performance(model_roots_wng) # performs badly?
 
-## root model 2: roots ~ w * n 
-model_roots_wn <- 
+###############################################################
+## root model 2: roots ~ w * n
+model_roots_wn <-
   lm(root_mass_cm3 ~ Namount_kg_ha_y * warming, data = roots.df)
 
 ## checking model performance
 model_performance(model_roots_wn) # performs badly?
 
-## root model 3: roots ~ w 
-model_roots_w <- 
+###############################################################
+## root model 3: roots ~ w
+model_roots_w <-
   lm(root_mass_cm3 ~ warming, data = roots.df)
 
 ## checking model performance
 model_performance(model_roots_w) # performs badly?
 
-## root model 4: roots ~ n 
-model_roots_n <- 
+###############################################################
+## root model 4: roots ~ n
+model_roots_n <-
   lm(root_mass_cm3 ~ Namount_kg_ha_y, data = roots.df)
 
 ## checking model performance
 model_performance(model_roots_n) # performs badly?
 
+###############################################################
+###############################################################
 ## figures  ------------------------------------------------------
 
-# megaplot - roots and warming x N x grazing 
-plot_roots_wng <- roots.df %>% 
-  group_by(Namount_kg_ha_y, origSiteID, warming, grazing) %>% 
-  summarise(root_mass_cm3 = mean(root_mass_cm3)) %>% 
-  ggplot(mapping = aes(x = log(Namount_kg_ha_y +1), 
-                       y = root_mass_cm3, 
+# megaplot - roots and warming x N x grazing
+plot_roots_wng <- roots.df %>%
+  group_by(Namount_kg_ha_y, origSiteID, warming, grazing) %>%
+  summarise(root_mass_cm3 = mean(root_mass_cm3)) %>%
+  ggplot(mapping = aes(x = log(Namount_kg_ha_y +1),
+                       y = root_mass_cm3,
                        color = warming,
                        linetype = warming,
                        shape = warming)) +
-  geom_point() + 
-  theme_minimal(base_size = 20) + 
-  scale_color_manual(values = colors_w) + 
-  scale_linetype_manual(values = c("longdash", "solid")) + 
-  scale_shape_manual(values = c(1, 16)) + 
-  labs(title = "Effect of warming, nitrogen and grazing on root growth", 
-       x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)), 
-       y = bquote(Root~mass~(g/cm^3))) + 
+  geom_point() +
+  theme_minimal(base_size = 20) +
+  scale_color_manual(values = colors_w) +
+  scale_linetype_manual(values = c("longdash", "solid")) +
+  scale_shape_manual(values = c(1, 16)) +
+  labs(title = "Effect of warming, nitrogen and grazing on root growth",
+       x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)),
+       y = bquote(Root~mass~(g/cm^3))) +
   facet_grid(origSiteID ~ grazing) +
   geom_smooth(method = "lm")
 plot_roots_wng
 
 
 
-# plot roots ~ grazing 
+# plot roots ~ grazing
 labels_g <- c("Control", "Intensive", "Medium", "Natural")
 
 plot_roots_g <- roots.df %>%
