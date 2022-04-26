@@ -45,6 +45,9 @@ model.roots.wng <- roots.df %>%
     #result.roots.wng = map(model.roots.wng, tidy)) #%>%
   #unnest(result.roots.wng) #%>% # opens the nested dataframes
  # View()
+hist(roots.df$root_mass_cm3)
+
+hist(log(roots.df$root_mass_cm3))
 
 
 ### MODEL: roots ~ w * n * g - create table of model outupt ----------
@@ -96,8 +99,10 @@ clean_output.roots.wng <- output.roots.wng %>%
 ### MODEL: roots ~ w * n * g - check model performance ------------
 ## must run model code without result- and unnest-line for this to be useful
 model_performance(model.roots.wng$model.roots.wng[[1]])
+check_model(model.roots.wng$model.roots.wng[[1]])
 
-
+library("see")
+qqplot(model.roots.wng)
 ###############################################################
 ### MODEL: roots ~ w * n ---------------------------------
 model.roots.wn <- roots.df %>%
