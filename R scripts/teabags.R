@@ -1,12 +1,27 @@
 #### TEABAG / DECOMP TEST SCRIPT
 
 source("R scripts/ThreeD_load_packages.R") 
-source("R scripts/ThreeD_create_metadata.R") 
+source("R scripts/ThreeD_create_metadata.R")  
+source("R scripts/MSc_aesthetics.R")
 
 ## importing data ---> dowload_plan ---------------------------------------
 teabag.raw.df <- read_csv("Data/THREE-D_clean_decomposition_fall_2021.csv") 
 
-## fixup ---> transformation_plan ---------------------------------------
+string.bag.weight.df <- read_excel("Data/additional_info.xlsx", 
+                                   sheet = "string_bag_weight") 
+
+tb.reweighed.df <- read_excel("Data/additional_info.xlsx", 
+                         sheet = "teabags_reweighed") %>% 
+                         mean(.)
+
+###############################################################
+## fixup ######################################################
+###############################################################
+
+## fixup mini dataset - bag and string weight 
+mean_string_bag_mass <- mean(string.bag.weight.df$weight_bag_string) 
+
+## fixup main dataset - teabags
 teabag.df <- teabag.raw.df %>%  
   mutate_if(is.character, as.factor) %>% 
   mutate(origBlockID = as.factor(origBlockID),
@@ -15,24 +30,29 @@ teabag.df <- teabag.raw.df %>%
          destPlotID = as.factor(destPlotID)) %>% 
          #tea_type = as.logical(tea_type)) %>% 
   mutate(Namount_kg_ha_y = log(Namount_kg_ha_y +1)) %>% # for better visualization
-  # remove teabag weight 
-  # mutate(preburial_weight_g = preburial_weight_g - XXX,
-  #        post_burial_weight_g = post_burial_weight_g - XXX)
   # filter out plots with damaged teabags
   mutate(comment_3 = ifelse(is.na(comment_2), 1, 0)) %>% 
   group_by(teabag_ID) %>% 
   mutate(comment_3 = sum(comment_3)) %>% 
   filter(comment_3 == 2) %>% 
   # calculating days buried 
-  mutate(days_buried = recover_date - burial_date) %>% 
-  mutate(days_overdue = days_buried - 90) %>% 
+  mutate(days_buried = recover_date - burial_date, 
+         days_overdue = days_buried - 90) %>% 
+  # reordeing factors 
   mutate(origSiteID = factor(origSiteID, levels = c("Lia", "Joa"))) %>% 
   mutate(grazing = recode(grazing, 
                           "C" = "Control", "I" = "Intensive", 
                           "M" = "Medium", "N" = "Natural"),
          warming = recode(warming, 
                           "A" = "Ambient", "W" = "Warmed")) %>% 
-  mutate(mass_loss_proportion = post_burial_weight_g / preburial_weight_g)
+  # remove weight of bag and string from teabag weight 
+  mutate(preburial_weight_g = preburial_weight_g - mean_string_bag_mass,
+         post_burial_weight_g = post_burial_weight_g - mean_string_bag_mass,
+  # renaming and recalculating mass loss 
+         mass_loss_g = weight_loss_g, 
+         mass_loss_g = preburial_weight_g - post_burial_weight_g,
+  # calculating proportion of mass loss   
+         mass_loss_proportion = post_burial_weight_g / preburial_weight_g)
 
 
 ## analysis ---> analysis_plan ---------------------------------------
@@ -60,7 +80,19 @@ teabag.df <- teabag.raw.df %>%
 #   mutate(a_r = h_r (1 - S))
 
 ## ALTERNATIVE ANALYSIS OF TEABAG WEIGHTLOSS -------------------
+# calculating 
 
+
+
+
+
+
+
+
+
+
+
+## figures ----------------------------------------------------
 plot_teabags <- teabag.df %>% 
   group_by(tea_type, origSiteID, warming, Namount_kg_ha_y, grazing) %>% 
   ggplot(mapping = aes(x = log(Namount_kg_ha_y +1), 
@@ -78,17 +110,7 @@ plot_teabags <- teabag.df %>%
        x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)),
        y = bquote(Mass~loss~proportion)) +
   #legend(horiz = TRUE) +
+  #geom_line() +
+  #geom_smooth(method = "lm") +
   facet_grid(origSiteID ~ grazing) 
-  #geom_smooth(method = "lm")
 plot_teabags
-
-
-
-
-
-
-
-
-
-
-## figures ---> figure_plan ---------------------------------------
