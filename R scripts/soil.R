@@ -2,11 +2,12 @@
 
 source("R scripts/ThreeD_load_packages.R")
 source("R scripts/ThreeD_create_metadata.R")
+source("R scripts/MSc_aesthetics.R")
 
 ## importing  ........-------------------------------------------
 soil.raw.df <- read_csv2(file = "Data/ThreeD_soilcores_2021.csv")
-add.inf.df <- read_excel("Data/additional_info.xlsx", 
-                         sheet = "coffeefilter_binder_mass")
+#add.inf.df <- read_excel("Data/additional_info.xlsx", 
+ #                        sheet = "coffeefilter_binder_mass")
 
 ## fixup -------------------------------------------------------
 # mean mass of coffee filter + binder
