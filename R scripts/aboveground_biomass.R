@@ -1,7 +1,8 @@
-## aboveground biomass
+### SCRIPT ABOVEGROUND BIOMASS
 
 source("R scripts/ThreeD_load_packages.R")
 source("R scripts/ThreeD_create_metadata.R")
+source("R scripts/MSc_aesthetics.R")
 
 ## importing data -----------------------------------
 agb.raw.df <- read_csv("Data/THREE-D_clean_biomass_2020-2021.csv")
@@ -15,28 +16,37 @@ agb.df <- agb.raw.df %>%
          destPlotID = as.factor(destPlotID)) %>% 
   mutate(Namount_kg_ha_y = log(Namount_kg_ha_y +1)) %>% 
   filter(year == 2021) %>% 
-  mutate(origSiteID = factor(origSiteID, levels = c("Lia", "Joa"))) %>% 
+  # renaming variables 
   mutate(grazing = recode(grazing, 
                           "C" = "Control", "I" = "Intensive", 
                           "M" = "Medium", "N" = "Natural"),
          warming = recode(warming, 
-                          "A" = "Ambient", "W" = "Warmed"))
+                          "A" = "Ambient", "W" = "Warmed")) %>% 
+  # reordering variables 
+  mutate(origSiteID = factor(origSiteID, levels = c("Lia", "Joa")),
+         grazing = factor(grazing, 
+                          levels = c("C" = "Control", 
+                                     "M" = "Medium",
+                                     "I" = "Intensive",
+                                     "N" = "Natural"))) 
 
 ## analysis agb ----------------------------------------
 ## writes numbers out instead of on exponential form 
 options(scipen = 100, digits = 4)
 
+###############################################################
 ### model: agb ~ warming x nitrogen x grazing 
 agb.df %>%
   group_by(origSiteID) %>% 
   nest() %>% 
   mutate(
     model.agb.wng = map(data, 
-                          ~ lm(biomass ~ Namount_kg_ha_y * warming * grazing, 
-                               data = .)),
-    result.agb.wng = map(model.agb.wng, tidy)) %>%
-  unnest(result.agb.wng) %>% # opens the nested dataframes 
-  View() 
+                          ~ lm(biomass ~ 
+                                 Namount_kg_ha_y * warming * grazing, 
+                               data = .)))#,
+#    result.agb.wng = map(model.agb.wng, tidy)) %>%
+#  unnest(result.agb.wng) %>% # opens the nested dataframes 
+#  #View() 
 
 ## making dataframe with model output 
 output.agb.wng <- agb.df %>%
@@ -44,7 +54,8 @@ output.agb.wng <- agb.df %>%
   nest() %>% 
   mutate(
     model.agb.wng = map(data, 
-                        ~ lm(biomass ~ Namount_kg_ha_y * warming * grazing, 
+                        ~ lm(biomass ~ 
+                               Namount_kg_ha_y * warming * grazing, 
                              data = .)),
     result.agb.wng = map(model.agb.wng, tidy)) %>%
   unnest(result.agb.wng) %>% 
