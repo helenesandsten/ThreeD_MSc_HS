@@ -29,7 +29,6 @@ mutate(dateRIC_washed = ymd(dateRIC_washed),
   left_join(NitrogenDictionary, by = "Nlevel") %>% 
   mutate(Namount_kg_ha_y = log(Namount_kg_ha_y +1))
 
-
 ## analysis - roots data --------------------------------------------
 ###############################################################
 ### MODEL: roots ~ w * n * g ---------------------------------------
@@ -38,22 +37,22 @@ model.roots.wng.int <- roots.df %>%
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
     model.roots.wng.int = map(data, # runs model in each litte dataset
-                          ~ lm(root_mass_cm3 ~
-                                 warming * Namount_kg_ha_y * grazing,
-                               data = .)))#,
-    #result.roots.wng.int = map(model.roots.wng.int, tidy)) #%>%
-  #unnest(result.roots.wng.int) #%>% # opens the nested dataframes
- # View()
+                              ~ lm(root_mass_cm3 ~
+                                     warming * Namount_kg_ha_y * grazing,
+                                   data = .)))#,
+#result.roots.wng.int = map(model.roots.wng.int, tidy)) #%>%
+#unnest(result.roots.wng.int) #%>% # opens the nested dataframes
+# View()
 
 ### MODEL: roots ~ w * n * g - check model --------------------
 ## must run model code without result- and unnest-line for this to be useful
 ## check performance 
-model_performance(model.roots.wng.int $ model.roots.wng.int[[1]])
+#model_performance(model.roots.wng.int $ model.roots.wng.int[[1]])
 ## check assumptions 
-check_model(model.roots.wng.int $ model.roots.wng.int[[1]])
+#check_model(model.roots.wng.int $ model.roots.wng.int[[1]])
 ## check plots that are off: collinearity 
 ## exspected as the model has interaction terms
-check_collinearity(model.roots.wng.int $ model.roots.wng.int[[1]])
+#check_collinearity(model.roots.wng.int $ model.roots.wng.int[[1]])
 
 
 
@@ -64,9 +63,9 @@ model.roots.wng.add <- roots.df %>%
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
     model.roots.wng.add = map(data, # runs model in each litte dataset
-                          ~ lm(root_mass_cm3 ~
-                                 warming + Namount_kg_ha_y + grazing,
-                               data = .)))#,
+                              ~ lm(root_mass_cm3 ~
+                                     warming + Namount_kg_ha_y + grazing,
+                                   data = .)))#,
 #result.roots.wng.add = map(model.roots.wng.add, tidy)) #%>%
 #unnest(result.roots.wng.add) #%>% # opens the nested dataframes
 # View()
@@ -74,9 +73,9 @@ model.roots.wng.add <- roots.df %>%
 ### MODEL: roots ~ w + n + g - check model --------------------
 ## must run model code without result- and unnest-line for this to be useful
 ## check performance 
-model_performance(model.roots.wng.add$model.roots.wng.add[[1]]) 
+#model_performance(model.roots.wng.add$model.roots.wng.add[[1]]) 
 ## check assumtions 
-check_model(model.roots.wng.add$model.roots.wng.add[[1]]) 
+#check_model(model.roots.wng.add$model.roots.wng.add[[1]]) 
 # all diagnostic plots looks good
 
 
@@ -88,18 +87,18 @@ model.roots.wng.intadd <- roots.df %>%
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
     model.roots.wng.intadd = map(data, # runs model in each litte dataset
-                              ~ lm(root_mass_cm3 ~
-                                     warming * Namount_kg_ha_y + grazing,
-                                   data = .)))#,
+                                 ~ lm(root_mass_cm3 ~
+                                        warming * Namount_kg_ha_y + grazing,
+                                      data = .)))#,
 #result.roots.wng.intadd = map(model.roots.wng.intadd, tidy)) #%>%
 #unnest(result.roots.wng.intadd) #%>% # opens the nested dataframes
 # View()
 
 ### MODEL: roots ~ w * n + g - check model --------------------
 ## check performance 
-model_performance(model.roots.wng.intadd $ model.roots.wng.intadd[[1]])
+#model_performance(model.roots.wng.intadd $ model.roots.wng.intadd[[1]])
 ## check assumptions 
-check_model(model.roots.wng.intadd $ model.roots.wng.intadd[[1]])
+#check_model(model.roots.wng.intadd $ model.roots.wng.intadd[[1]])
 ## all assumptions looks good 
 
 
@@ -120,9 +119,9 @@ model.roots.wng.addint <- roots.df %>%
 
 ### MODEL: roots ~ w + n * g - check model --------------------
 ## check performance 
-model_performance(model.roots.wng.intadd $ model.roots.wng.intadd[[1]])
+#model_performance(model.roots.wng.intadd $ model.roots.wng.intadd[[1]])
 ## check assumptions 
-check_model(model.roots.wng.intadd $ model.roots.wng.intadd[[1]])
+#check_model(model.roots.wng.intadd $ model.roots.wng.intadd[[1]])
 
 
 
@@ -142,9 +141,9 @@ model.roots.wgn.intadd <- roots.df %>%
 
 ### MODEL: roots ~ w * g + n - check model --------------------
 ## check performance 
-model_performance(model.roots.wgn.intadd $ model.roots.wgn.intadd[[1]])
+#model_performance(model.roots.wgn.intadd $ model.roots.wgn.intadd[[1]])
 ## check assumptions 
-check_model(model.roots.wgn.intadd $ model.roots.wgn.intadd[[1]])
+#check_model(model.roots.wgn.intadd $ model.roots.wgn.intadd[[1]])
 
 
 ###############################################################
@@ -163,9 +162,9 @@ model.roots.wn.int <- roots.df %>%
 
 ### MODEL: roots ~ w * n - check model ------------
 ## check performance 
-model_performance(model.roots.wn.int$model.roots.wn.int[[1]])
+#model_performance(model.roots.wn.int$model.roots.wn.int[[1]])
 ## check assumptions 
-check_model(model.roots.wn.int$model.roots.wn.int[[1]]) # looks alright 
+#check_model(model.roots.wn.int$model.roots.wn.int[[1]]) # looks alright 
 
 ###############################################################
 ### MODEL: roots ~ w + n ---------------------------------
@@ -183,9 +182,9 @@ model.roots.wn.add <- roots.df %>%
 
 ### MODEL: roots ~ w + n - check model ------------
 ## check performance 
-model_performance(model.roots.wn.add$model.roots.wn.add[[1]])
+#model_performance(model.roots.wn.add$model.roots.wn.add[[1]])
 ## check assumptions 
-check_model(model.roots.wn.add$model.roots.wn.add[[1]])
+#check_model(model.roots.wn.add$model.roots.wn.add[[1]])
 ###############################################################
 ### MODEL: roots ~ w * g ---------------------------------
 model.roots.wg.int <- roots.df %>%
@@ -204,9 +203,9 @@ model.roots.wg.int <- roots.df %>%
 ## check performance 
 model_performance(model.roots.wg.int$model.roots.wg.int[[1]])
 ## check assumptions 
-check_model(model.roots.wg.int$model.roots.wg.int[[1]])
+#check_model(model.roots.wg.int$model.roots.wg.int[[1]])
 ## check plots that are off
-check_outliers(model.roots.wg.int$model.roots.wg.int[[1]])
+#check_outliers(model.roots.wg.int$model.roots.wg.int[[1]])
 check_collinearity(model.roots.wg.int$model.roots.wg.int[[1]])
 ###############################################################
 ### MODEL: roots ~ w + g ---------------------------------
@@ -224,9 +223,9 @@ model.roots.wg.add <- roots.df %>%
 
 ### MODEL: roots ~ w + g - check model ------------
 ## check performance 
-model_performance(model.roots.wg.add$model.roots.wg.add[[1]])
+#model_performance(model.roots.wg.add$model.roots.wg.add[[1]])
 ## check assumptions 
-check_model(model.roots.wg.add$model.roots.wg.add[[1]])
+#check_model(model.roots.wg.add$model.roots.wg.add[[1]])
 ###############################################################
 ### MODEL: roots ~ n * g ---------------------------------
 model.roots.ng.int <- roots.df %>%
@@ -243,9 +242,9 @@ model.roots.ng.int <- roots.df %>%
 
 ### MODEL: roots ~ n * g - check model ------------
 ## check performance 
-model_performance(model.roots.ng.int$model.roots.ng.int[[1]])
+#model_performance(model.roots.ng.int$model.roots.ng.int[[1]])
 ## check assumptions 
-check_model(model.roots.ng.int$model.roots.ng.int[[1]]) # looks alright 
+#check_model(model.roots.ng.int$model.roots.ng.int[[1]]) # looks alright 
 
 ###############################################################
 ### MODEL: roots ~ n + g ---------------------------------
@@ -263,9 +262,9 @@ model.roots.ng.add <- roots.df %>%
 
 ### MODEL: roots ~ n + g  - check model ------------
 ## check performance 
-model_performance(model.roots.ng.add$model.roots.ng.add[[1]])
+#model_performance(model.roots.ng.add$model.roots.ng.add[[1]])
 ## check assumptions 
-check_model(model.roots.ng.add$model.roots.ng.add[[1]])
+#check_model(model.roots.ng.add$model.roots.ng.add[[1]])
 
 ###############################################################
 ### MODEL: roots ~ w ---------------------------------
@@ -283,9 +282,9 @@ model.roots.w <- roots.df %>%
 
 ### MODEL: roots ~ w - check model ------------
 ## check performance 
-model_performance(model.roots.w$model.roots.w[[1]])
+#model_performance(model.roots.w$model.roots.w[[1]])
 ## check assumptions 
-check_model(model.roots.w$model.roots.w[[1]])
+#check_model(model.roots.w$model.roots.w[[1]])
 ###############################################################
 ### MODEL: roots ~ n ---------------------------------
 model.roots.n <- roots.df %>%
@@ -302,9 +301,9 @@ model.roots.n <- roots.df %>%
 
 ### MODEL: roots ~ n - check model ------------
 ## check performance 
-model_performance(model.roots.n$model.roots.n[[1]])
+#model_performance(model.roots.n$model.roots.n[[1]])
 ## check assumptions 
-check_model(model.roots.n$model.roots.n[[1]])
+#check_model(model.roots.n$model.roots.n[[1]])
 ###############################################################
 ### MODEL: roots ~ g ---------------------------------
 model.roots.g <- roots.df %>%
@@ -321,9 +320,9 @@ model.roots.g <- roots.df %>%
 
 ### MODEL: roots ~ g - check model ------------
 ## check performance 
-model_performance(model.roots.g$model.roots.g[[1]])
+#model_performance(model.roots.g$model.roots.g[[1]])
 ## check assumptions 
-check_model(model.roots.g$model.roots.g[[1]])
+#check_model(model.roots.g$model.roots.g[[1]])
 ###############################################################
 ### compare models -------------------------------------------
 ### warming & nitrogen & grazing 
@@ -334,9 +333,66 @@ compare_performance(model.roots.wng.int$model.roots.wng.int[[1]],
 
 plot.models.roots.wng <-
   plot(compare_performance(model.roots.wng.int$model.roots.wng.int[[1]], 
-                         model.roots.wng.add$model.roots.wng.add[[1]],
-                         model.roots.wng.intadd$model.roots.wng.intadd[[1]],
-                         model.roots.wgn.intadd$model.roots.wgn.intadd[[1]]))
+                           model.roots.wng.add$model.roots.wng.add[[1]],
+                           model.roots.wng.intadd$model.roots.wng.intadd[[1]],
+                           model.roots.wgn.intadd$model.roots.wgn.intadd[[1]])) # best
+###############################################################
+### compare models -------------------------------------------
+### warming & nitrogen  
+compare_performance(model.roots.wn.int$model.roots.wn.int[[1]], 
+                    model.roots.wn.add$model.roots.wn.add[[1]])
+
+plot.models.roots.wn <-
+  plot(compare_performance(model.roots.wn.int$model.roots.wn.int[[1]], 
+                           model.roots.wn.add$model.roots.wn.add[[1]])) # best 
+###############################################################
+### compare models -------------------------------------------
+### warming & grazing  
+compare_performance(model.roots.wg.int$model.roots.wg.int[[1]], 
+                    model.roots.wg.add$model.roots.wg.add[[1]])
+
+plot.models.roots.wg <-
+  plot(compare_performance(model.roots.wg.int$model.roots.wg.int[[1]],
+                           # 1 best but check assumptions
+                           model.roots.wg.add$model.roots.wg.add[[1]]))
+###############################################################
+### compare models -------------------------------------------
+### warming & grazing  
+compare_performance(model.roots.ng.int$model.roots.ng.int[[1]], 
+                    model.roots.ng.add$model.roots.ng.add[[1]])
+
+plot.models.roots.ng <-
+  plot(compare_performance(model.roots.ng.int$model.roots.ng.int[[1]], 
+                           model.roots.ng.add$model.roots.ng.add[[1]])) # best
+###############################################################
+### compare models -------------------------------------------
+### warming & grazing  
+compare_performance(
+  model.roots.wng.int$model.roots.wng.int[[1]],        # w * n * g
+  model.roots.wng.add$model.roots.wng.add[[1]],        # w + n + g 
+  model.roots.wng.intadd$model.roots.wng.intadd[[1]],  # w * n + g
+  model.roots.wgn.intadd$model.roots.wgn.intadd[[1]],  # w + n * g 
+  model.roots.wn.int$model.roots.wn.int[[1]],          # w * n
+  model.roots.wn.add$model.roots.wn.add[[1]],          # w + n
+  model.roots.wg.int$model.roots.wg.int[[1]],          # w * g
+  model.roots.wg.add$model.roots.wg.add[[1]],          # w + g
+  model.roots.ng.int$model.roots.ng.int[[1]],          # n * g
+  model.roots.ng.add$model.roots.ng.add[[1]])          # n + g
+
+plot.models.roots.ng <-
+  plot(compare_performance(
+    model.roots.wng.int$model.roots.wng.int[[1]],        # w * n * g
+    model.roots.wng.add$model.roots.wng.add[[1]],        # w + n + g 
+    model.roots.wng.intadd$model.roots.wng.intadd[[1]],  # w * n + g
+    model.roots.wgn.intadd$model.roots.wgn.intadd[[1]],  # w + n * g 
+    model.roots.wn.int$model.roots.wn.int[[1]],          # w * n
+    model.roots.wn.add$model.roots.wn.add[[1]],          # w + n
+    model.roots.wg.int$model.roots.wg.int[[1]],          # w * g
+    model.roots.wg.add$model.roots.wg.add[[1]],          # w + g
+    model.roots.ng.int$model.roots.ng.int[[1]],          # n * g
+    model.roots.ng.add$model.roots.ng.add[[1]])          # n + g
+  )
+
 ###############################################################
 ### MODEL: XXX - create table of model outupt ----------
 # writes numbers out instead of on exponential form
