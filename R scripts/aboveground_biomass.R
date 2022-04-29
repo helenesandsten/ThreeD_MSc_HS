@@ -31,39 +31,328 @@ agb.df <- agb.raw.df %>%
                                      "N" = "Natural"))) 
 
 ## analysis agb ----------------------------------------
-## writes numbers out instead of on exponential form 
-options(scipen = 100, digits = 4)
+
+### MODEL: agb ~ w * n * g ---------------------------------------
+model.agb.wng.int <- agb.df %>%
+  group_by(origSiteID) %>% #
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.agb.wng.int = map(data, # runs model in each litte dataset
+                              ~ lm(biomass ~
+                                     warming * Namount_kg_ha_y * grazing,
+                                   data = .)))#,
+#result.agb.wng.int = map(model.agb.wng.int, tidy)) #%>%
+#unnest(result.agb.wng.int) #%>% # opens the nested dataframes
+# View()
+
+### MODEL: agb ~ w * n * g - check model --------------------
+## must run model code without result- and unnest-line for this to be useful
+## check performance 
+model_performance(model.agb.wng.int $ model.agb.wng.int[[1]])
+## check assumptions 
+check_model(model.agb.wng.int $ model.agb.wng.int[[1]])
+## check plots that are off: collinearity 
+## exspected as the model has interaction terms
+#check_collinearity(model.agb.wng.int $ model.agb.wng.int[[1]])
+
+
 
 ###############################################################
-### model: agb ~ warming x nitrogen x grazing 
-agb.df %>%
-  group_by(origSiteID) %>% 
-  nest() %>% 
+### MODEL: agb ~ w + n + g ---------------------------------------
+model.agb.wng.add <- agb.df %>%
+  group_by(origSiteID) %>% #
+  nest() %>% # makes little dataframes inside my data, closed
   mutate(
-    model.agb.wng = map(data, 
-                          ~ lm(biomass ~ 
-                                 Namount_kg_ha_y * warming * grazing, 
-                               data = .)))#,
-#    result.agb.wng = map(model.agb.wng, tidy)) %>%
-#  unnest(result.agb.wng) %>% # opens the nested dataframes 
-#  #View() 
+    model.agb.wng.add = map(data, # runs model in each litte dataset
+                              ~ lm(biomass ~
+                                     warming + Namount_kg_ha_y + grazing,
+                                   data = .)))#,
+#result.agb.wng.add = map(model.agb.wng.add, tidy)) #%>%
+#unnest(result.agb.wng.add) #%>% # opens the nested dataframes
+# View()
 
-## making dataframe with model output 
-output.agb.wng <- agb.df %>%
-  group_by(origSiteID) %>% 
-  nest() %>% 
+### MODEL: agb ~ w + n + g - check model --------------------
+## must run model code without result- and unnest-line for this to be useful
+## check performance 
+#model_performance(model.agb.wng.add$model.agb.wng.add[[1]]) 
+## check assumtions 
+#check_model(model.agb.wng.add$model.agb.wng.add[[1]]) 
+# all diagnostic plots looks good
+
+
+
+###############################################################
+### MODEL: agb ~ w * n + g ----------------------------------
+model.agb.wng.intadd <- agb.df %>%
+  group_by(origSiteID) %>% #
+  nest() %>% # makes little dataframes inside my data, closed
   mutate(
-    model.agb.wng = map(data, 
-                        ~ lm(biomass ~ 
-                               Namount_kg_ha_y * warming * grazing, 
-                             data = .)),
-    result.agb.wng = map(model.agb.wng, tidy)) %>%
-  unnest(result.agb.wng) %>% 
-  select(origSiteID, term, estimate, std.error, statistic, p.value)
+    model.agb.wng.intadd = map(data, # runs model in each litte dataset
+                                 ~ lm(biomass ~
+                                        warming * Namount_kg_ha_y + grazing,
+                                      data = .)))#,
+#result.agb.wng.intadd = map(model.agb.wng.intadd, tidy)) #%>%
+#unnest(result.agb.wng.intadd) #%>% # opens the nested dataframes
+# View()
 
-View(output.agb.wng)
+### MODEL: agb ~ w * n + g - check model --------------------
+## check performance 
+#model_performance(model.agb.wng.intadd $ model.agb.wng.intadd[[1]])
+## check assumptions 
+#check_model(model.agb.wng.intadd $ model.agb.wng.intadd[[1]])
+## all assumptions looks good 
 
 
+
+###############################################################
+### MODEL: agb ~ w + n * g ----------------------------------
+model.agb.wng.addint <- agb.df %>%
+  group_by(origSiteID) %>% #
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.agb.wng.intadd = map(data, # runs model in each litte dataset
+                                 ~ lm(biomass ~
+                                        warming + Namount_kg_ha_y * grazing,
+                                      data = .)))#,
+#result.agb.wng.intadd = map(model.agb.wng.intadd, tidy)) #%>%
+#unnest(result.agb.wng.intadd) #%>% # opens the nested dataframes
+# View()
+
+### MODEL: agb ~ w + n * g - check model --------------------
+## check performance 
+#model_performance(model.agb.wng.intadd $ model.agb.wng.intadd[[1]])
+## check assumptions 
+#check_model(model.agb.wng.intadd $ model.agb.wng.intadd[[1]])
+
+
+
+###############################################################
+### MODEL: agb ~ w * g + n ----------------------------------
+model.agb.wgn.intadd <- agb.df %>%
+  group_by(origSiteID) %>% #
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.agb.wgn.intadd = map(data, # runs model in each litte dataset
+                                 ~ lm(biomass ~
+                                        warming * grazing + Namount_kg_ha_y,
+                                      data = .)))#,
+#result.agb.wgn.intadd = map(model.agb.wgn.intadd, tidy)) #%>%
+#unnest(result.agb.wgn.intadd) #%>% # opens the nested dataframes
+# View()
+
+### MODEL: agb ~ w * g + n - check model --------------------
+## check performance 
+#model_performance(model.agb.wgn.intadd $ model.agb.wgn.intadd[[1]])
+## check assumptions 
+#check_model(model.agb.wgn.intadd $ model.agb.wgn.intadd[[1]])
+
+
+###############################################################
+### MODEL: agb ~ w * n ---------------------------------
+model.agb.wn.int <- agb.df %>%
+  group_by(origSiteID) %>% #
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.agb.wn.int = map(
+      data, # runs model in each litte dataset
+      ~ lm(biomass ~ warming * Namount_kg_ha_y,
+           data = .)))
+#    result.agb.wn.int = map(model.agb.wn.int, tidy) %>%
+#  unnest(result.agb.wn.int) # opens the nested dataframes
+#  #View()
+
+### MODEL: agb ~ w * n - check model ------------
+## check performance 
+#model_performance(model.agb.wn.int$model.agb.wn.int[[1]])
+## check assumptions 
+#check_model(model.agb.wn.int$model.agb.wn.int[[1]]) # looks alright 
+
+###############################################################
+### MODEL: agb ~ w + n ---------------------------------
+model.agb.wn.add <- agb.df %>%
+  group_by(origSiteID) %>% #
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.agb.wn.add = map(
+      data, # runs model in each litte dataset
+      ~ lm(biomass ~ warming + Namount_kg_ha_y,
+           data = .)))
+#    result.agb.wn.add = map(model.agb.wn.add, tidy) %>%
+#  unnest(result.agb.wn.add) # opens the nested dataframes
+#  #View()
+
+### MODEL: agb ~ w + n - check model ------------
+## check performance 
+#model_performance(model.agb.wn.add$model.agb.wn.add[[1]])
+## check assumptions 
+#check_model(model.agb.wn.add$model.agb.wn.add[[1]])
+###############################################################
+### MODEL: agb ~ w * g ---------------------------------
+model.agb.wg.int <- agb.df %>%
+  group_by(origSiteID) %>% #
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.agb.wg.int = map(
+      data, # runs model in each litte dataset
+      ~ lm(biomass ~ warming * grazing,
+           data = .)))
+#    result.agb.wg.int = map(model.agb.wg.int, tidy) %>%
+#  unnest(result.agb.wg.int) # opens the nested dataframes
+#  #View()
+
+### MODEL: agb ~ w * g - check model ------------
+## check performance 
+#model_performance(model.agb.wg.int$model.agb.wg.int[[1]])
+## check assumptions 
+#check_model(model.agb.wg.int$model.agb.wg.int[[1]])
+## check plots that are off
+#check_outliers(model.agb.wg.int$model.agb.wg.int[[1]])
+#check_collinearity(model.agb.wg.int$model.agb.wg.int[[1]])
+###############################################################
+### MODEL: agb ~ w + g ---------------------------------
+model.agb.wg.add <- agb.df %>%
+  group_by(origSiteID) %>% #
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.agb.wg.add = map(
+      data, # runs model in each litte dataset
+      ~ lm(biomass ~ warming + grazing,
+           data = .)))
+#    result.agb.wg.add = map(model.agb.wg.add, tidy) %>%
+#  unnest(result.agb.wg.add) # opens the nested dataframes
+#  #View()
+
+### MODEL: agb ~ w + g - check model ------------
+## check performance 
+#model_performance(model.agb.wg.add$model.agb.wg.add[[1]])
+## check assumptions 
+#check_model(model.agb.wg.add$model.agb.wg.add[[1]])
+###############################################################
+### MODEL: agb ~ n * g ---------------------------------
+model.agb.ng.int <- agb.df %>%
+  group_by(origSiteID) %>% #
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.agb.ng.int = map(
+      data, # runs model in each litte dataset
+      ~ lm(biomass ~ Namount_kg_ha_y * grazing,
+           data = .)))
+#    result.agb.ng.int = map(model.agb.ng.int, tidy) %>%
+#  unnest(result.agb.ng.int) # opens the nested dataframes
+#  #View()
+
+### MODEL: agb ~ n * g - check model ------------
+## check performance 
+#model_performance(model.agb.ng.int$model.agb.ng.int[[1]])
+## check assumptions 
+#check_model(model.agb.ng.int$model.agb.ng.int[[1]]) # looks alright 
+
+###############################################################
+### MODEL: agb ~ n + g ---------------------------------
+model.agb.ng.add <- agb.df %>%
+  group_by(origSiteID) %>% #
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.agb.ng.add = map(
+      data, # runs model in each litte dataset
+      ~ lm(biomass ~ warming + Namount_kg_ha_y,
+           data = .)))
+#    result.agb.ng.add = map(model.agb.ng.add, tidy) %>%
+#  unnest(result.agb.ng.add) # opens the nested dataframes
+#  #View()
+
+### MODEL: agb ~ n + g  - check model ------------
+## check performance 
+#model_performance(model.agb.ng.add$model.agb.ng.add[[1]])
+## check assumptions 
+#check_model(model.agb.ng.add$model.agb.ng.add[[1]])
+
+###############################################################
+### MODEL: agb ~ w ---------------------------------
+model.agb.w <- agb.df %>%
+  group_by(origSiteID) %>% #
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.agb.w = map(
+      data, # runs model in each litte dataset
+      ~ lm(biomass ~ warming,
+           data = .)))
+#    result.agb.w = map(model.agb.w, tidy) %>%
+#  unnest(result.agb.w) # opens the nested dataframes
+#  #View()
+
+### MODEL: agb ~ w - check model ------------
+## check performance 
+#model_performance(model.agb.w$model.agb.w[[1]])
+## check assumptions 
+#check_model(model.agb.w$model.agb.w[[1]])
+###############################################################
+### MODEL: agb ~ n ---------------------------------
+model.agb.n <- agb.df %>%
+  group_by(origSiteID) %>% #
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.agb.n = map(
+      data, # runs model in each litte dataset
+      ~ lm(biomass ~ Namount_kg_ha_y,
+           data = .)))
+#    result.agb.n = map(model.agb.n, tidy) %>%
+#  unnest(result.agb.n) # opens the nested dataframes
+#  #View()
+
+### MODEL: agb ~ n - check model ------------
+## check performance 
+#model_performance(model.agb.n$model.agb.n[[1]])
+## check assumptions 
+#check_model(model.agb.n$model.agb.n[[1]])
+###############################################################
+### MODEL: agb ~ g ---------------------------------
+model.agb.g <- agb.df %>%
+  group_by(origSiteID) %>% #
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.agb.g = map(
+      data, # runs model in each litte dataset
+      ~ lm(biomass ~ grazing,
+           data = .)))
+#    result.agb.g = map(model.agb.g, tidy) %>%
+#  unnest(result.agb.g) # opens the nested dataframes
+#  #View()
+
+### MODEL: agb ~ g - check model ------------
+## check performance 
+#model_performance(model.agb.g$model.agb.g[[1]])
+## check assumptions 
+#check_model(model.agb.g$model.agb.g[[1]])
+
+###############################################################
+### compare models -------------------------------------------
+### warming & grazing  
+compare_performance(
+  model.agb.wng.int$model.agb.wng.int[[1]],        # w * n * g
+  model.agb.wng.add$model.agb.wng.add[[1]],        # w + n + g 
+  model.agb.wng.intadd$model.agb.wng.intadd[[1]],  # w * n + g
+  model.agb.wgn.intadd$model.agb.wgn.intadd[[1]],  # w + n * g 
+  model.agb.wn.int$model.agb.wn.int[[1]],          # w * n
+  model.agb.wn.add$model.agb.wn.add[[1]],          # w + n
+  model.agb.wg.int$model.agb.wg.int[[1]],          # w * g
+  model.agb.wg.add$model.agb.wg.add[[1]],          # w + g
+  model.agb.ng.int$model.agb.ng.int[[1]],          # n * g
+  model.agb.ng.add$model.agb.ng.add[[1]])          # n + g
+
+plot.models.agb.ng <-
+  plot(compare_performance(
+    model.agb.wng.int$model.agb.wng.int[[1]],        # w * n * g
+    model.agb.wng.add$model.agb.wng.add[[1]],        # w + n + g 
+    model.agb.wng.intadd$model.agb.wng.intadd[[1]],  # w * n + g
+    model.agb.wgn.intadd$model.agb.wgn.intadd[[1]],  # w + n * g 
+    model.agb.wn.int$model.agb.wn.int[[1]],          # w * n
+    model.agb.wn.add$model.agb.wn.add[[1]],          # w + n
+    model.agb.wg.int$model.agb.wg.int[[1]],          # w * g
+    model.agb.wg.add$model.agb.wg.add[[1]],          # w + g
+    model.agb.ng.int$model.agb.ng.int[[1]],          # n * g
+    model.agb.ng.add$model.agb.ng.add[[1]])          # n + g
+  )
 
 ## figures -----------------------------------------
 plot_agb_w_scatter <- agb.df %>% 
