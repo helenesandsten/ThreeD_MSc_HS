@@ -175,18 +175,20 @@ model.roots.wgn.intadd.2 <- roots.df %>%
 ###############################################################
 ### compare models -------------------------------------------
 ### warming & nitrogen & grazing 
-compare_performance(model.roots.wng.int.2$model.roots.wng.int.2[[1]], 
-                    model.roots.wng.add.2$model.roots.wng.add.2[[1]],
-                    model.roots.wng.intadd.2$model.roots.wng.intadd.2[[1]],
-                    model.roots.wng.addint.2$model.roots.wng.addint.2[[1]],
-                    model.roots.wgn.intadd.2$model.roots.wgn.intadd.2[[1]])
+model_perf_roots <- compare_performance(
+  model.roots.wng.int.2$model.roots.wng.int.2[[1]], 
+  model.roots.wng.add.2$model.roots.wng.add.2[[1]],
+  model.roots.wng.intadd.2$model.roots.wng.intadd.2[[1]],
+  model.roots.wng.addint.2$model.roots.wng.addint.2[[1]],
+  model.roots.wgn.intadd.2$model.roots.wgn.intadd.2[[1]])
 
 plot.models.roots.wng.2 <-
-  plot(compare_performance(model.roots.wng.int.2$model.roots.wng.int.2[[1]], 
-                           model.roots.wng.add.2$model.roots.wng.add.2[[1]],
-                           model.roots.wng.intadd.2$model.roots.wng.intadd.2[[1]],
-                           model.roots.wng.addint.2$model.roots.wng.addint.2[[1]],
-                           model.roots.wgn.intadd.2$model.roots.wgn.intadd.2[[1]]))
+  plot(compare_performance(
+    model.roots.wng.int.2$model.roots.wng.int.2[[1]], 
+    model.roots.wng.add.2$model.roots.wng.add.2[[1]],
+    model.roots.wng.intadd.2$model.roots.wng.intadd.2[[1]],
+    model.roots.wng.addint.2$model.roots.wng.addint.2[[1]],
+    model.roots.wgn.intadd.2$model.roots.wgn.intadd.2[[1]]))
 
 
 ## making clean and readable output for table 
@@ -196,9 +198,9 @@ clean_output.roots.wng.2 <- output.roots.wng.2 %>%
     (term == "Namount_kg_ha_y") ~ "Nitrogen",
     (term == "warmingWarmed") ~ "Warmed",
     (term == "grazing_lvl") ~ "Grazing",
-    (term == "Namount_kg_ha_y:warmingWarmed") ~ "Nitrogen : Warmed",
-    (term == "Namount_kg_ha_y:grazing_lvl") ~ "Nitrogen : Grazing",
+    (term == "warmingWarmed:Namount_kg_ha_y") ~ "Warmed : Nitrogen",
     (term == "warmingWarmed:grazing_lvl") ~ "Warmed : Grazing",
-    (term == "Namount_kg_ha_y:warmingWarmed:grazing_lvl") ~
-      "Nitrogen : Warmed : Grazing"
+    (term == "Namount_kg_ha_y:grazing_lvl") ~ "Nitrogen : Grazing",
+    (term == "warmingWarmed:Namount_kg_ha_y:grazing_lvl") ~
+      "Warmed : Nitrogen : Grazing"
   ))
