@@ -62,6 +62,25 @@ model.roots.wng.int.2 <- roots.df %>%
 ## exspected as the model has interaction terms
 #check_collinearity(model.roots.wng.int.2 $ model.roots.wng.int.2[[1]])
 
+## OUTPUT OF MODEL 1: roots ~ w * n * g
+
+options(scipen = 100, digits = 5)
+## running model with result and unnest to create output 
+output.roots.wng.2 <- roots.df %>%
+  group_by(origSiteID) %>% #
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.roots.wng.int.2 = map(data, # runs model in each litte dataset
+                                ~ lm(root_mass_cm3 ~
+                                       warming * Namount_kg_ha_y * grazing_lvl,
+                                     data = .)),
+    result.roots.wng.int.2 = map(model.roots.wng.int.2, tidy)) %>%
+  unnest(result.roots.wng.int.2) %>% # opens the nested dataframes 
+  select(origSiteID, term, estimate, std.error, statistic, p.value)
+# View()
+
+
+
 
 
 ###############################################################
@@ -162,7 +181,7 @@ compare_performance(model.roots.wng.int.2$model.roots.wng.int.2[[1]],
                     model.roots.wng.addint.2$model.roots.wng.addint.2[[1]],
                     model.roots.wgn.intadd.2$model.roots.wgn.intadd.2[[1]])
 
-plot.models.roots.wng <-
+plot.models.roots.wng.2 <-
   plot(compare_performance(model.roots.wng.int.2$model.roots.wng.int.2[[1]], 
                            model.roots.wng.add.2$model.roots.wng.add.2[[1]],
                            model.roots.wng.intadd.2$model.roots.wng.intadd.2[[1]],
@@ -170,3 +189,16 @@ plot.models.roots.wng <-
                            model.roots.wgn.intadd.2$model.roots.wgn.intadd.2[[1]]))
 
 
+## making clean and readable output for table 
+clean_output.roots.wng.2 <- output.roots.wng.2 %>%
+  mutate(term = case_when(
+    (term == "(Intercept)") ~ "Intercept (no N, not warmed, not grazed)",
+    (term == "Namount_kg_ha_y") ~ "Nitrogen",
+    (term == "warmingWarmed") ~ "Warmed",
+    (term == "grazing_lvl") ~ "Grazing",
+    (term == "Namount_kg_ha_y:warmingWarmed") ~ "Nitrogen : Warmed",
+    (term == "Namount_kg_ha_y:grazing_lvl") ~ "Nitrogen : Grazing",
+    (term == "warmingWarmed:grazing_lvl") ~ "Warmed : Grazing",
+    (term == "Namount_kg_ha_y:warmingWarmed:grazing_lvl") ~
+      "Nitrogen : Warmed : Grazing"
+  ))
