@@ -15,7 +15,7 @@ soil.raw.df <- read_csv2(file = "Data/ThreeD_soilcores_2021.csv")
 
 soil.df <- soil.raw.df %>% 
   # removing unwanted columns and fixing weird ones 
-  select(-c(X14, X15, X16, X17, X18)) %>% 
+ # select(-c(X14, X15, X16, X17, X18)) %>% 
   mutate(alutray_ID = str_replace(alutray_ID, "  ", " ")) %>% 
   mutate(burn_mass1 = if_else(
     alutray_ID == "Vik W B5 I" & burn_mass1 == 11.5771, # row and col you want to change
@@ -78,6 +78,8 @@ soil.df <- soil.raw.df %>%
   mutate(prop_sample_left = burnmass_1_550 / drymass_4_87) %>% 
   mutate(prop_org_mat = 1 - prop_sample_left)
 
+## CHECK OUT BETA REGRESSION 
+## https://towardsdatascience.com/a-guide-to-the-regression-of-rates-and-proportions-bcfe1c35344f
 
 ## analysis -------------------------------------------------------
 
