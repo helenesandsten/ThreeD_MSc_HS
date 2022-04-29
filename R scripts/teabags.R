@@ -52,7 +52,13 @@ teabag.df <- teabag.raw.df %>%
          mass_loss_g = preburial_weight_g - post_burial_weight_g,
   # calculating proportion of mass loss   
          mass_loss_proportion = post_burial_weight_g / preburial_weight_g)
+  
 
+
+depth_tb <- teabag.df %>% 
+  select(burial_depth_cm)
+
+mean_depth_tb <- mean(teabag.df$burial_depth_cm)
 
 ## analysis ---> analysis_plan ---------------------------------------
 ## TEABAG INDEX -----------------------------------------------------
