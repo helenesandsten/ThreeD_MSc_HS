@@ -37,5 +37,22 @@ mutate(origSiteID = case_when((destSiteID == "Lia" & warming == "A") ~ "Lia",
                               (destSiteID == "Vik" & warming == "W") ~ "Joa"))
 
 
+### MODEL: XXX - create table of model outupt ----------
+# writes numbers out instead of on exponential form
+options(scipen = 100, digits = 4)
+## running model with result and unnest to create output 
+output.roots.wng <- roots.df %>%
+  group_by(origSiteID) %>% #
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate( # makes column - do we want that?
+    model.roots.wng = map(data, # runs model in each litte dataset
+                          ~ lm(root_mass_cm3 ~
+                                 Namount_kg_ha_y * warming * grazing,
+                               data = .)),
+    result.roots.wng = map(model.roots.wng, tidy)) %>%
+  unnest(result.roots.wng) %>% # opens the nested dataframes
+  select(origSiteID, term, estimate, std.error, statistic, p.value)
+#View(output.roots.wng)
+## none of the terms are significantly different from intercept
 
 
