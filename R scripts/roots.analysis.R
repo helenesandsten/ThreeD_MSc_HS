@@ -175,14 +175,14 @@ model.roots.wgn.intadd.2 <- roots.df %>%
 ###############################################################
 ### compare models -------------------------------------------
 ### warming & nitrogen & grazing 
-model_perf_roots <- compare_performance(
+model_performance_roots <- compare_performance(
   model.roots.wng.int.2$model.roots.wng.int.2[[1]], 
   model.roots.wng.add.2$model.roots.wng.add.2[[1]],
   model.roots.wng.intadd.2$model.roots.wng.intadd.2[[1]],
   model.roots.wng.addint.2$model.roots.wng.addint.2[[1]],
   model.roots.wgn.intadd.2$model.roots.wgn.intadd.2[[1]])
 
-plot.models.roots.wng.2 <-
+plot_model_performance_roots <-
   plot(compare_performance(
     model.roots.wng.int.2$model.roots.wng.int.2[[1]], 
     model.roots.wng.add.2$model.roots.wng.add.2[[1]],
