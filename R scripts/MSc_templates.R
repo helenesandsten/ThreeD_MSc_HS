@@ -16,6 +16,23 @@
 # combined_plan.R goes into manuscript_plan (?)
 
 
+### MARKDOWN CHUNK TEMPLATES ------------------------------
+
+## FIGURE CHUNKS
+# ```{r, echo = FALSE, fig.cap = "This is the caption for my figure."}
+# #plot_XXX_wng
+# ```
+
+## TABLE CHUNKS 
+#```{r, echo = FALSE}
+## table of model output form best fitted model
+#knitr::kable(clean_output.model.XXX[,], 
+#format = "markdown",
+#caption = "This is my table caption")
+#```
+
+
+
 ### FIGURES ---------------------------------------------------------
 
 # SCATTER PLOT
