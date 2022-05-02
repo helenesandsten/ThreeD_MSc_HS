@@ -14,6 +14,19 @@ colors_g <- c("Control" = "#8FAADC", "Intensive" = "#F8CBAD",
 colors_w <- c("Ambient" = "blue", "Warmed" = "red")
 
 # colors_n 
+colors_Nlevel <- c("1" = "#969696",
+                   "2" = "#6baed6",
+                   "3" = "#9ecae1",
+                   "4" = "#969696",
+                   "5" = "#08306b",
+                   "6" = "#4292c6",
+                   "7" = "#c6dbef",
+                   "8" = "#2171b5",
+                   "9" = "#08519c",
+                   "10" = "#969696"
+                   )
+
+
 #scale_fill_viridis(option = "mako") 
 
 # colors for teabags
