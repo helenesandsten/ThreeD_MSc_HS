@@ -178,6 +178,43 @@ model_comparison_roots.lia <- compare_performance(
 # plot.models.roots.ng <-
 #   plot(model_comparison_roots.lia)
 
+
+
+## making output of best model ALPINE / LIAHOVDEN ---------------------------
+## roots ~ w * n + g 
+options(scipen = 100, digits = 4)
+## running model with result and unnest to create output 
+output.model.roots.lia <- roots.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>%
+  group_by(origSiteID) %>% 
+  filter(origSiteID == "Lia") %>% 
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.roots.wng.intadd.lia = map(data, # runs model in each litte dataset
+                                     ~ lm(root_mass_cm3 ~
+                                            warming * Namount_kg_ha_y + grazing_lvl,
+                                          data = .x)),
+    result.roots.wng.intadd.lia = map(model.roots.wng.intadd.lia, tidy)) %>%
+  unnest(result.roots.wng.intadd.lia) %>% # opens the nested dataframes
+  select(origSiteID, term, estimate, std.error, statistic, p.value)
+
+## making clean and readable output for table ---------------------
+clean_output.model.roots.lia <- output.model.roots.lia %>%
+  mutate(term = case_when(
+    (term == "(Intercept)") ~ "Intercept (no N, no warming, no grazing)",
+    (term == "Namount_kg_ha_y") ~ "Nitrogen",
+    (term == "warmingWarming") ~ "Warming",
+    (term == "grazing_lvl") ~ "Grazing",
+    (term == "warmingWarming:Namount_kg_ha_y") ~ "Warming : Nitrogen",
+    (term == "warmingWarming:grazing_lvl") ~ "Warming : Grazing",
+    (term == "Namount_kg_ha_y:grazing_lvl") ~ "Nitrogen : Grazing",
+    (term == "warmingWarming:Namount_kg_ha_y:grazing_lvl") ~
+      "Warming : Nitrogen : Grazing"
+  ))
+
+
+
 ### ------ MODELS FOR SUB ALPINE / JOASETE ----------------------
 ### MODEL: roots ~ w * n * g ------------------------------------
 model.roots.wng.int.joa <- roots.df %>%
@@ -321,32 +358,40 @@ model_comparison_roots.joa <- compare_performance(
 #   plot(model_comparison_roots.joa)
 
 
-
-
-## making output of best model -----------------------------------
+## making output of best model SUB ALPINE / JOASETE ---------------------------
 ## roots ~ w + n + g 
 options(scipen = 100, digits = 4)
 ## running model with result and unnest to create output 
-
-  # select(origSiteID, term, estimate, std.error, statistic, p.value)
-# View()
+output.model.roots.joa <- roots.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>%
+  group_by(origSiteID) %>% 
+  filter(origSiteID == "Joa") %>% 
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.roots.wng.intadd.joa = map(data, # runs model in each litte dataset
+                                     ~ lm(root_mass_cm3 ~
+                                            warming + Namount_kg_ha_y + grazing_lvl,
+                                          data = .x)),
+    result.roots.wng.intadd.joa = map(model.roots.wng.intadd.joa, tidy)) %>%
+  unnest(result.roots.wng.intadd.joa) %>% # opens the nested dataframes
+  select(origSiteID, term, estimate, std.error, statistic, p.value)
 
 ## making clean and readable output for table ---------------------
-# clean_output.model.roots.lia <- output.model.roots %>%
-#   mutate(term = case_when(
-#     (term == "(Intercept)") ~ "Intercept (no N, no warming, no grazing)",
-#     (term == "Namount_kg_ha_y") ~ "Nitrogen",
-#     (term == "warmingWarming") ~ "Warming",
-#     (term == "grazing_lvl") ~ "Grazing",
-#     (term == "warmingWarming:Namount_kg_ha_y") ~ "Warming : Nitrogen",
-#     (term == "warmingWarming:grazing_lvl") ~ "Warming : Grazing",
-#     (term == "Namount_kg_ha_y:grazing_lvl") ~ "Nitrogen : Grazing",
-#     (term == "warmingWarming:Namount_kg_ha_y:grazing_lvl") ~
-#       "Warming : Nitrogen : Grazing"
-#   )) #%>% 
-#  kable(booktabs = T) %>%
-#  kable_styling() %>%
-#  row_spec(which(output.model.roots$p.value < 0.05), bold = T)
+clean_output.model.roots.joa <- output.model.roots.joa %>%
+  mutate(term = case_when(
+    (term == "(Intercept)") ~ "Intercept (no N, no warming, no grazing)",
+    (term == "Namount_kg_ha_y") ~ "Nitrogen",
+    (term == "warmingWarming") ~ "Warming",
+    (term == "grazing_lvl") ~ "Grazing",
+    (term == "warmingWarming:Namount_kg_ha_y") ~ "Warming : Nitrogen",
+    (term == "warmingWarming:grazing_lvl") ~ "Warming : Grazing",
+    (term == "Namount_kg_ha_y:grazing_lvl") ~ "Nitrogen : Grazing",
+    (term == "warmingWarming:Namount_kg_ha_y:grazing_lvl") ~
+      "Warming : Nitrogen : Grazing"
+  ))
+
+
 
 
 ## figures - roots --------------------------------------------------
