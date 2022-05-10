@@ -15,7 +15,7 @@ soil.raw.df <- read_csv2(file = "Data/ThreeD_soilcores_2021.csv")
 
 soil.df <- soil.raw.df %>% 
   # removing unwanted columns and fixing weird ones 
-  #select(-c(X14, X15, X16, X17, X18)) %>%
+  select(-c(...14, ...15, ...16, ...17, ...18)) %>%
   mutate(alutray_ID = str_replace(alutray_ID, "  ", " ")) %>% 
   mutate(burn_mass1 = if_else(
     alutray_ID == "Vik W B5 I" & burn_mass1 == 11.5771, # row and col you want to change
@@ -56,9 +56,11 @@ soil.df <- soil.raw.df %>%
                           "C" = "Control", "M" = "Medium",
                           "I" = "Intensive","N" = "Natural"),
          warming = recode(warming, 
-                          "A" = "Ambient", "W" = "Warmed")) %>% 
-  # removing grazing level N too reduce degrees of freedom (Richard)
-  filter(!grazing == "Natural") %>% 
+                          "A" = "Ambient", "W" = "Warming")) %>% 
+  mutate(grazing = factor(grazing, levels = c("C" = "Control", 
+                                              "M" = "Medium",
+                                              "I" = "Intensive",
+                                              "N" = "Natural"))) %>% 
   # changing grazing into numbered levels (Richard)
   mutate(grazing_lvl = case_when((grazing == "Control") ~ 0,
                                  (grazing == "Medium") ~ 2,
@@ -82,173 +84,321 @@ soil.df <- soil.raw.df %>%
   filter(!drymass_4_87 < burnmass_1_550,
          !burnmass_1_550 < burnmass_2_950) %>% 
   mutate(prop_sample_left = burnmass_1_550 / drymass_4_87) %>% 
-  mutate(prop_org_mat = 1 - prop_sample_left)
+  mutate(prop_org_mat = 1 - prop_sample_left) 
 
 
 ## analysis -------------------------------------------------------
 
-### MODEL: soil ~ w * n * g ---------------------------------------
-model.soil.wng.int <- soil.df %>%
-  group_by(origSiteID) %>% #
+### ------ MODELS FOR ALPINE / LIAHOVDEN ------------------------
+### MODEL: soil ~ w * n * g -------------------------------------
+model.soil.wng.int.lia <- soil.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>% 
+  group_by(origSiteID) %>% 
+  filter(origSiteID == "Lia") %>% 
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
-    model.soil.wng.int = map(data, # runs model in each litte dataset
-                             ~ lm(prop_org_mat ~
-                                    warming * Namount_kg_ha_y * grazing_lvl,
-                                  data = .x)))#,
-#result.soil.wng.int = map(model.soil.wng.int, tidy)) #%>%
-#unnest(result.soil.wng.int) #%>% # opens the nested dataframes
+    model.soil.wng.int.lia = map(data, # runs model in each litte dataset
+                                 ~ lm(prop_org_mat ~
+                                        warming * Namount_kg_ha_y * grazing_lvl,
+                                      data = .x)))#,
+#result.soil.wng.int.lia = map(model.soil.wng.int.lia, tidy)) #%>%
+#unnest(result.soil.wng.int.lia) #%>% # opens the nested dataframes
 # View()
 
 ### MODEL: soil ~ w * n * g - check model --------------------
-## must run model code without result- and unnest-line for this to be useful
-## check performance 
-#model_performance(model.soil.wng.int $ model.soil.wng.int[[1]])
+## must run model code without result- and unnest-line for this to be useful 
+
 ## check assumptions 
-#check_model(model.soil.wng.int $ model.soil.wng.int[[1]])
-# collinearity
+#check_model(model.soil.wng.int.lia $ model.soil.wng.int.lia[[1]])
+# moderate collinearity
 
 
 ###############################################################
 ### MODEL: soil ~ w + n + g ---------------------------------------
-model.soil.wng.add <- soil.df %>%
-  group_by(origSiteID) %>% #
+model.soil.wng.add.lia <- soil.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>% 
+  group_by(origSiteID) %>% 
+  filter(origSiteID == "Lia") %>% 
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
-    model.soil.wng.add = map(data, # runs model in each litte dataset
-                             ~ lm(prop_org_mat ~
-                                    warming + Namount_kg_ha_y + grazing_lvl,
-                                  data = .x)))#,
-#result.soil.wng.add = map(model.soil.wng.add, tidy)) #%>%
-#unnest(result.soil.wng.add) #%>% # opens the nested dataframes
+    model.soil.wng.add.lia = map(data, # runs model in each litte dataset
+                                 ~ lm(prop_org_mat ~
+                                        warming + Namount_kg_ha_y + grazing_lvl,
+                                      data = .x)))#,
+#result.soil.wng.add.lia = map(model.soil.wng.add.lia, tidy)) #%>%
+#unnest(result.soil.wng.add).lia #%>% # opens the nested dataframes
 # View()
 
 ### MODEL: soil ~ w + n + g - check model --------------------
 ## must run model code without result- and unnest-line for this to be useful
-## check performance 
-#model_performance(model.soil.wng.add$model.soil.wng.add[[1]]) 
+
 ## check assumtions 
-#check_model(model.soil.wng.add$model.soil.wng.add[[1]]) 
+#check_model(model.soil.wng.add.lia$model.soil.wng.add.lia[[1]]) 
 # all diagnostic plots looks good
 
 
 
 ###############################################################
 ### MODEL: soil ~ w * n + g ----------------------------------
-model.soil.wng.intadd <- soil.df %>%
-  group_by(origSiteID) %>% #
+model.soil.wng.intadd.lia <- soil.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>% 
+  group_by(origSiteID) %>% 
+  filter(origSiteID == "Lia") %>% 
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
-    model.soil.wng.intadd = map(data, # runs model in each litte dataset
-                                ~ lm(prop_org_mat ~
-                                       warming * Namount_kg_ha_y + grazing_lvl,
-                                     data = .x)))#,
-#result.soil.wng.intadd = map(model.soil.wng.intadd, tidy)) #%>%
-#unnest(result.soil.wng.intadd) #%>% # opens the nested dataframes
+    model.soil.wng.intadd.lia = map(data, # runs model in each litte dataset
+                                    ~ lm(prop_org_mat ~
+                                           warming * Namount_kg_ha_y + grazing_lvl,
+                                         data = .x)))#,
+#result.soil.wng.intadd.lia = map(model.soil.wng.intadd.lia, tidy)) #%>%
+#unnest(result.soil.wng.intadd.lia) #%>% # opens the nested dataframes
 # View()
 
 ### MODEL: soil ~ w * n + g - check model --------------------
-## check performance 
-#model_performance(model.soil.wng.intadd $ model.soil.wng.intadd[[1]])
+
 ## check assumptions 
-#check_model(model.soil.wng.intadd $ model.soil.wng.intadd[[1]])
+#check_model(model.soil.wng.intadd.lia $ model.soil.wng.intadd.lia[[1]])
 ## all assumptions looks good 
 
 
 
 ###############################################################
 ### MODEL: soil ~ w + n * g ----------------------------------
-model.soil.wng.addint <- soil.df %>%
-  group_by(origSiteID) %>% #
+model.soil.wng.addint.lia <- soil.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>% 
+  group_by(origSiteID) %>% 
+  filter(origSiteID == "Lia") %>% 
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
-    model.soil.wng.addint = map(data, # runs model in each litte dataset
-                                ~ lm(prop_org_mat ~
-                                       warming + Namount_kg_ha_y * grazing_lvl,
-                                     data = .x)))#,
-#result.soil.wng.addint = map(model.soil.wng.addint, tidy)) #%>%
-#unnest(result.soil.wng.addint) #%>% # opens the nested dataframes
+    model.soil.wng.addint.lia = map(data, # runs model in each litte dataset
+                                    ~ lm(prop_org_mat ~
+                                           warming + Namount_kg_ha_y * grazing_lvl,
+                                         data = .x)))#,
+#result.soil.wng.addint.lia = map(model.soil.wng.addint.lia, tidy)) #%>%
+#unnest(result.soil.wng.addint.lia) #%>% # opens the nested dataframes
 # View()
 
 ### MODEL: soil ~ w + n * g - check model --------------------
-## check performance 
-#model_performance(model.soil.wng.addint $ model.soil.wng.addint[[1]])
+
 ## check assumptions 
-#check_model(model.soil.wng.addint $ model.soil.wng.addint[[1]])
+#check_model(model.soil.wng.addint.lia $ model.soil.wng.addint.lia[[1]])
 # some collinearity
 
 
 ###############################################################
 ### MODEL: soil ~ w * g + n ----------------------------------
-model.soil.wgn.intadd <- soil.df %>%
-  group_by(origSiteID) %>% #
+model.soil.wgn.intadd.lia <- soil.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>% 
+  group_by(origSiteID) %>% 
+  filter(origSiteID == "Lia") %>% 
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
-    model.soil.wgn.intadd = map(data, # runs model in each litte dataset
-                                ~ lm(prop_org_mat ~
-                                       warming * grazing_lvl + Namount_kg_ha_y,
-                                     data = .x)))#,
-#result.soil.wgn.intadd = map(model.soil.wgn.intadd, tidy)) #%>%
-#unnest(result.soil.wgn.intadd) #%>% # opens the nested dataframes
+    model.soil.wgn.intadd.lia = map(data, # runs model in each litte dataset
+                                    ~ lm(prop_org_mat ~
+                                           warming * grazing_lvl + Namount_kg_ha_y,
+                                         data = .x)))#,
+#result.soil.wgn.intadd.lia = map(model.soil.wgn.intadd.lia, tidy)) #%>%
+#unnest(result.soil.wgn.intadd.lia) #%>% # opens the nested dataframes
 # View()
 
 ### MODEL: soil ~ w * g + n - check model --------------------
-## check performance 
-#model_performance(model.soil.wgn.intadd $ model.soil.wgn.intadd[[1]])
+
 ## check assumptions 
-#check_model(model.soil.wgn.intadd $ model.soil.wgn.intadd[[1]])
+#check_model(model.soil.wgn.intadd.lia $ model.soil.wgn.intadd.lia[[1]])
 # some collinearity
 
 
 ###############################################################
-### compare models -------------------------------------------
-model_comparison_soil <- compare_performance(
-  model.soil.wng.int$model.soil.wng.int[[1]],        # w * n * g 
-  model.soil.wng.add$model.soil.wng.add[[1]],        # w + n + g 
-  model.soil.wng.intadd$model.soil.wng.intadd[[1]],  # w * n + g
-  model.soil.wng.addint$model.soil.wng.addint[[1]],  # w + n * g
-  model.soil.wgn.intadd$model.soil.wgn.intadd[[1]]  # w + n * g 
-)         
+### compare models lia -------------------------------------------
+model_comparison_soil.lia <- compare_performance(
+  model.soil.wng.add.lia$model.soil.wng.add.lia[[1]],         # w + n + g 
+  model.soil.wng.addint.lia$model.soil.wng.addint.lia[[1]],   # w + n * g
+  model.soil.wng.intadd.lia$model.soil.wng.intadd.lia[[1]],   # w * n + g
+  model.soil.wgn.intadd.lia$model.soil.wgn.intadd.lia[[1]],   # w * g + n
+  model.soil.wng.int.lia$model.soil.wng.int.lia[[1]]          # w * n * g
+)
+
 
 # plot.models.soil.ng <-
-#   plot(compare_performance(
-#     model.soil.wng.int$model.soil.wng.int[[1]],        # w * n * g
-#     model.soil.wng.add$model.soil.wng.add[[1]],        # w + n + g 
-#     model.soil.wng.intadd$model.soil.wng.intadd[[1]],  # w * n + g
-#     model.soil.wng.addint$model.soil.wng.addint[[1]],  # w + n * g
-#     model.soil.wgn.intadd$model.soil.wgn.intadd[[1]]  # w + n * g 
-#   ))
+#   plot(model_comparison_soil.lia)
 
 ## making output of best model -----------------------------------
 ## soil ~ w * n * g 
-options(scipen = 100, digits = 5)
+options(scipen = 100, digits = 4)
 ## running model with result and unnest to create output 
 output.model.soil <- soil.df %>%
-  group_by(origSiteID) %>% #
-  nest() %>% # makes little dataframes inside my data, closed
-  mutate(
-    model.soil.wng.add = map(data, # runs model in each litte dataset
-                             ~ lm(prop_org_mat ~
-                                    warming + Namount_kg_ha_y + grazing_lvl,
-                                  data = .x)),
-    result.soil.wng.add = map(model.soil.wng.add, tidy)) %>%
-  unnest(result.soil.wng.add) %>% # opens the nested dataframes
+  # removing grazing level N to reduce degrees of freedom
+  # filter(!grazing == "Natural") %>%
+  # group_by(origSiteID) %>% 
+  # filter(origSiteID == "Lia") %>% 
+  # nest() %>% # makes little dataframes inside my data, closed
+  # mutate(
+  #   model.soil.wng.add = map(data, # runs model in each litte dataset
+  #                            ~ lm(prop_org_mat ~
+  #                                   warming + Namount_kg_ha_y + grazing_lvl,
+  #                                 data = .x)),
+  #   result.soil.wng.add = map(model.soil.wng.add, tidy)) %>%
+  # unnest(result.soil.wng.add) %>% # opens the nested dataframes
   select(origSiteID, term, estimate, std.error, statistic, p.value)
 # View()
 
 ## making clean and readable output for table ---------------------
 clean_output.model.soil <- output.model.soil %>%
   mutate(term = case_when(
-    (term == "(Intercept)") ~ "Intercept (no N, not warmed, not grazed)",
-    (term == "warmingWarmed") ~ "Warmed",
+    (term == "(Intercept)") ~ "Intercept (no N, not Warming, not grazed)",
+    (term == "warmingWarming") ~ "Warming",
     (term == "Namount_kg_ha_y") ~ "Nitrogen",
     (term == "grazing_lvl") ~ "Grazing",
-    (term == "warmingWarmed:Namount_kg_ha_y") ~ "Warmed : Nitrogen",
-    (term == "warmingWarmed:grazing_lvl") ~ "Warmed : Grazing",
+    (term == "warmingWarming:Namount_kg_ha_y") ~ "Warming : Nitrogen",
+    (term == "warmingWarming:grazing_lvl") ~ "Warming : Grazing",
     (term == "Namount_kg_ha_y:grazing_lvl") ~ "Nitrogen : Grazing",
-    (term == "warmingWarmed:Namount_kg_ha_y:grazing_lvl") ~
-      "Warmed : Nitrogen : Grazing"
+    (term == "warmingWarming:Namount_kg_ha_y:grazing_lvl") ~
+      "Warming : Nitrogen : Grazing"
   ))
+
+
+### ------ MODELS FOR SUB ALPINE / JOASETE ------------------------
+### MODEL: soil ~ w * n * g -------------------------------------
+model.soil.wng.int.joa <- soil.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>% 
+  group_by(origSiteID) %>% 
+  filter(origSiteID == "Joa") %>% 
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.soil.wng.int.joa = map(data, # runs model in each litte dataset
+                                 ~ lm(prop_org_mat ~
+                                        warming * Namount_kg_ha_y * grazing_lvl,
+                                      data = .x)))#,
+#result.soil.wng.int.joa = map(model.soil.wng.int.joa, tidy)) #%>%
+#unnest(result.soil.wng.int.joa) #%>% # opens the nested dataframes
+# View()
+
+### MODEL: soil ~ w * n * g - check model --------------------
+## must run model code without result- and unnest-line for this to be useful 
+
+## check assumptions 
+#check_model(model.soil.wng.int.joa $ model.soil.wng.int.joa[[1]])
+# moderate collinearity
+
+
+###############################################################
+### MODEL: soil ~ w + n + g ---------------------------------------
+model.soil.wng.add.joa <- soil.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>% 
+  group_by(origSiteID) %>% 
+  filter(origSiteID == "Joa") %>% 
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.soil.wng.add.joa = map(data, # runs model in each litte dataset
+                                 ~ lm(prop_org_mat ~
+                                        warming + Namount_kg_ha_y + grazing_lvl,
+                                      data = .x)))#,
+#result.soil.wng.add.joa = map(model.soil.wng.add.joa, tidy)) #%>%
+#unnest(result.soil.wng.add).joa #%>% # opens the nested dataframes
+# View()
+
+### MODEL: soil ~ w + n + g - check model --------------------
+## must run model code without result- and unnest-line for this to be useful
+
+## check assumtions 
+#check_model(model.soil.wng.add.joa$model.soil.wng.add.joa[[1]]) 
+# all diagnostic plots looks good
+
+
+
+###############################################################
+### MODEL: soil ~ w * n + g ----------------------------------
+model.soil.wng.intadd.joa <- soil.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>% 
+  group_by(origSiteID) %>% 
+  filter(origSiteID == "Joa") %>% 
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.soil.wng.intadd.joa = map(data, # runs model in each litte dataset
+                                    ~ lm(prop_org_mat ~
+                                           warming * Namount_kg_ha_y + grazing_lvl,
+                                         data = .x)))#,
+#result.soil.wng.intadd.joa = map(model.soil.wng.intadd.joa, tidy)) #%>%
+#unnest(result.soil.wng.intadd.joa) #%>% # opens the nested dataframes
+# View()
+
+### MODEL: soil ~ w * n + g - check model --------------------
+
+## check assumptions 
+#check_model(model.soil.wng.intadd.joa $ model.soil.wng.intadd.joa[[1]])
+## all assumptions looks good 
+
+
+
+###############################################################
+### MODEL: soil ~ w + n * g ----------------------------------
+model.soil.wng.addint.joa <- soil.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>% 
+  group_by(origSiteID) %>% 
+  filter(origSiteID == "Joa") %>% 
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.soil.wng.addint.joa = map(data, # runs model in each litte dataset
+                                    ~ lm(prop_org_mat ~
+                                           warming + Namount_kg_ha_y * grazing_lvl,
+                                         data = .x)))#,
+#result.soil.wng.addint.joa = map(model.soil.wng.addint.joa, tidy)) #%>%
+#unnest(result.soil.wng.addint.joa) #%>% # opens the nested dataframes
+# View()
+
+### MODEL: soil ~ w + n * g - check model --------------------
+
+## check assumptions 
+#check_model(model.soil.wng.addint.joa $ model.soil.wng.addint.joa[[1]])
+# some collinearity
+
+
+###############################################################
+### MODEL: soil ~ w * g + n ----------------------------------
+model.soil.wgn.intadd.joa <- soil.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>% 
+  group_by(origSiteID) %>% 
+  filter(origSiteID == "Joa") %>% 
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.soil.wgn.intadd.joa = map(data, # runs model in each litte dataset
+                                    ~ lm(prop_org_mat ~
+                                           warming * grazing_lvl + Namount_kg_ha_y,
+                                         data = .x)))#,
+#result.soil.wgn.intadd.joa = map(model.soil.wgn.intadd.joa, tidy)) #%>%
+#unnest(result.soil.wgn.intadd.joa) #%>% # opens the nested dataframes
+# View()
+
+### MODEL: soil ~ w * g + n - check model --------------------
+
+## check assumptions 
+#check_model(model.soil.wgn.intadd.joa $ model.soil.wgn.intadd.joa[[1]])
+# some collinearity
+
+
+###############################################################
+### compare models -------------------------------------------
+model_comparison_soil.joa <- compare_performance(
+  model.soil.wng.add.joa$model.soil.wng.add.joa[[1]],         # w + n + g 
+  model.soil.wng.addint.joa$model.soil.wng.addint.joa[[1]],   # w + n * g
+  model.soil.wng.intadd.joa$model.soil.wng.intadd.joa[[1]],   # w * n + g
+  model.soil.wgn.intadd.joa$model.soil.wgn.intadd.joa[[1]],   # w * g + n
+  model.soil.wng.int.joa$model.soil.wng.int.joa[[1]]          # w * n * g
+)
+
+
+# plot.models.soil.ng <-
+#   plot(model_comparison_soil.joa)
 
 
 ## figures--------------------------------------------------------
@@ -267,36 +417,12 @@ plot_soil_wng <- soil.df %>%
   scale_color_manual(values = colors_w) + 
   scale_linetype_manual(values = c("longdash", "solid")) + 
   scale_shape_manual(values = c(1, 16)) + 
-  labs(title = "Proportion organic matter\nMass loss after burning at 550 *C", 
+  labs(title = "Proportion of soil organic matter", 
        x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)), 
        y = bquote(Proportion~organic~material)) + 
   facet_grid(origSiteID ~ grazing) +
   geom_smooth(method = "lm") 
 plot_soil_wng 
-
-
-## soil org matter plot wng
-plot_soil_wng <- soil.df %>% 
-  group_by(Namount_kg_ha_y, origSiteID, warming, grazing) %>% 
-  summarise(prop_org_mat = mean(prop_org_mat)) %>% 
-  ggplot(mapping = aes(x = log(Namount_kg_ha_y +1), 
-                       y = prop_org_mat, 
-                       color = warming,
-                       linetype = warming,
-                       shape = warming)) +
-  geom_point() + 
-  theme_minimal(base_size = 20) + 
-  scale_color_manual(values = colors_w) + 
-  scale_linetype_manual(values = c("longdash", "solid")) + 
-  scale_shape_manual(values = c(1, 16)) + 
-  labs(title = "Proportion organic matter\nMass loss after burning at 550 *C", 
-       x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)), 
-       y = bquote(Proportion~organic~material)) + 
-  facet_grid(origSiteID ~ grazing) +
-  geom_smooth(method = "lm") 
-plot_soil_wng 
-
-
 
 
 
