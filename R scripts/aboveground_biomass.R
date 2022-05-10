@@ -21,7 +21,7 @@ agb.df <- agb.raw.df %>%
                           "C" = "Control", "I" = "Intensive", 
                           "M" = "Medium", "N" = "Natural"),
          warming = recode(warming, 
-                          "A" = "Ambient", "W" = "Warmed")) %>% 
+                          "A" = "Ambient", "W" = "Warming")) %>% 
   # reordering variables 
   mutate(origSiteID = factor(origSiteID, levels = c("Lia", "Joa")),
          grazing = factor(grazing, 
@@ -29,8 +29,6 @@ agb.df <- agb.raw.df %>%
                                      "M" = "Medium",
                                      "I" = "Intensive",
                                      "N" = "Natural"))) %>% 
-  # removing grazing level N too reduce degrees of freedom in models
-  filter(!grazing == "Natural") %>% 
   # changing grazing into cont. variable too reduce degrees of freedom in models
   mutate(grazing_lvl = case_when((grazing == "Control") ~ 0,
                                  (grazing == "Medium") ~ 2,
@@ -38,210 +36,370 @@ agb.df <- agb.raw.df %>%
 
 ## analysis agb ----------------------------------------
 
+### ------ MODELS FOR ALPINE / LIAHOVDEN ------------------------
 ### MODEL: agb ~ w * n * g ---------------------------------------
-model.agb.wng.int <- agb.df %>%
-  group_by(origSiteID) %>% #
+model.agb.wng.int.lia <- agb.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>% 
+  group_by(origSiteID) %>% 
+  filter(origSiteID == "Lia") %>% 
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
-    model.agb.wng.int = map(data, # runs model in each litte dataset
+    model.agb.wng.int.lia = map(data, # runs model in each litte dataset
                             ~ lm(biomass ~
                                    warming * Namount_kg_ha_y * grazing_lvl,
                                  data = .x)))#,
-#result.agb.wng.int = map(model.agb.wng.int, tidy)) #%>%
-#unnest(result.agb.wng.int) #%>% # opens the nested dataframes
+#result.agb.wng.int.lia = map(model.agb.wng.int.lia, tidy)) #%>%
+#unnest(result.agb.wng.int.lia) #%>% # opens the nested dataframes
 # View()
 
 ### MODEL: agb ~ w * n * g - check model --------------------
 ## must run model code without result- and unnest-line for this to be useful
-## check performance 
-#model_performance(model.agb.wng.int $ model.agb.wng.int[[1]])
+
 ## check assumptions 
-#check_model(model.agb.wng.int $ model.agb.wng.int[[1]])
+#check_model(model.agb.wng.int.lia $ model.agb.wng.int.lia[[1]])
+
 ## check plots that are off: collinearity 
 ## exspected as the model has interaction terms
-#check_collinearity(model.agb.wng.int $ model.agb.wng.int[[1]])
-
+#check_collinearity(model.agb.wng.int.lia $ model.agb.wng.int.lia[[1]])
+#plot(check_collinearity(model.agb.wng.int.lia $ model.agb.wng.int.lia[[1]])) 
 
 
 ###############################################################
 ### MODEL: agb ~ w + n + g ---------------------------------------
-model.agb.wng.add <- agb.df %>%
+model.agb.wng.add.lia <- agb.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>%
   group_by(origSiteID) %>% #
+  filter(origSiteID == "Lia") %>% 
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
-    model.agb.wng.add = map(data, # runs model in each litte dataset
+    model.agb.wng.add.lia = map(data, # runs model in each litte dataset
                             ~ lm(biomass ~
                                    warming + Namount_kg_ha_y + grazing_lvl,
                                  data = .x)))#,
-#result.agb.wng.add = map(model.agb.wng.add, tidy)) #%>%
-#unnest(result.agb.wng.add) #%>% # opens the nested dataframes
+#result.agb.wng.add.lia = map(model.agb.wng.add.lia, tidy)) #%>%
+#unnest(result.agb.wng.add.lia) #%>% # opens the nested dataframes
 # View()
 
 ### MODEL: agb ~ w + n + g - check model --------------------
 ## must run model code without result- and unnest-line for this to be useful
-## check performance 
-#model_performance(model.agb.wng.add$model.agb.wng.add[[1]]) 
+
 ## check assumtions 
-#check_model(model.agb.wng.add$model.agb.wng.add[[1]]) 
-# all diagnostic plots looks good
+#check_model(model.agb.wng.add.lia$model.agb.wng.add.lia[[1]]) 
+# all diagnostic plots looks good (green/blue) but 
+# posterior predictive check is spiky and 
+# normality of residuals is not normal at the right 
 
 
 
 ###############################################################
 ### MODEL: agb ~ w * n + g ----------------------------------
-model.agb.wng.intadd <- agb.df %>%
-  group_by(origSiteID) %>% #
+model.agb.wng.intadd.lia <- agb.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>%
+  group_by(origSiteID) %>% 
+  filter(origSiteID == "Lia") %>% 
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
-    model.agb.wng.intadd = map(data, # runs model in each litte dataset
+    model.agb.wng.intadd.lia = map(data, # runs model in each litte dataset
                                ~ lm(biomass ~
                                       warming * Namount_kg_ha_y + grazing_lvl,
                                     data = .x)))#,
-#result.agb.wng.intadd = map(model.agb.wng.intadd, tidy)) #%>%
-#unnest(result.agb.wng.intadd) #%>% # opens the nested dataframes
+#result.agb.wng.intadd.lia = map(model.agb.wng.intadd.lia, tidy)) #%>%
+#unnest(result.agb.wng.intadd.lia) #%>% # opens the nested dataframes
 # View()
 
 ### MODEL: agb ~ w * n + g - check model --------------------
-## check performance 
-#model_performance(model.agb.wng.intadd $ model.agb.wng.intadd[[1]])
+
 ## check assumptions 
-#check_model(model.agb.wng.intadd $ model.agb.wng.intadd[[1]])
+#check_model(model.agb.wng.intadd.lia $ model.agb.wng.intadd.lia[[1]])
 ## all assumptions looks good 
 
 
 
 ###############################################################
 ### MODEL: agb ~ w + n * g ----------------------------------
-model.agb.wng.addint <- agb.df %>%
-  group_by(origSiteID) %>% #
+model.agb.wng.addint.lia <- agb.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>%
+  group_by(origSiteID) %>% 
+  filter(origSiteID == "Lia") %>% 
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
-    model.agb.wng.addint = map(data, # runs model in each litte dataset
+    model.agb.wng.addint.lia = map(data, # runs model in each litte dataset
                                ~ lm(biomass ~
                                       warming + Namount_kg_ha_y * grazing_lvl,
                                     data = .x)))#,
-#result.agb.wng.addint = map(model.agb.wng.addint, tidy)) #%>%
-#unnest(result.agb.wng.addint) #%>% # opens the nested dataframes
+#result.agb.wng.addint.lia = map(model.agb.wng.addint.lia, tidy)) #%>%
+#unnest(result.agb.wng.addint.lia) #%>% # opens the nested dataframes
 # View()
 
 ### MODEL: agb ~ w + n * g - check model --------------------
-## check performance 
-#model_performance(model.agb.wng.addint $ model.agb.wng.addint[[1]])
+
 ## check assumptions 
-#check_model(model.agb.wng.addint $ model.agb.wng.addint[[1]])
+#check_model(model.agb.wng.addint.lia $ model.agb.wng.addint.lia[[1]])
 
 
 
 ###############################################################
 ### MODEL: agb ~ w * g + n ----------------------------------
-model.agb.wgn.intadd <- agb.df %>%
-  group_by(origSiteID) %>% #
+model.agb.wgn.intadd.lia <- agb.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>%
+  group_by(origSiteID) %>% 
+  filter(origSiteID == "Lia") %>% 
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
-    model.agb.wgn.intadd = map(data, # runs model in each litte dataset
+    model.agb.wgn.intadd.lia = map(data, # runs model in each litte dataset
                                ~ lm(biomass ~
                                       warming * grazing_lvl + Namount_kg_ha_y,
                                     data = .x)))#,
-#result.agb.wgn.intadd = map(model.agb.wgn.intadd, tidy)) #%>%
-#unnest(result.agb.wgn.intadd) #%>% # opens the nested dataframes
+#result.agb.wgn.intadd.lia = map(model.agb.wgn.intadd.lia, tidy)) #%>%
+#unnest(result.agb.wgn.intadd.lia) #%>% # opens the nested dataframes
 # View()
 
 ### MODEL: agb ~ w * g + n - check model --------------------
-## check performance 
-#model_performance(model.agb.wgn.intadd $ model.agb.wgn.intadd[[1]])
+
 ## check assumptions 
-#check_model(model.agb.wgn.intadd $ model.agb.wgn.intadd[[1]])
+#check_model(model.agb.wgn.intadd.lia $ model.agb.wgn.intadd.lia[[1]])
+
+
+###############################################################
+### compare models ALPINE / LIA ---------------------------------
+model_comparison_agb.lia <- compare_performance(
+  model.agb.wng.add.lia$model.agb.wng.add.lia[[1]],         # w + n + g 
+  model.agb.wng.addint.lia$model.agb.wng.addint.lia[[1]],   # w + n * g
+  model.agb.wng.intadd.lia$model.agb.wng.intadd.lia[[1]],   # w * n + g
+  model.agb.wgn.intadd.lia$model.agb.wgn.intadd.lia[[1]],   # w * g + n
+  model.agb.wng.int.lia$model.agb.wng.int.lia[[1]]          # w * n * g
+)
+  
+
+# plot.models.agb.ng <-
+#   plot(model_comparison_agb.lia)
+
+## making output of best model -----------------------------------
+## agb ~ w * n + g 
+# options(scipen = 100, digits = 4)
+# ## running model with result and unnest to create output 
+# output.model.agb.lia <- agb.df %>%
+#   # removing grazing level N to reduce degrees of freedom
+#   filter(!grazing == "Natural") %>%
+#   group_by(origSiteID) %>% #
+#   nest() %>% # makes little dataframes inside my data, closed
+#   mutate(
+#     model.agb.wng.intadd = map(data, # runs model in each litte dataset
+#                             ~ lm(biomass ~
+#                                    warming * Namount_kg_ha_y + grazing_lvl,
+#                                  data = .)),
+#     result.agb.wng.intadd = map(model.agb.wng.intadd, tidy)) %>%
+#   unnest(result.agb.wng.intadd) %>% # opens the nested dataframes
+#   select(origSiteID, term, estimate, std.error, statistic, p.value)
+# # View()
+# 
+# ## making clean and readable output for table ---------------------
+# clean_output.model.agb.lia <- output.model.agb.lia %>%
+#   mutate(term = case_when(
+#     (term == "(Intercept)") ~ "Intercept (no N, no warming, no grazing)",
+#     (term == "warmingWarming") ~ "Warming",
+#     (term == "Namount_kg_ha_y") ~ "Nitrogen",
+#     (term == "grazing_lvl") ~ "Grazing",
+#     (term == "warmingWarming:Namount_kg_ha_y") ~ "Warming : Nitrogen",
+#     (term == "warmingWarming:grazing_lvl") ~ "Warming : Grazing",
+#     (term == "Namount_kg_ha_y:grazing_lvl") ~ "Nitrogen : Grazing",
+#     (term == "warmingWarming:Namount_kg_ha_y:grazing_lvl") ~
+#       "Warming : Nitrogen : Grazing"
+#   ))
+
+### ------ MODELS FOR SUB ALPINE / JOASETE -----------------------
+### MODEL: agb ~ w * n * g ---------------------------------------
+model.agb.wng.int.joa <- agb.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>% 
+  group_by(origSiteID) %>% 
+  filter(origSiteID == "Joa") %>% 
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.agb.wng.int.joa = map(data, # runs model in each litte dataset
+                                ~ lm(biomass ~
+                                       warming * Namount_kg_ha_y * grazing_lvl,
+                                     data = .x)))#,
+#result.agb.wng.int.joa = map(model.agb.wng.int.joa, tidy)) #%>%
+#unnest(result.agb.wng.int.joa) #%>% # opens the nested dataframes
+# View()
+
+### MODEL: agb ~ w * n * g - check model --------------------
+## must run model code without result- and unnest-line for this to be useful
+
+## check assumptions 
+#check_model(model.agb.wng.int.joa $ model.agb.wng.int.joa[[1]])
+
+## check plots that are off: collinearity 
+## exspected as the model has interaction terms
+#check_collinearity(model.agb.wng.int.joa $ model.agb.wng.int.joa[[1]])
+#plot(check_collinearity(model.agb.wng.int.joa $ model.agb.wng.int.joa[[1]])) 
+
+
+###############################################################
+### MODEL: agb ~ w + n + g ---------------------------------------
+model.agb.wng.add.joa <- agb.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>%
+  group_by(origSiteID) %>% #
+  filter(origSiteID == "Joa") %>% 
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.agb.wng.add.joa = map(data, # runs model in each litte dataset
+                                ~ lm(biomass ~
+                                       warming + Namount_kg_ha_y + grazing_lvl,
+                                     data = .x)))#,
+#result.agb.wng.add.joa = map(model.agb.wng.add.joa, tidy)) #%>%
+#unnest(result.agb.wng.add.joa) #%>% # opens the nested dataframes
+# View()
+
+### MODEL: agb ~ w + n + g - check model --------------------
+## must run model code without result- and unnest-line for this to be useful
+
+## check assumtions 
+#check_model(model.agb.wng.add.joa$model.agb.wng.add.joa[[1]]) 
+# all diagnostic plots looks good (green/blue) but 
+# posterior predictive check is spiky and 
+# normality of residuals is not normal at the right 
 
 
 
 ###############################################################
-### compare models -------------------------------------------
-### warming & grazing_lvl  
-model_comparison_agb <- compare_performance(
-  model.agb.wng.int$model.agb.wng.int[[1]],        # w * n * g
-  model.agb.wng.add$model.agb.wng.add[[1]],        # w + n + g 
-  model.agb.wng.intadd$model.agb.wng.intadd[[1]],  # w * n + g
-  model.agb.wng.addint$model.agb.wng.addint[[1]],  # w + n * g
-  model.agb.wgn.intadd$model.agb.wgn.intadd[[1]]  # w + n * g 
-)         
-
-# plot.models.agb.ng <-
-#   plot(compare_performance(
-#     model.agb.wng.int$model.agb.wng.int[[1]],        # w * n * g
-#     model.agb.wng.add$model.agb.wng.add[[1]],        # w + n + g 
-#     model.agb.wng.intadd$model.agb.wng.intadd[[1]],  # w * n + g
-#     model.agb.wng.addint$model.agb.wng.addint[[1]],  # w + n * g
-#     model.agb.wgn.intadd$model.agb.wgn.intadd[[1]]  # w + n * g 
-#   ))
-
-## making output of best model -----------------------------------
-## agb ~ w * n * g 
-options(scipen = 100, digits = 5)
-## running model with result and unnest to create output 
-output.model.agb <- agb.df %>%
-  group_by(origSiteID) %>% #
+### MODEL: agb ~ w * n + g ----------------------------------
+model.agb.wng.intadd.joa <- agb.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>%
+  group_by(origSiteID) %>% 
+  filter(origSiteID == "Joa") %>% 
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
-    model.agb.wng.int = map(data, # runs model in each litte dataset
+    model.agb.wng.intadd.joa = map(data, # runs model in each litte dataset
+                                   ~ lm(biomass ~
+                                          warming * Namount_kg_ha_y + grazing_lvl,
+                                        data = .x)))#,
+#result.agb.wng.intadd.joa = map(model.agb.wng.intadd.joa, tidy)) #%>%
+#unnest(result.agb.wng.intadd.joa) #%>% # opens the nested dataframes
+# View()
+
+### MODEL: agb ~ w * n + g - check model --------------------
+
+## check assumptions 
+#check_model(model.agb.wng.intadd.joa $ model.agb.wng.intadd.joa[[1]])
+## all assumptions looks good 
+
+
+
+###############################################################
+### MODEL: agb ~ w + n * g ----------------------------------
+model.agb.wng.addint.joa <- agb.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>%
+  group_by(origSiteID) %>% 
+  filter(origSiteID == "Joa") %>% 
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.agb.wng.addint.joa = map(data, # runs model in each litte dataset
+                                   ~ lm(biomass ~
+                                          warming + Namount_kg_ha_y * grazing_lvl,
+                                        data = .x)))#,
+#result.agb.wng.addint.joa = map(model.agb.wng.addint.joa, tidy)) #%>%
+#unnest(result.agb.wng.addint.joa) #%>% # opens the nested dataframes
+# View()
+
+### MODEL: agb ~ w + n * g - check model --------------------
+
+## check assumptions 
+#check_model(model.agb.wng.addint.joa $ model.agb.wng.addint.joa[[1]])
+## looks good
+
+
+
+###############################################################
+### MODEL: agb ~ w * g + n ----------------------------------
+model.agb.wgn.intadd.joa <- agb.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>%
+  group_by(origSiteID) %>% 
+  filter(origSiteID == "Joa") %>% 
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.agb.wgn.intadd.joa = map(data, # runs model in each litte dataset
+                                   ~ lm(biomass ~
+                                          warming * grazing_lvl + Namount_kg_ha_y,
+                                        data = .x)))#,
+#result.agb.wgn.intadd.joa = map(model.agb.wgn.intadd.joa, tidy)) #%>%
+#unnest(result.agb.wgn.intadd.joa) #%>% # opens the nested dataframes
+# View()
+
+### MODEL: agb ~ w * g + n - check model --------------------
+
+## check assumptions 
+#check_model(model.agb.wgn.intadd.joa $ model.agb.wgn.intadd.joa[[1]])
+
+###############################################################
+### compare models SUB ALPINE / JOA ---------------------------------
+model_comparison_agb.joa <- compare_performance(
+  model.agb.wng.add.joa$model.agb.wng.add.joa[[1]],         # w + n + g 
+  model.agb.wng.addint.joa$model.agb.wng.addint.joa[[1]],   # w + n * g
+  model.agb.wng.intadd.joa$model.agb.wng.intadd.joa[[1]],   # w * n + g
+  model.agb.wgn.intadd.joa$model.agb.wgn.intadd.joa[[1]],   # w * g + n
+  model.agb.wng.int.joa$model.agb.wng.int.joa[[1]]          # w * n * g
+)
+
+
+# plot.models.agb.ng <-
+#   plot(model_comparison_agb.joa)
+
+
+
+## lia 
+model.agb.wng.intadd.lia$model.agb.wng.intadd.lia[[1]]
+
+
+# making output of best model -----------------------------------
+# agb ~ w * n + g
+options(scipen = 100, digits = 4)
+## running model with result and unnest to create output
+output.model.agb.lia <- agb.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>%
+  group_by(origSiteID) %>% #
+  filter(origSiteID == "Lia") %>% 
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.agb.wng.intadd.lia = map(data, # runs model in each litte dataset
                             ~ lm(biomass ~
-                                   warming * Namount_kg_ha_y * grazing_lvl_lvl,
+                                   warming * Namount_kg_ha_y + grazing_lvl,
                                  data = .)),
-    result.agb.wng.int = map(model.agb.wng.int, tidy)) %>%
-  unnest(result.agb.wng.int) %>% # opens the nested dataframes
+    result.agb.wng.intadd.lia = map(model.agb.wng.intadd.lia, tidy)) %>%
+  unnest(result.agb.wng.intadd.lia) %>% # opens the nested dataframes
   select(origSiteID, term, estimate, std.error, statistic, p.value)
 # View()
 
 ## making clean and readable output for table ---------------------
-clean_output.model.agb <- output.model.agb %>%
+clean_output.model.agb.lia <- output.model.agb.lia %>%
   mutate(term = case_when(
-    (term == "(Intercept)") ~ "Intercept (no N, not warmed, not grazed)",
-    (term == "warmingWarmed") ~ "Warmed",
+    (term == "(Intercept)") ~ "Intercept (no N, no warming, no grazing)",
+    (term == "warmingWarming") ~ "Warming",
     (term == "Namount_kg_ha_y") ~ "Nitrogen",
     (term == "grazing_lvl") ~ "Grazing",
-    (term == "warmingWarmed:Namount_kg_ha_y") ~ "Warmed : Nitrogen",
-    (term == "warmingWarmed:grazing_lvl") ~ "Warmed : Grazing",
+    (term == "warmingWarming:Namount_kg_ha_y") ~ "Warming : Nitrogen",
+    (term == "warmingWarming:grazing_lvl") ~ "Warming : Grazing",
     (term == "Namount_kg_ha_y:grazing_lvl") ~ "Nitrogen : Grazing",
-    (term == "warmingWarmed:Namount_kg_ha_y:grazing_lvl") ~
-      "Warmed : Nitrogen : Grazing"
+    (term == "warmingWarming:Namount_kg_ha_y:grazing_lvl") ~
+      "Warming : Nitrogen : Grazing"
   ))
 
 
 ## figures -----------------------------------------
-plot_agb_w_scatter <- agb.df %>% 
-  #filter(year == 2021) %>% 
-  filter(grazing == "C") %>%
-  filter(Nlevel == 1 & 2 & 3) %>% 
-  group_by(turfID) %>% 
-  summarise(total_biomass = sum(biomass)) %>% 
-  ggplot(data = agb.df, 
-         mapping = aes(x = Namount_kg_ha_y, y = biomass, color = warming)) +
-  geom_point(alpha = 0.5, size = 3) +
-  #geom_jitter() +
-  scale_color_manual(values = c("#fecc5c", "#fd8d3c")) +
-  theme_bw(base_size = 20) +
-  labs(title = "Effect of warming on aboveground production", 
-       x = "N (kg/ha/y)", y = "Aboveground biomass (g)") 
-plot_agb_w_scatter
+## add nice label and show this plot?
+#plot(check_collinearity(model.agb.wng.int $ model.agb.wng.int[[1]]))
 
-
-plot_agb_w_violin <- agb.df %>% 
-  #filter(year == 2021) %>% 
-  filter(grazing == "C") %>%
-  filter(Nlevel == 1 & 2 & 3) %>% 
-  group_by(turfID) %>% 
-  summarise(total_biomass = sum(biomass)) %>% 
-  ggplot(data = agb.df, mapping = aes(x = Namount_kg_ha_y, y = biomass, color = warming)) +
-  geom_violin() +
-  #geom_jitter() +
-  scale_color_manual(values = c("#fecc5c", "#fd8d3c")) +
-  theme_bw(base_size = 20) +
-  labs(title = "Effect of warming on aboveground production", 
-       x = "N (kg/ha/y)", y = "Aboveground biomass (g)") 
-plot_agb_w_violin
-
-agb.df %>%  
-  filter(warming == "W", biomass > 35) %>% # top W outlier
-  select(turfID) 
 
 ## plot aboveground biomass ~ w, n, g
 plot_agb_wng <- agb.df %>% 
@@ -257,7 +415,7 @@ plot_agb_wng <- agb.df %>%
   scale_color_manual(values = colors_w) + 
   scale_linetype_manual(values = c("longdash", "solid")) + 
   scale_shape_manual(values = c(1, 16)) + 
-  labs(title = "Effect of warming, nitrogen and grazing on aboveground biomass", 
+  labs(title = "Aboveground productivity", 
        x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)), 
        y = bquote(Biomass~(g))) + 
   facet_grid(origSiteID ~ grazing) +
