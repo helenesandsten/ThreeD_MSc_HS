@@ -97,6 +97,7 @@ soil.df_NEW <- soil.df %>%
 par(bg="transparent")
 plot_soil_oikos <- soil.df_NEW %>% 
   group_by(Namount_kg_ha_y, origSiteID_new, warming, grazing) %>% 
+  filter(!grazing == "Natural") %>%
   summarise(prop_org_mat = mean(prop_org_mat)) %>% 
   ggplot(mapping = aes(x = log(Namount_kg_ha_y +1), 
                        y = prop_org_mat, 
