@@ -6,216 +6,213 @@ output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, fig.width = 12, fig.height = 8)
+knitr::opts_chunk$set(echo = TRUE, fig.width = 12, fig.height = 8, show_col_types = FALSE)
 source("R scripts/ThreeD_load_packages.R")
 source("R scripts/ThreeD_create_metadata.R")
+source("R scripts/aboveground_biomass.R")
 source("R scripts/roots.R")
+source("R scripts/teabags.R")
+source("R scripts/soil.R")
 ```
 
 
-# Results
+# METHODS
 
 
-This is my results section.  
+... All response varibles (y) were fitted with the five following linear models:
 
-Here I'll put a nice little paragraph that sums up my findings. 
+1. y ~ warming * nitrogen * grazing 
+2. y ~ warming + nitrogen + grazing 
+3. y ~ warming * nitrogen + grazing 
+4. y ~ warming + nitrogen * grazing 
+5. y ~ warming * grazing + nitrogen 
+
+
+
+
+```{r, nitrogen-table, echo = FALSE}
+knitr::kable(nitrogen_table[,],
+             format = "markdown",
+             caption = "caption caption caption.")
+```
+
+
+
+```{r, model-table, echo = FALSE}
+models_table %>% 
+  kable(booktabs = T, 
+        caption = "Overview of the linear models that were run ") %>%
+  kable_styling()
+```
+
+
+
+```{r, data-var-table, echo = FALSE}
+data_variable_table %>% 
+  kable(booktabs = T, 
+        caption = "This is my data variable table and this might be too much") %>%
+  kable_styling()
+```
+
+
+# RESULTS
+
+
+Warming and nitrogen had significant effects on production, both above and belowground, although not at both sites. Grazing did not have any significant effect on any of the response variables in any models.  
 
 
 ## 3.1 Aboveground biomass
 
 
-Insert:
-
-1. **Model comparison (table)** 
-2. **Best model output (table)** 
-3. **Figure** - *with prediction lines?*
+The model that best explained the response of aboveground biomass was model 3, `aboveground biomass ~ warming * nitrogen + grazing` (see table X). Aboveground productivity significantly increased with warming (p-value = 0.0203, std.error = 0.2977) and warming when in interaction with nitrogen (p-value = 0.0081, std.error = 0.1153), although only in plots that originated from the alpine site, Liahovden. There was no significant change in aboveground biomass in plots that originated from the sub-alpine site, Joasete.   
 
 
 
-#### Table X, model comparison. 
-```{r, echo = FALSE}
+```{r, mod-comp-agb, echo = FALSE}
 ## table of model comparison roots 
-# knitr::kable(model_comparison_XXX[,], 
-#              format = "markdown",
-#              caption = "Table 1. This is my caption for this table.")
+knitr::kable(model_comparison_agb[,],
+             format = "markdown",
+             caption = "Performance and comparison of models that include warming, nitrogen and grazing as explanatory variables for the response of aboveground biomass production.")
 ```
 
-#### Table Y, model output of model y ~ x. 
-```{r, echo = FALSE}
+
+```{r, best-mod-op-agb, echo = FALSE}
 ## table of model output form best fitted model
-# knitr::kable(clean_output.model.XXX[,],
+# knitr::kable(clean_output.model.agb[,],
 #              format = "markdown",
-#              caption = "Table 2 - This is my table caption")
+#              caption = "Output from model that performed best, aboveground biomass ~ w * n + g.")
+
+## neat table with bold significant rows, except intercept
+clean_output.model.agb %>% 
+  kable(booktabs = T, 
+        caption = "Output from model that performed best, aboveground biomass ~ warming * nitrogen + grazing.") %>%
+  kable_styling() %>%
+  row_spec(which(clean_output.model.agb$p.value < 0.05001 & 
+                   clean_output.model.agb$term != "Intercept (no N, no warming, no grazing)"),
+           bold = T) 
 ```
 
-## Figure of XXX 
-```{r, echo = FALSE, fig.cap = "This is the caption for my figure."}
-#plot_XXX_wng
-```
 
 
 
 ## 3.2 Belowground biomass
 
 
-The model with the best fit was model #2 `roots ~ warming + nitrogen + grazing` (*see table X*). The model output from model #2 showed that nitrogen was the only predictor variable that significantly affected root growth, and only at the sub-alpine site, Joasete (*see table Y*).
+The model that best explained belowground productivity was model 2, the additive model: `belowground biomass ~ warming + nitrogen + grazing` (see table x). Root growth significantly decreased with nitrogen, although only at the sub-alpine site, Joasete. 
+
 
 
 ```{r, mod-comp-roots, echo = FALSE}
 ## table of model comparison roots 
 knitr::kable(model_comparison_roots[,], 
              format = "markdown",
-             caption = "Table 1. Output from model performance.")
-
+             caption = "Performance and comparison of models that include warming, nitrogen and grazing as explanatory variables for the response of fine root production.")
 ```
 
-#### Table Y, test. 
-```{r, mod-output-roots, echo = FALSE}
+
+```{r, best-mod-op-roots, echo = FALSE}
 ## table of model output form best fitted model
-knitr::kable(clean_output.model.roots[,], 
-             format = "markdown",
-             caption = "Table 2. Model output from best model: roots ~ warming + nitrogen + grazing.")
+# knitr::kable(clean_output.model.roots[,], 
+#              format = "markdown",
+#              caption = "Table 2. Model output from best model: roots ~ warming + nitrogen + grazing.")
 
-# https://rdrr.io/cran/kableExtra/man/row_spec.html
-# row_spec(table_x, 3, bold = TRUE)
+## neat table with bold significant rows, except intercept
+clean_output.model.roots %>% 
+  kable(booktabs = T, 
+        caption = "Output from model that performed best, root biomass~~warming + nitrogen + grazing.") %>%
+  kable_styling() %>%
+  row_spec(which(
+    clean_output.model.roots$p.value < 0.05001 &
+      clean_output.model.roots$term != "Intercept (no N, no warming, no grazing)"),
+    bold = T) 
 ```
 
-## Figure of roots 
-```{r, fig-roots-wng, echo = FALSE, message = FALSE, fig.cap = "Figure 1 - Root growth (per cm3) and the effects of warming and nitrogen."}
-plot_roots_wng
-```
 
 
 
 ## 3.3 Decomposition
+
 
 Insert:
 
 1. **Model comparison (table)** 
 2. **Best model output (table)** 
 3. **Figure** - *with prediction lines?*
+4. **Text**
 
 
-#### Table X, model comparison. 
 ```{r, echo = FALSE}
 ## table of model comparison roots 
-#knitr::kable(model_comparison_XXX[,], format = "markdown")
+#knitr::kable(model_comparison_decomp[,], format = "markdown")
 ```
 
-#### Table Y, model output of model y ~ x. 
+
 ```{r, echo = FALSE}
 ## table of model output form best fitted model
-#knitr::kable(clean_output.model.XXX[,], format = "markdown")
+#knitr::kable(clean_output.model.decomp[,], format = "markdown")
 ```
 
-## Figure of XXX 
-```{r, echo = FALSE}
-#plot_XXX_wng
-```
 
 
 
 ## 3.4 Soil organic matter
 
 
-Insert:
-
-1. **Model comparison (table)** 
-2. **Best model output (table)** 
-3. **Figure** - *with prediction lines?*
+The model that best explained the response of soil organic matter content was the additive model, `soil organic matter ~ w + n + g`. Soil organic matter content significantly decreased with warming in plots that originated from both the alpine (Liahovden) and subalpine site (Joasete).   
 
 
 
-#### Table X, model comparison. 
-```{r, echo = FALSE}
-## table of model comparison roots 
-#knitr::kable(model_comparison_XXX[,], format = "markdown")
+```{r, echo = FALSE, message = FALSE}
+## table of model comparison soil 
+knitr::kable(model_comparison_soil[,], 
+             format = "markdown",
+             caption = "Performance and comparison of models that include warming, nitrogen and grazing as explanatory variables for the response of proportion of soil organic matter.")
 ```
 
-#### Table Y, model output of model y ~ x. 
-```{r, echo = FALSE}
-## table of model output form best fitted model
-#knitr::kable(clean_output.model.XXX[,], format = "markdown")
+
+```{r, echo = FALSE, message = FALSE}
+## table with output from model with best fit 
+## neat table with bold significant rows, except intercept
+clean_output.model.soil %>% 
+  kable(booktabs = T, 
+        caption = "Output from model that performed best, soil organic matter ~~ warming + nitrogen + grazing.") %>%
+  kable_styling() %>%
+  row_spec(which(
+    clean_output.model.soil$p.value < 0.05001 &
+      clean_output.model.soil$term != "Intercept (no N, no warming, no grazing)"),
+    bold = T) 
 ```
 
-## Figure of XXX 
-```{r, echo = FALSE}
-#plot_XXX_wng
+
+
+
+## Figures
+
+
+Even though the naturally grazed plots were not included in the models, I wanted to see what effect warming, nitrogen and grazing had on all the grazing levels (control, medium, intensive and natural) and compare them.  
+
+
+```{r, plot-agb, echo = FALSE, message = FALSE, fig.cap = "Different aboveground biomass productivity when treated with different levels of warming, nitrogen addition and grazing"}
+plot_agb_wng
 ```
 
+
+
+```{r, fig-roots-wng, echo = FALSE, message = FALSE, fig.cap = "Root growth (per cm3) and the effects of warming and nitrogen."}
+plot_roots_wng
+```
+
+
+
+```{r, echo = FALSE}
+#plot_decomp_wng
+```
+
+
+
+```{r, echo = FALSE, message = FALSE, fig.cap = "Proportion of soil organic matter (per sample) and the effects of warming and nitrogen."}
+plot_soil_wng
+```
 
 
 -----
-
-
-# For other sections of the thesis
-
-
-### Nitrogen table
-```{r, nitrogen-table, echo = FALSE}
-nitrogen_table <- tibble(
-  "Block" = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
-  "N level" = c(1,6,5,3,10,7,4,8,9,2),
-  "N kg/ha/y" = c(0, 5, 1, 0, 150, 10, 0.5, 50, 100, 0))
-
-knitr::kable(nitrogen_table[,], format = "markdown") 
-
-```
-
-
-
----
-
-https://github.com/biostats-r/quartothesis
-
-
-# Neat things in markdown
-
-
-# Header 1
-
-
-## Header 2
-
-
-### Header 3
-
-
-#### Header 4
-
-
-##### Header 5
-
-
-###### Header 6
-
-
-
-
-
-* **Bold text** when you wrap text in ** on each side.  
-
-* *Italic text* when you wrap text in * on each side.  
-
-* ***Bold and italic text*** when you wrap text in *** on each side.  
-
-* ~~Strikethough~~ when you wrap text in ~~ on each side.  
-
-
-# Code chunk options
-
-`include = FALSE` prevents code and results from appearing in the finished file. R Markdown still runs the code in the chunk, and the results can be used by other chunks.  
-
-`echo = FALSE` prevents code, but not the results from appearing in the finished file. This is a useful way to embed figures.  
-
-`message = FALSE` prevents messages that are generated by code from appearing in the finished file.  
-
-`warning = FALSE` prevents warnings that are generated by code from appearing in the finished.  
-
-`fig.cap = "..."` adds a caption to graphical results.  
-
-
-
-# Global options
-
-To set global options that apply to every chunk in your file, call `knitr::opts_chunk$set` in a code chunk. `Knitr` will treat each option that you pass to `knitr::opts_chunk$set` as a global default that can be overwritten in individual chunk headers.
