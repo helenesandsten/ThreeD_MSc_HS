@@ -7,6 +7,7 @@ source("R scripts/MSc_aesthetics.R")
 ## importing data ---> dowload_plan ---------------------------------------
 teabag.raw.df <- read_csv("Data/THREE-D_clean_decomposition_fall_2021.csv") 
 
+
 string.bag.weight.df <- read_excel("Data/additional_info.xlsx", 
                                    sheet = "string_bag_weight") 
 
@@ -29,11 +30,13 @@ teabag.df <- teabag.raw.df %>%
          destPlotID = as.factor(destPlotID)) %>% 
          #tea_type = as.logical(tea_type)) %>% 
   mutate(Namount_kg_ha_y = log(Namount_kg_ha_y +1)) %>% # for better visualization
-  # filter out plots with damaged teabags
+  # filter out damaged teabags 
   mutate(comment_3 = ifelse(is.na(comment_2), 1, 0)) %>% 
-  group_by(teabag_ID) %>% 
-  mutate(comment_3 = sum(comment_3)) %>% 
-  filter(comment_3 == 2) %>% 
+  filter(comment_3 == 1) %>% # do not run this line if you want to remove tea bag pairs
+  # filter out all teabag pairs with 1 or 2 damaged teabags
+  # group_by(teabag_ID) %>% 
+  # mutate(comment_3 = sum(comment_3)) %>% 
+  # filter(comment_3 == 2) %>% 
   # calculating days buried 
   mutate(days_buried = recover_date - burial_date, 
          days_overdue = days_buried - 90) %>% 
@@ -43,7 +46,11 @@ teabag.df <- teabag.raw.df %>%
                           "C" = "Control", "I" = "Intensive", 
                           "M" = "Medium", "N" = "Natural"),
          warming = recode(warming, 
-                          "A" = "Ambient", "W" = "Warmed")) %>% 
+                          "A" = "Ambient", "W" = "Warming")) %>% 
+  # changing grazing into cont. variable too reduce degrees of freedom in models
+  mutate(grazing_lvl = case_when((grazing == "Control") ~ 0,
+                                 (grazing == "Medium") ~ 2,
+                                 (grazing == "Intensive") ~ 4)) %>% 
   # remove weight of bag and string from teabag weight 
   mutate(preburial_weight_g = preburial_weight_g - mean_string_bag_mass,
          post_burial_weight_g = post_burial_weight_g - mean_string_bag_mass,
@@ -53,7 +60,6 @@ teabag.df <- teabag.raw.df %>%
   # calculating proportion of mass loss   
          mass_loss_proportion = post_burial_weight_g / preburial_weight_g)
   
-
 
 depth_tb <- teabag.df %>% 
   select(burial_depth_cm)
@@ -69,13 +75,25 @@ mean_depth_tb <- mean(teabag.df$burial_depth_cm)
 # calculating 
 
 
+h_g <- 0.842 # hydrolyzable fraction green tea 
+h_r <- 0.552 # hydrolyzable fraction rooibos/red tea 
 
+# calculating S from green tea 
+teabag.df.new <- teabag.df %>% 
+  select(teabag_ID, tea_type, post_burial_weight_g, preburial_weight_g, incubation_time) %>% 
+  pivot_wider(names_from = tea_type, 
+              values_from = c(post_burial_weight_g, preburial_weight_g)) %>% 
+  mutate(a_g = 
+           (1 - (post_burial_weight_g_green/preburial_weight_g_green)),
+         S = 1 - (a_g/h_g),
+         a_r = h_r * (1 - S),
+         w_t = (post_burial_weight_g_red/preburial_weight_g_red),
+         k = log((a_r / (w_t - (1 - a_r)))/incubation_time)
+         )
+  
+  
 
-
-
-
-
-
+# 
 
 
 ## figures ----------------------------------------------------
