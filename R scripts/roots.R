@@ -19,185 +19,331 @@ mutate(dateRIC_washed = ymd(dateRIC_washed),
                           "C" = "Control", "M" = "Medium",
                           "I" = "Intensive","N" = "Natural"),
          warming = recode(warming, 
-                          "A" = "Ambient", "W" = "Warmed")) %>% 
+                          "A" = "Ambient", "W" = "Warming")) %>% 
   mutate(origSiteID = factor(origSiteID, levels = c("Lia", "Joa")),
          grazing = factor(grazing, 
                           levels = c("C" = "Control", 
                                      "M" = "Medium",
                                      "I" = "Intensive",
                                      "N" = "Natural"))) %>% 
-  # removing grazing level N too reduce degrees of freedom in models
-  filter(!grazing == "Natural") %>% 
   # changing grazing into cont. variable too reduce degrees of freedom in models
   mutate(grazing_lvl = case_when((grazing == "Control") ~ 0,
                                  (grazing == "Medium") ~ 2,
                                  (grazing == "Intensive") ~ 4)) %>% 
   left_join(NitrogenDictionary, by = "Nlevel") %>% 
-  mutate(Namount_kg_ha_y = log(Namount_kg_ha_y +1))
+  mutate(Namount_kg_ha_y = log(Namount_kg_ha_y +1)) %>% 
+  mutate(days_buried = recover_date_2021 - burial_date)
 
-### analysis - roots data ----------------------------------------
+### analysis - roots data ---------------------------------------
 ###############################################################
-### MODEL: roots ~ w * n * g ---------------------------------------
-model.roots.wng.int <- roots.df %>%
+### ------ MODELS FOR ALPINE / LIAHOVDEN ------------------------
+### MODEL: roots ~ w * n * g ------------------------------------
+model.roots.wng.int.lia <- roots.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>%
   group_by(origSiteID) %>% #
+  filter(origSiteID == "Lia") %>% 
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
-    model.roots.wng.int = map(data, # runs model in each litte dataset
-                              ~ lm(root_mass_cm3 ~
-                                     warming * Namount_kg_ha_y * grazing_lvl,
-                                   data = .)))#,
-#result.roots.wng.int = map(model.roots.wng.int, tidy)) #%>%
-#unnest(result.roots.wng.int) #%>% # opens the nested dataframes
-# View()
+    model.roots.wng.int.lia = map(data, # runs model in each litte dataset
+                                  ~ lm(root_mass_cm3 ~
+                                         warming * Namount_kg_ha_y * grazing_lvl,
+                                       data = .x)))#,
+#result.roots.wng.int.lia = map(model.roots.wng.int.lia, tidy)) #%>%
+#unnest(result.roots.wng.int.lia) #%>% # opens the nested dataframes 
+# View() 
 
 ### MODEL: roots ~ w * n * g - check model --------------------
 ## must run model code without result- and unnest-line for this to be useful
-## check performance 
-#model_performance(model.roots.wng.int $ model.roots.wng.int[[1]])
+
 ## check assumptions 
-#check_model(model.roots.wng.int $ model.roots.wng.int[[1]])
+#check_model(model.roots.wng.int.lia $ model.roots.wng.int.lia[[1]])
+
 ## check plots that are off: collinearity 
 ## exspected as the model has interaction terms
-#check_collinearity(model.roots.wng.int $ model.roots.wng.int[[1]])
+#check_collinearity(model.roots.wng.int.lia $ model.roots.wng.int.lia[[1]])
+#plot(check_collinearity(model.roots.wng.int.lia $ model.roots.wng.int.lia[[1]]))
 
 
 ###############################################################
 ### MODEL: roots ~ w + n + g ---------------------------------------
-model.roots.wng.add <- roots.df %>%
-  group_by(origSiteID) %>% #
+model.roots.wng.add.lia <- roots.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>%
+  group_by(origSiteID) %>% 
+  filter(origSiteID == "Lia") %>% 
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
-    model.roots.wng.add = map(data, # runs model in each litte dataset
-                              ~ lm(root_mass_cm3 ~
-                                     warming + Namount_kg_ha_y + grazing_lvl,
-                                   data = .)))#,
-#result.roots.wng.add = map(model.roots.wng.add, tidy)) #%>%
-#unnest(result.roots.wng.add) #%>% # opens the nested dataframes
+    model.roots.wng.add.lia = map(data, # runs model in each litte dataset
+                                  ~ lm(root_mass_cm3 ~
+                                         warming + Namount_kg_ha_y + grazing_lvl,
+                                       data = .x)))#,
+#result.roots.wng.add = map(model.roots.wng.add.lia, tidy)) #%>%
+#unnest(result.roots.wng.add.lia) #%>% # opens the nested dataframes
 # View()
 
 ### MODEL: roots ~ w + n + g - check model --------------------
 ## must run model code without result- and unnest-line for this to be useful
-## check performance 
-#model_performance(model.roots.wng.add$model.roots.wng.add[[1]]) 
+
 ## check assumtions 
-#check_model(model.roots.wng.add$model.roots.wng.add[[1]]) 
+#check_model(model.roots.wng.add.lia$model.roots.wng.add.lia[[1]]) 
 # all diagnostic plots looks good
 
 
 
 ###############################################################
 ### MODEL: roots ~ w * n + g ----------------------------------
-model.roots.wng.intadd <- roots.df %>%
-  group_by(origSiteID) %>% #
+model.roots.wng.intadd.lia <- roots.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>%
+  group_by(origSiteID) %>% 
+  filter(origSiteID == "Lia") %>% 
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
-    model.roots.wng.intadd = map(data, # runs model in each litte dataset
-                                 ~ lm(root_mass_cm3 ~
-                                        warming * Namount_kg_ha_y + grazing_lvl,
-                                      data = .)))#,
-#result.roots.wng.intadd = map(model.roots.wng.intadd, tidy)) #%>%
-#unnest(result.roots.wng.intadd) #%>% # opens the nested dataframes
+    model.roots.wng.intadd.lia = map(data, # runs model in each litte dataset
+                                     ~ lm(root_mass_cm3 ~
+                                            warming * Namount_kg_ha_y + grazing_lvl,
+                                          data = .x)))#,
+#result.roots.wng.intadd.lia = map(model.roots.wng.intadd.lia, tidy)) #%>%
+#unnest(result.roots.wng.intadd.lia) #%>% # opens the nested dataframes
 # View()
 
 ### MODEL: roots ~ w * n + g - check model --------------------
-## check performance 
-#model_performance(model.roots.wng.intadd $ model.roots.wng.intadd[[1]])
+
 ## check assumptions 
-#check_model(model.roots.wng.intadd $ model.roots.wng.intadd[[1]])
-## all assumptions looks good 
+#check_model(model.roots.wng.intadd.lia $ model.roots.wng.intadd.lia[[1]])
+## all diagnostic plots looks good 
 
 
 
 ###############################################################
 ### MODEL: roots ~ w + n * g ----------------------------------
-model.roots.wng.addint <- roots.df %>%
-  group_by(origSiteID) %>% #
+model.roots.wng.addint.lia <- roots.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>%
+  group_by(origSiteID) %>% 
+  filter(origSiteID == "Lia") %>% 
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
-    model.roots.wng.addint = map(data, # runs model in each litte dataset
-                                 ~ lm(root_mass_cm3 ~
-                                        warming + Namount_kg_ha_y * grazing_lvl,
-                                      data = .)))#,
-#result.roots.wng.intadd = map(model.roots.wng.addint, tidy)) #%>%
-#unnest(result.roots.wng.intadd) #%>% # opens the nested dataframes
+    model.roots.wng.addint.lia = map(data, # runs model in each litte dataset
+                                     ~ lm(root_mass_cm3 ~
+                                            warming + Namount_kg_ha_y * grazing_lvl,
+                                          data = .x)))#,
+#result.roots.wng.intadd.lia = map(model.roots.wng.addint.lia, tidy)) #%>%
+#unnest(result.roots.wng.intadd.lia) #%>% # opens the nested dataframes
 # View()
 
 ### MODEL: roots ~ w + n * g - check model --------------------
-## check performance 
-#model_performance(model.roots.wng.addint $ model.roots.wng.addint[[1]])
-## check assumptions 
-#check_model(model.roots.wng.addint $ model.roots.wng.addint[[1]])
 
+## check assumptions 
+#check_model(model.roots.wng.addint.lia $ model.roots.wng.addint.lia[[1]])
+## all diagnostic plots looks good 
 
 
 ###############################################################
 ### MODEL: roots ~ w * g + n ----------------------------------
-model.roots.wgn.intadd <- roots.df %>%
-  group_by(origSiteID) %>% #
+model.roots.wgn.intadd.lia <- roots.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>%
+  group_by(origSiteID) %>% 
+  filter(origSiteID == "Lia") %>% 
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
-    model.roots.wgn.intadd = map(data, # runs model in each litte dataset
-                                 ~ lm(root_mass_cm3 ~
-                                        warming * grazing_lvl + Namount_kg_ha_y,
-                                      data = .)))#,
-#result.roots.wgn.intadd = map(model.roots.wgn.intadd, tidy)) #%>%
-#unnest(result.roots.wgn.intadd) #%>% # opens the nested dataframes
+    model.roots.wgn.intadd.lia = map(data, # runs model in each litte dataset
+                                     ~ lm(root_mass_cm3 ~
+                                            warming * grazing_lvl + Namount_kg_ha_y,
+                                          data = .x)))#,
+#result.roots.wgn.intadd.lia = map(model.roots.wgn.intadd.lia, tidy)) #%>%
+#unnest(result.roots.wgn.intadd.lia) #%>% # opens the nested dataframes
 # View()
 
 ### MODEL: roots ~ w * g + n - check model --------------------
-## check performance 
-#model_performance(model.roots.wgn.intadd $ model.roots.wgn.intadd[[1]])
+
 ## check assumptions 
-#check_model(model.roots.wgn.intadd $ model.roots.wgn.intadd[[1]])
+#check_model(model.roots.wgn.intadd.lia $ model.roots.wgn.intadd.lia[[1]])
+## all diagnostic plots looks good 
 
 ###############################################################
 ### compare models -------------------------------------------
 ### warming & nitrogen & grazing 
-model_comparison_roots <- compare_performance(
-  model.roots.wng.int$model.roots.wng.int[[1]], 
-  model.roots.wng.add$model.roots.wng.add[[1]],
-  model.roots.wng.intadd$model.roots.wng.intadd[[1]],
-  model.roots.wng.addint$model.roots.wng.addint[[1]],
-  model.roots.wgn.intadd$model.roots.wgn.intadd[[1]])
+model_comparison_roots.lia <- compare_performance(
+  model.roots.wng.add.lia$model.roots.wng.add.lia[[1]],         # w + n + g 
+  model.roots.wng.addint.lia$model.roots.wng.addint.lia[[1]],   # w + n * g
+  model.roots.wng.intadd.lia$model.roots.wng.intadd.lia[[1]],   # w * n + g
+  model.roots.wgn.intadd.lia$model.roots.wgn.intadd.lia[[1]],   # w * g + n
+  model.roots.wng.int.lia$model.roots.wng.int.lia[[1]]          # w * n * g
+)
 
-# plot_model_performance_roots <-
-#   plot(compare_performance(
-#     model.roots.wng.int$model.roots.wng.int[[1]], 
-#     model.roots.wng.add$model.roots.wng.add[[1]],
-#     model.roots.wng.intadd$model.roots.wng.intadd[[1]],
-#     model.roots.wng.addint$model.roots.wng.addint[[1]],
-#     model.roots.wgn.intadd$model.roots.wgn.intadd[[1]]))
+
+# plot.models.roots.ng <-
+#   plot(model_comparison_roots.lia)
+
+### ------ MODELS FOR SUB ALPINE / JOASETE ----------------------
+### MODEL: roots ~ w * n * g ------------------------------------
+model.roots.wng.int.joa <- roots.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>%
+  group_by(origSiteID) %>% #
+  filter(origSiteID == "Joa") %>% 
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.roots.wng.int.joa = map(data, # runs model in each litte dataset
+                                  ~ lm(root_mass_cm3 ~
+                                         warming * Namount_kg_ha_y * grazing_lvl,
+                                       data = .x)))#,
+#result.roots.wng.int.joa = map(model.roots.wng.int.joa, tidy)) #%>%
+#unnest(result.roots.wng.int.joa) #%>% # opens the nested dataframes 
+# View() 
+
+### MODEL: roots ~ w * n * g - check model --------------------
+## must run model code without result- and unnest-line for this to be useful
+
+## check assumptions 
+#check_model(model.roots.wng.int.joa $ model.roots.wng.int.joa[[1]])
+
+## check plots that are off: collinearity 
+## exspected as the model has interaction terms
+#check_collinearity(model.roots.wng.int.joa $ model.roots.wng.int.joa[[1]])
+#plot(check_collinearity(model.roots.wng.int.joa $ model.roots.wng.int.joa[[1]]))
+
+
+###############################################################
+### MODEL: roots ~ w + n + g ---------------------------------------
+model.roots.wng.add.joa <- roots.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>%
+  group_by(origSiteID) %>% 
+  filter(origSiteID == "Joa") %>% 
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.roots.wng.add.joa = map(data, # runs model in each litte dataset
+                                  ~ lm(root_mass_cm3 ~
+                                         warming + Namount_kg_ha_y + grazing_lvl,
+                                       data = .x)))#,
+#result.roots.wng.add = map(model.roots.wng.add.joa, tidy)) #%>%
+#unnest(result.roots.wng.add.joa) #%>% # opens the nested dataframes
+# View()
+
+### MODEL: roots ~ w + n + g - check model --------------------
+## must run model code without result- and unnest-line for this to be useful
+
+## check assumtions 
+#check_model(model.roots.wng.add.joa$model.roots.wng.add.joa[[1]]) 
+# all diagnostic plots looks good 
+
+
+
+###############################################################
+### MODEL: roots ~ w * n + g ----------------------------------
+model.roots.wng.intadd.joa <- roots.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>%
+  group_by(origSiteID) %>% 
+  filter(origSiteID == "Joa") %>% 
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.roots.wng.intadd.joa = map(data, # runs model in each litte dataset
+                                     ~ lm(root_mass_cm3 ~
+                                            warming * Namount_kg_ha_y + grazing_lvl,
+                                          data = .x)))#,
+#result.roots.wng.intadd.joa = map(model.roots.wng.intadd.joa, tidy)) #%>%
+#unnest(result.roots.wng.intadd.joa) #%>% # opens the nested dataframes
+# View()
+
+### MODEL: roots ~ w * n + g - check model --------------------
+
+## check assumptions 
+#check_model(model.roots.wng.intadd.joa $ model.roots.wng.intadd.joa[[1]])
+## all diagnostic plots looks good 
+
+
+
+###############################################################
+### MODEL: roots ~ w + n * g ----------------------------------
+model.roots.wng.addint.joa <- roots.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>%
+  group_by(origSiteID) %>% 
+  filter(origSiteID == "Joa") %>% 
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.roots.wng.addint.joa = map(data, # runs model in each litte dataset
+                                     ~ lm(root_mass_cm3 ~
+                                            warming + Namount_kg_ha_y * grazing_lvl,
+                                          data = .x)))#,
+#result.roots.wng.intadd.joa = map(model.roots.wng.addint.joa, tidy)) #%>%
+#unnest(result.roots.wng.intadd.joa) #%>% # opens the nested dataframes
+# View()
+
+### MODEL: roots ~ w + n * g - check model --------------------
+
+## check assumptions 
+#check_model(model.roots.wng.addint.joa $ model.roots.wng.addint.joa[[1]])
+## all diagnostic plots looks good 
+
+
+###############################################################
+### MODEL: roots ~ w * g + n ----------------------------------
+model.roots.wgn.intadd.joa <- roots.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>%
+  group_by(origSiteID) %>% 
+  filter(origSiteID == "Joa") %>% 
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.roots.wgn.intadd.joa = map(data, # runs model in each litte dataset
+                                     ~ lm(root_mass_cm3 ~
+                                            warming * grazing_lvl + Namount_kg_ha_y,
+                                          data = .x)))#,
+#result.roots.wgn.intadd.joa = map(model.roots.wgn.intadd.joa, tidy)) #%>%
+#unnest(result.roots.wgn.intadd.joa) #%>% # opens the nested dataframes
+# View()
+
+### MODEL: roots ~ w * g + n - check model --------------------
+
+## check assumptions 
+#check_model(model.roots.wgn.intadd.joa $ model.roots.wgn.intadd.joa[[1]])
+## all diagnostic plots looks good 
+
+###############################################################
+### compare models -------------------------------------------
+### warming & nitrogen & grazing 
+model_comparison_roots.joa <- compare_performance(
+  model.roots.wng.add.joa$model.roots.wng.add.joa[[1]],         # w + n + g 
+  model.roots.wng.addint.joa$model.roots.wng.addint.joa[[1]],   # w + n * g
+  model.roots.wng.intadd.joa$model.roots.wng.intadd.joa[[1]],   # w * n + g
+  model.roots.wgn.intadd.joa$model.roots.wgn.intadd.joa[[1]],   # w * g + n
+  model.roots.wng.int.joa$model.roots.wng.int.joa[[1]]          # w * n * g
+)
+
+
+# plot.models.roots.ng <-
+#   plot(model_comparison_roots.joa)
+
+
+
 
 ## making output of best model -----------------------------------
 ## roots ~ w + n + g 
-options(scipen = 100, digits = 5)
+options(scipen = 100, digits = 4)
 ## running model with result and unnest to create output 
-output.model.roots <- roots.df %>%
-  group_by(origSiteID) %>% #
-  nest() %>% # makes little dataframes inside my data, closed
-  mutate(
-    model.roots.wng.add = map(data, # runs model in each litte dataset
-                              ~ lm(root_mass_cm3 ~
-                                     warming + Namount_kg_ha_y + grazing_lvl,
-                                   data = .)),
-result.roots.wng.add = map(model.roots.wng.add, tidy)) %>%
-unnest(result.roots.wng.add) %>% # opens the nested dataframes
-  select(origSiteID, term, estimate, std.error, statistic, p.value)
+
+  # select(origSiteID, term, estimate, std.error, statistic, p.value)
 # View()
 
 ## making clean and readable output for table ---------------------
-clean_output.model.roots <- output.model.roots %>%
-  mutate(term = case_when(
-    (term == "(Intercept)") ~ "Intercept (no N, not warmed, not grazed)",
-    (term == "Namount_kg_ha_y") ~ "Nitrogen",
-    (term == "warmingWarmed") ~ "Warmed",
-    (term == "grazing_lvl") ~ "Grazing",
-    (term == "warmingWarmed:Namount_kg_ha_y") ~ "Warmed : Nitrogen",
-    (term == "warmingWarmed:grazing_lvl") ~ "Warmed : Grazing",
-    (term == "Namount_kg_ha_y:grazing_lvl") ~ "Nitrogen : Grazing",
-    (term == "warmingWarmed:Namount_kg_ha_y:grazing_lvl") ~
-      "Warmed : Nitrogen : Grazing"
-  )) #%>% 
+# clean_output.model.roots.lia <- output.model.roots %>%
+#   mutate(term = case_when(
+#     (term == "(Intercept)") ~ "Intercept (no N, no warming, no grazing)",
+#     (term == "Namount_kg_ha_y") ~ "Nitrogen",
+#     (term == "warmingWarming") ~ "Warming",
+#     (term == "grazing_lvl") ~ "Grazing",
+#     (term == "warmingWarming:Namount_kg_ha_y") ~ "Warming : Nitrogen",
+#     (term == "warmingWarming:grazing_lvl") ~ "Warming : Grazing",
+#     (term == "Namount_kg_ha_y:grazing_lvl") ~ "Nitrogen : Grazing",
+#     (term == "warmingWarming:Namount_kg_ha_y:grazing_lvl") ~
+#       "Warming : Nitrogen : Grazing"
+#   )) #%>% 
 #  kable(booktabs = T) %>%
 #  kable_styling() %>%
 #  row_spec(which(output.model.roots$p.value < 0.05), bold = T)
@@ -221,7 +367,7 @@ plot_roots_wng <- roots.df %>%
   scale_color_manual(values = colors_w) +
   scale_linetype_manual(values = c("longdash", "solid")) +
   scale_shape_manual(values = c(1, 16)) +
-  labs(title = "Effect of warming, nitrogen and grazing on root growth",
+  labs(title = "Belowground productivity",
        x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)),
        y = bquote(Root~mass~(g/cm^3))) +
   facet_grid(origSiteID ~ grazing) +
