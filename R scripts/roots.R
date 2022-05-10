@@ -211,7 +211,10 @@ clean_output.model.roots.lia <- output.model.roots.lia %>%
     (term == "Namount_kg_ha_y:grazing_lvl") ~ "Nitrogen : Grazing",
     (term == "warmingWarming:Namount_kg_ha_y:grazing_lvl") ~
       "Warming : Nitrogen : Grazing"
-  ))
+  )) %>% 
+  mutate(origSiteID = case_when(
+    (origSiteID == "Lia") ~ "Alpine",
+    (origSiteID == "Joa") ~ "Sub-alpine"))
 
 
 
@@ -389,7 +392,10 @@ clean_output.model.roots.joa <- output.model.roots.joa %>%
     (term == "Namount_kg_ha_y:grazing_lvl") ~ "Nitrogen : Grazing",
     (term == "warmingWarming:Namount_kg_ha_y:grazing_lvl") ~
       "Warming : Nitrogen : Grazing"
-  ))
+  )) %>% 
+  mutate(origSiteID = case_when(
+    (origSiteID == "Lia") ~ "Alpine",
+    (origSiteID == "Joa") ~ "Sub-alpine"))
 
 
 
@@ -401,14 +407,21 @@ clean_output.model.roots.joa <- output.model.roots.joa %>%
 
 plot_roots_wng <- roots.df %>%
   group_by(Namount_kg_ha_y, origSiteID, warming, grazing) %>%
+  mutate(origSiteID = case_when(
+    (origSiteID == "Lia") ~ "Alpine",
+    (origSiteID == "Joa") ~ "Sub-alpine")) %>% 
+  filter(!grazing == "Natural") %>%
   summarise(root_mass_cm3 = mean(root_mass_cm3)) %>%
   ggplot(mapping = aes(x = log(Namount_kg_ha_y +1),
                        y = root_mass_cm3,
                        color = warming,
                        linetype = warming,
                        shape = warming)) +
-  geom_point() +
-  theme_minimal(base_size = 20) +
+  geom_point() + 
+  theme_minimal(base_size = 20) + 
+  theme(legend.title = element_blank(),
+        legend.position = "bottom", 
+        legend.box = "horizontal") +
   scale_color_manual(values = colors_w) +
   scale_linetype_manual(values = c("longdash", "solid")) +
   scale_shape_manual(values = c(1, 16)) +
