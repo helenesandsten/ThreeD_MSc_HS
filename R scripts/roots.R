@@ -34,6 +34,7 @@ mutate(dateRIC_washed = ymd(dateRIC_washed),
   mutate(Namount_kg_ha_y = log(Namount_kg_ha_y +1)) %>% 
   mutate(days_buried = recover_date_2021 - burial_date)
 
+
 ### analysis - roots data ---------------------------------------
 ###############################################################
 ### ------ MODELS FOR ALPINE / LIAHOVDEN ------------------------
@@ -417,7 +418,7 @@ plot_roots_wng <- roots.df %>%
                        color = warming,
                        linetype = warming,
                        shape = warming)) +
-  geom_point() + 
+  geom_point(size = 4) + 
   theme_minimal(base_size = 20) + 
   theme(legend.title = element_blank(),
         legend.position = "bottom", 
@@ -429,7 +430,7 @@ plot_roots_wng <- roots.df %>%
        x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)),
        y = bquote(Root~mass~(g/cm^3))) +
   facet_grid(origSiteID ~ grazing) +
-  geom_smooth(method = "lm")
+  geom_smooth(method = "lm", size = 2)
 plot_roots_wng
 
 
