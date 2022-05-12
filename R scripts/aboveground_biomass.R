@@ -7,6 +7,32 @@ source("R scripts/MSc_aesthetics.R")
 ## importing data -----------------------------------
 agb.raw.df <- read_csv("Data/THREE-D_clean_biomass_2020-2021.csv")
 
+
+## checking for missing biomass (forbs/graminoids)
+agb.biomasscheck.df <- agb.raw.df %>% 
+  select(turfID, biomass, fun_group, origSiteID, destSiteID, 
+         Nlevel, warming, grazing, destBlockID) %>% 
+  mutate_if(is.character, as.factor) %>% 
+  filter(!fun_group == "legumes") %>% 
+  filter(!fun_group == "litter") %>% 
+  filter(!fun_group == "bryophytes") %>% 
+  filter(!fun_group == "lichen") %>% 
+  filter(!fun_group == "shrub") %>% 
+  filter(!fun_group == "fungi") %>% 
+  filter(!fun_group == "cyperaceae") %>% 
+  filter(!Nlevel == 1,
+         !Nlevel == 2,
+         !Nlevel == 3#,
+         # !Nlevel == 4,
+         # !Nlevel == 5,
+         # !Nlevel == 6
+         ) %>% 
+  filter(grazing == "M",
+         warming == "A",
+         destSiteID == "Joa")
+
+
+
 ## fixup  ------------------------------------------
 agb.df <- agb.raw.df %>% 
   mutate_if(is.character, as.factor) %>%
@@ -15,7 +41,10 @@ agb.df <- agb.raw.df %>%
          destBlockID = as.factor(destBlockID),
          destPlotID = as.factor(destPlotID)) %>% 
   mutate(Namount_kg_ha_y = log(Namount_kg_ha_y +1)) %>% 
-  filter(year == 2021) %>% 
+  # calculating biomass per m2 to standardize amounts
+  mutate(biomass_m2 = ((biomass / area_cm2) * 10000)) %>% 
+  filter(year == 2021) %>%
+  filter(turfID != "147 WN9C 194") %>%# removing plots with missing forbs biomass
   # renaming variables 
   mutate(grazing = recode(grazing, 
                           "C" = "Control", "I" = "Intensive", 
@@ -46,7 +75,7 @@ model.agb.wng.int.lia <- agb.df %>%
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
     model.agb.wng.int.lia = map(data, # runs model in each litte dataset
-                            ~ lm(biomass ~
+                            ~ lm(biomass_m2 ~
                                    warming * Namount_kg_ha_y * grazing_lvl,
                                  data = .x)))#,
 #result.agb.wng.int.lia = map(model.agb.wng.int.lia, tidy)) #%>%
@@ -75,7 +104,7 @@ model.agb.wng.add.lia <- agb.df %>%
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
     model.agb.wng.add.lia = map(data, # runs model in each litte dataset
-                            ~ lm(biomass ~
+                            ~ lm(biomass_m2 ~
                                    warming + Namount_kg_ha_y + grazing_lvl,
                                  data = .x)))#,
 #result.agb.wng.add.lia = map(model.agb.wng.add.lia, tidy)) #%>%
@@ -103,7 +132,7 @@ model.agb.wng.intadd.lia <- agb.df %>%
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
     model.agb.wng.intadd.lia = map(data, # runs model in each litte dataset
-                               ~ lm(biomass ~
+                               ~ lm(biomass_m2 ~
                                       warming * Namount_kg_ha_y + grazing_lvl,
                                     data = .x)))#,
 #result.agb.wng.intadd.lia = map(model.agb.wng.intadd.lia, tidy)) #%>%
@@ -128,7 +157,7 @@ model.agb.wng.addint.lia <- agb.df %>%
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
     model.agb.wng.addint.lia = map(data, # runs model in each litte dataset
-                               ~ lm(biomass ~
+                               ~ lm(biomass_m2 ~
                                       warming + Namount_kg_ha_y * grazing_lvl,
                                     data = .x)))#,
 #result.agb.wng.addint.lia = map(model.agb.wng.addint.lia, tidy)) #%>%
@@ -152,7 +181,7 @@ model.agb.wgn.intadd.lia <- agb.df %>%
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
     model.agb.wgn.intadd.lia = map(data, # runs model in each litte dataset
-                               ~ lm(biomass ~
+                               ~ lm(biomass_m2 ~
                                       warming * grazing_lvl + Namount_kg_ha_y,
                                     data = .x)))#,
 #result.agb.wgn.intadd.lia = map(model.agb.wgn.intadd.lia, tidy)) #%>%
@@ -192,7 +221,7 @@ output.model.agb.lia <- agb.df %>%
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
     model.agb.wng.intadd.lia = map(data, # runs model in each litte dataset
-                                   ~ lm(biomass ~
+                                   ~ lm(biomass_m2 ~
                                           warming * Namount_kg_ha_y + grazing_lvl,
                                         data = .x)),
 result.agb.wng.intadd.lia = map(model.agb.wng.intadd.lia, tidy)) %>%
@@ -227,7 +256,7 @@ model.agb.wng.int.joa <- agb.df %>%
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
     model.agb.wng.int.joa = map(data, # runs model in each litte dataset
-                                ~ lm(biomass ~
+                                ~ lm(biomass_m2 ~
                                        warming * Namount_kg_ha_y * grazing_lvl,
                                      data = .x)))#,
 #result.agb.wng.int.joa = map(model.agb.wng.int.joa, tidy)) #%>%
@@ -256,7 +285,7 @@ model.agb.wng.add.joa <- agb.df %>%
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
     model.agb.wng.add.joa = map(data, # runs model in each litte dataset
-                                ~ lm(biomass ~
+                                ~ lm(biomass_m2 ~
                                        warming + Namount_kg_ha_y + grazing_lvl,
                                      data = .x)))#,
 #result.agb.wng.add.joa = map(model.agb.wng.add.joa, tidy)) #%>%
@@ -284,7 +313,7 @@ model.agb.wng.intadd.joa <- agb.df %>%
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
     model.agb.wng.intadd.joa = map(data, # runs model in each litte dataset
-                                   ~ lm(biomass ~
+                                   ~ lm(biomass_m2 ~
                                           warming * Namount_kg_ha_y + grazing_lvl,
                                         data = .x)))#,
 #result.agb.wng.intadd.joa = map(model.agb.wng.intadd.joa, tidy)) #%>%
@@ -309,7 +338,7 @@ model.agb.wng.addint.joa <- agb.df %>%
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
     model.agb.wng.addint.joa = map(data, # runs model in each litte dataset
-                                   ~ lm(biomass ~
+                                   ~ lm(biomass_m2 ~
                                           warming + Namount_kg_ha_y * grazing_lvl,
                                         data = .x)))#,
 #result.agb.wng.addint.joa = map(model.agb.wng.addint.joa, tidy)) #%>%
@@ -334,7 +363,7 @@ model.agb.wgn.intadd.joa <- agb.df %>%
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
     model.agb.wgn.intadd.joa = map(data, # runs model in each litte dataset
-                                   ~ lm(biomass ~
+                                   ~ lm(biomass_m2 ~
                                           warming * grazing_lvl + Namount_kg_ha_y,
                                         data = .x)))#,
 #result.agb.wgn.intadd.joa = map(model.agb.wgn.intadd.joa, tidy)) #%>%
@@ -372,7 +401,7 @@ output.model.agb.joa <- agb.df %>%
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
     model.agb.wng.add.joa = map(data, # runs model in each litte dataset
-                                ~ lm(biomass ~
+                                ~ lm(biomass_m2 ~
                                        warming + Namount_kg_ha_y + grazing_lvl,
                                      data = .x)),
 result.agb.wng.add.joa = map(model.agb.wng.add.joa, tidy)) %>%
@@ -395,7 +424,7 @@ clean_output.model.agb.joa <- output.model.agb.joa %>%
   )) %>% 
   mutate(origSiteID = case_when(
     (origSiteID == "Lia") ~ "Alpine",
-    (origSiteID == "Joa") ~ "Sub-alpine"))
+    (origSiteID == "Joa") ~ "Sub-alpine")) 
 
 
 ## figures -----------------------------------------
@@ -405,30 +434,29 @@ clean_output.model.agb.joa <- output.model.agb.joa %>%
 
 ## plot aboveground biomass ~ w, n, g
 plot_agb_wng <- agb.df %>% 
-  group_by(Namount_kg_ha_y, origSiteID, warming, grazing) %>% 
+  group_by(Namount_kg_ha_y, origSiteID, warming, grazing, Nlevel, turfID) %>% 
   mutate(origSiteID = case_when(
     (origSiteID == "Lia") ~ "Alpine",
     (origSiteID == "Joa") ~ "Sub-alpine")) %>% 
   filter(!grazing == "Natural") %>% 
-  summarise(biomass = mean(biomass)) %>% 
+  summarise(biomass_m2 = mean(biomass_m2)) %>% 
   ggplot(mapping = aes(x = log(Namount_kg_ha_y +1), 
-                       y = biomass, 
+                       y = biomass_m2, 
                        color = warming,
                        linetype = warming,
                        shape = warming)) +
-  geom_point() + 
+  geom_point(size = 4) + 
   theme_minimal(base_size = 20) + 
   theme(legend.title = element_blank(),
         legend.position = "bottom", 
         legend.box = "horizontal") +
+  #scale_color_manual(values = "148 AN9M 148") +
   scale_color_manual(values = colors_w) + 
   scale_linetype_manual(values = c("longdash", "solid")) + 
   scale_shape_manual(values = c(1, 16)) + 
   labs(title = "Aboveground productivity", 
        x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)), 
-       y = bquote(Biomass~(g))) + 
+       y = bquote(Biomass~(g~m^-2))) + 
   facet_grid(origSiteID ~ grazing) +
-  geom_smooth(method = "lm")
+  geom_smooth(method = "lm", size = 2)
 plot_agb_wng
-
-
