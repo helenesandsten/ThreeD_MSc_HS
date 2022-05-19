@@ -9,27 +9,26 @@ agb.raw.df <- read_csv("Data/THREE-D_clean_biomass_2020-2021.csv")
 
 
 ## checking for missing biomass (forbs/graminoids)
-agb.biomasscheck.df <- agb.raw.df %>% 
-  select(turfID, biomass, fun_group, origSiteID, destSiteID, 
-         Nlevel, warming, grazing, destBlockID) %>% 
-  mutate_if(is.character, as.factor) %>% 
-  filter(!fun_group == "legumes") %>% 
-  filter(!fun_group == "litter") %>% 
-  filter(!fun_group == "bryophytes") %>% 
-  filter(!fun_group == "lichen") %>% 
-  filter(!fun_group == "shrub") %>% 
-  filter(!fun_group == "fungi") %>% 
-  filter(!fun_group == "cyperaceae") %>% 
-  filter(!Nlevel == 1,
-         !Nlevel == 2,
-         !Nlevel == 3#,
-         # !Nlevel == 4,
-         # !Nlevel == 5,
-         # !Nlevel == 6
-         ) %>% 
-  filter(grazing == "M",
-         warming == "A",
-         destSiteID == "Joa")
+# agb.biomasscheck.df <- agb.raw.df %>%
+#   mutate(biomass_m2 = ((biomass / area_cm2) * 10000)) %>% 
+#   select(turfID, biomass, fun_group, origSiteID, destSiteID,
+#          Nlevel, warming, grazing, destBlockID, biomass_m2) %>%
+#   mutate_if(is.character, as.factor) %>%
+#   filter(!fun_group == "legumes") %>%
+#   filter(!fun_group == "litter") %>%
+#   filter(!fun_group == "bryophytes") %>%
+#   filter(!fun_group == "lichen") %>%
+#   filter(!fun_group == "shrub") %>%
+#   filter(!fun_group == "fungi") %>%
+#   filter(!fun_group == "cyperaceae") %>%
+#   filter(!Nlevel == 1,
+#          !Nlevel == 2,
+#          !Nlevel == 3,
+#          !Nlevel == 4,
+#          !Nlevel == 5,
+#          !Nlevel == 6
+#          ) %>%
+#   filter(grazing == "M")
 
 
 
@@ -90,6 +89,7 @@ model.agb.wng.int.lia <- agb.df %>%
 
 ## check plots that are off: collinearity 
 ## exspected as the model has interaction terms
+
 #check_collinearity(model.agb.wng.int.lia $ model.agb.wng.int.lia[[1]])
 #plot(check_collinearity(model.agb.wng.int.lia $ model.agb.wng.int.lia[[1]])) 
 
@@ -209,8 +209,7 @@ model_comparison_agb.lia <- compare_performance(
 #   plot(model_comparison_agb.lia)
 
 ## making output of best model -----------------------------------
-## agb ~ w * n + g 
-# options(scipen = 100, digits = 4)
+ options(scipen = 100, digits = 4)
 
 ## running model with result and unnest to create output 
 output.model.agb.lia <- agb.df %>%
@@ -220,12 +219,12 @@ output.model.agb.lia <- agb.df %>%
   filter(origSiteID == "Lia") %>% 
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
-    model.agb.wng.intadd.lia = map(data, # runs model in each litte dataset
+    model.agb.wng.int.lia = map(data, # runs model in each litte dataset
                                    ~ lm(biomass_m2 ~
-                                          warming * Namount_kg_ha_y + grazing_lvl,
+                                          warming * Namount_kg_ha_y  * grazing_lvl,
                                         data = .x)),
-result.agb.wng.intadd.lia = map(model.agb.wng.intadd.lia, tidy)) %>%
-unnest(result.agb.wng.intadd.lia) %>% # opens the nested dataframes
+    result.agb.wng.int.lia = map(model.agb.wng.int.lia, tidy)) %>%
+unnest(result.agb.wng.int.lia) %>% # opens the nested dataframes
   select(origSiteID, term, estimate, std.error, statistic, p.value)
 # View()
 
@@ -240,11 +239,52 @@ clean_output.model.agb.lia <- output.model.agb.lia %>%
     (term == "warmingWarming:grazing_lvl") ~ "Warming : Grazing",
     (term == "Namount_kg_ha_y:grazing_lvl") ~ "Nitrogen : Grazing",
     (term == "warmingWarming:Namount_kg_ha_y:grazing_lvl") ~
-      "Warming : Nitrogen : Grazing"
+      "Warming : Nitrogen : Grazing",
+    # (term == "warmingWarming:grazing_lvl:Namount_kg_ha_y") ~
+    #   "Warming : Grazing : Nitrogen"
   )) %>% 
   mutate(origSiteID = case_when(
     (origSiteID == "Lia") ~ "Alpine",
     (origSiteID == "Joa") ~ "Sub-alpine"))
+
+## WARNING - BEST MODEL BUT WITH COLLINEARITY ISSUES
+# ## making output of best model -----------------------------------
+# options(scipen = 100, digits = 4)
+# 
+# ## running model with result and unnest to create output 
+# output.model.agb.lia_warning <- agb.df %>%
+#   # removing grazing level N to reduce degrees of freedom
+#   filter(!grazing == "Natural") %>%
+#   group_by(origSiteID) %>% 
+#   filter(origSiteID == "Lia") %>% 
+#   nest() %>% # makes little dataframes inside my data, closed
+#   mutate(
+#     model.agb.wng.int.lia = map(data, # runs model in each litte dataset
+#                                    ~ lm(biomass_m2 ~
+#                                           warming * Namount_kg_ha_y * grazing_lvl,
+#                                         data = .x)),
+#     result.agb.wng.int.lia = map(model.agb.wng.int.lia, tidy)) %>%
+#   unnest(result.agb.wng.int.lia) %>% # opens the nested dataframes
+#   select(origSiteID, term, estimate, std.error, statistic, p.value)
+# # View()
+# 
+# ## making clean and readable output for table ---------------------
+# clean_output.model.agb.lia_warning <- output.model.agb.lia_warning %>%
+#   mutate(term = case_when(
+#     (term == "(Intercept)") ~ "Intercept (no N, no warming, no grazing)",
+#     (term == "warmingWarming") ~ "Warming",
+#     (term == "Namount_kg_ha_y") ~ "Nitrogen",
+#     (term == "grazing_lvl") ~ "Grazing",
+#     (term == "warmingWarming:Namount_kg_ha_y") ~ "Warming : Nitrogen",
+#     (term == "warmingWarming:grazing_lvl") ~ "Warming : Grazing",
+#     (term == "Namount_kg_ha_y:grazing_lvl") ~ "Nitrogen : Grazing",
+#     (term == "warmingWarming:Namount_kg_ha_y:grazing_lvl") ~
+#       "Warming : Nitrogen : Grazing"
+#   )) %>% 
+#   mutate(origSiteID = case_when(
+#     (origSiteID == "Lia") ~ "Alpine",
+#     (origSiteID == "Joa") ~ "Sub-alpine"))
+
 
 ### ------ MODELS FOR SUB ALPINE / JOASETE -----------------------
 ### MODEL: agb ~ w * n * g ---------------------------------------
@@ -400,12 +440,12 @@ output.model.agb.joa <- agb.df %>%
   filter(origSiteID == "Joa") %>% 
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
-    model.agb.wng.add.joa = map(data, # runs model in each litte dataset
+    model.agb.wng.int.joa = map(data, # runs model in each litte dataset
                                 ~ lm(biomass_m2 ~
-                                       warming + Namount_kg_ha_y + grazing_lvl,
+                                       warming * Namount_kg_ha_y * grazing_lvl,
                                      data = .x)),
-result.agb.wng.add.joa = map(model.agb.wng.add.joa, tidy)) %>%
-unnest(result.agb.wng.add.joa) %>% # opens the nested dataframes
+result.agb.wng.int.joa = map(model.agb.wng.int.joa, tidy)) %>%
+unnest(result.agb.wng.int.joa) %>% # opens the nested dataframes 
   select(origSiteID, term, estimate, std.error, statistic, p.value)
 # View()
 
@@ -439,18 +479,17 @@ plot_agb_wng <- agb.df %>%
     (origSiteID == "Lia") ~ "Alpine",
     (origSiteID == "Joa") ~ "Sub-alpine")) %>% 
   filter(!grazing == "Natural") %>% 
-  summarise(biomass_m2 = mean(biomass_m2)) %>% 
+  summarise(biomass_m2 = sum(biomass_m2)) %>% 
   ggplot(mapping = aes(x = log(Namount_kg_ha_y +1), 
                        y = biomass_m2, 
                        color = warming,
-                       linetype = warming,
+                       #linetype = warming,
                        shape = warming)) +
   geom_point(size = 4) + 
   theme_minimal(base_size = 20) + 
   theme(legend.title = element_blank(),
         legend.position = "bottom", 
         legend.box = "horizontal") +
-  #scale_color_manual(values = "148 AN9M 148") +
   scale_color_manual(values = colors_w) + 
   scale_linetype_manual(values = c("longdash", "solid")) + 
   scale_shape_manual(values = c(1, 16)) + 
