@@ -404,9 +404,8 @@ model_comparison_soil.joa <- compare_performance(
 #   plot(model_comparison_soil.joa)
 
 ## making output of best model -----------------------------------
-## soil ~ w * n * g 
 options(scipen = 100, digits = 4)
-### MODEL: soil ~ w + n + g ---------------------------------------
+### MODEL: soil ~ w * g + n ---------------------------------------
 output.model.soil.joa <- soil.df %>%
   # removing grazing level N to reduce degrees of freedom
   filter(!grazing == "Natural") %>% 
@@ -414,12 +413,12 @@ output.model.soil.joa <- soil.df %>%
   filter(origSiteID == "Joa") %>% 
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
-    model.soil.wng.intadd.joa = map(data, # runs model in each litte dataset
+    model.soil.wgn.intadd.joa = map(data, # runs model in each litte dataset
                                  ~ lm(prop_org_mat ~
-                                        warming + Namount_kg_ha_y + grazing_lvl,
+                                        warming * grazing_lvl + Namount_kg_ha_y,
                                       data = .x)),
-    result.soil.wng.intadd.joa = map(model.soil.wng.intadd.joa, tidy)) %>%
-  unnest(result.soil.wng.intadd.joa) %>% # opens the nested dataframes
+    result.soil.wgn.intadd.joa = map(model.soil.wgn.intadd.joa, tidy)) %>%
+  unnest(result.soil.wgn.intadd.joa) %>% # opens the nested dataframes
   select(origSiteID, term, estimate, std.error, statistic, p.value)
 
 
@@ -456,16 +455,19 @@ plot_soil_wng <- soil.df %>%
   ggplot(mapping = aes(x = log(Namount_kg_ha_y +1), 
                        y = prop_org_mat, 
                        color = warming,
-                       linetype = warming,
-                       shape = warming)) +
+                       fill = warming,
+                       #linetype = warming,
+                       shape = warming)
+  ) +
   geom_point(size = 4) + 
   theme_minimal(base_size = 20) + 
   theme(legend.title = element_blank(),
         legend.position = "bottom", 
         legend.box = "horizontal") +
   scale_color_manual(values = colors_w) + 
-  scale_linetype_manual(values = c("longdash", "solid")) + 
-  scale_shape_manual(values = c(1, 16)) + 
+  scale_fill_manual(values = colors_w) + 
+  scale_shape_manual(values = c(21, 25)) + 
+  #scale_linetype_manual(values = c("longdash", "solid")) + 
   labs(title = "Proportion of soil organic matter", 
        x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)), 
        y = bquote(Proportion~organic~material)) + 
