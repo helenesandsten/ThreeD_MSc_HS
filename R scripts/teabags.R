@@ -476,9 +476,9 @@ plot_decomp <- teabag.df.new %>%
   scale_linetype_manual(values = c("longdash", "solid")) +
   scale_shape_manual(values = c(1, 16)) +
   #scale_size_manual(values = 10) +
-  labs(title = "Mass loss of teabags(?) (MUST FIX!)",
+  labs(title = "Decomposition",
        x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)),
-       y = bquote(S~factor~(MUST~FIX))) +
+       y = bquote(Stabilization~factor~(S))) +
   #geom_line() +
   geom_smooth(method = "lm", size = 2, fill = "grey") +
   facet_grid(origSiteID ~ grazing)
