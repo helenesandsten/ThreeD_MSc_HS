@@ -416,16 +416,19 @@ plot_roots_wng <- roots.df %>%
   ggplot(mapping = aes(x = log(Namount_kg_ha_y +1),
                        y = root_mass_cm3,
                        color = warming,
-                       linetype = warming,
-                       shape = warming)) +
+                       fill = warming,
+                       #linetype = warming,
+                       shape = warming)
+  ) +
   geom_point(size = 4) + 
   theme_minimal(base_size = 20) + 
   theme(legend.title = element_blank(),
         legend.position = "bottom", 
         legend.box = "horizontal") +
-  scale_color_manual(values = colors_w) +
-  scale_linetype_manual(values = c("longdash", "solid")) +
-  scale_shape_manual(values = c(1, 16)) +
+  scale_color_manual(values = colors_w) + 
+  scale_fill_manual(values = colors_w) + 
+  scale_shape_manual(values = c(21, 25)) + 
+  #scale_linetype_manual(values = c("longdash", "solid")) + 
   labs(title = "Belowground productivity",
        x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)),
        y = bquote(Root~mass~(g/cm^3))) +
