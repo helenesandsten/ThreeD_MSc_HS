@@ -66,30 +66,24 @@ depth_tb <- teabag.df %>%
 
 mean_depth_tb <- mean(teabag.df$burial_depth_cm)
 
-## analysis ---> analysis_plan ---------------------------------------
-## TEABAG INDEX -----------------------------------------------------
-## additional weightloss of re-dried teabags 
 
-
-h_g <- 0.842 # hydrolyzable fraction green tea 
-h_r <- 0.552 # hydrolyzable fraction rooibos/red tea 
-
-# calculating S from green tea 
-teabag.df.new <- teabag.df %>% 
+### NEW TEABAG INDEX 
+decomp_df <- teabag.df %>% 
   select(teabag_ID, tea_type, post_burial_weight_g, preburial_weight_g, incubation_time,
          origSiteID, destSiteID, destBlockID, origBlockID, warming, grazing, grazing_lvl,
-         Namount_kg_ha_y) %>% 
+         Namount_kg_ha_y, recover_date, burial_date) %>%
   pivot_wider(names_from = tea_type, 
-              values_from = c(post_burial_weight_g, preburial_weight_g)) %>% 
-  mutate(a_g = (1 - (post_burial_weight_g_green/preburial_weight_g_green)),
-         S = 1 - (a_g/h_g),
-         a_r = h_r * (1 - S),
-         w_t = (post_burial_weight_g_red/preburial_weight_g_red),
-         k = log((a_r / (w_t - (1 - a_r)))/incubation_time)
-         ) %>%
-  drop_na() 
-  
-## MODELS 
+              values_from = c(post_burial_weight_g, preburial_weight_g)) %>%
+  mutate(incubation_time = as.numeric(recover_date - burial_date), 
+         fraction_decomposed_green = 1 - post_burial_weight_g_green/preburial_weight_g_green,
+         fraction_remaining_green = post_burial_weight_g_green/preburial_weight_g_green,
+         fraction_remaining_red = post_burial_weight_g_red/preburial_weight_g_red,
+         S = 1 - (fraction_decomposed_green / Hydrolysable_fraction_green),
+         predicted_labile_fraction_red = Hydrolysable_fraction_red * (1 - S),
+         k = log(predicted_labile_fraction_red / (fraction_remaining_red - (1 - predicted_labile_fraction_red))) / incubation_time)
+
+
+
 ### ------ MODELS FOR ALPINE / LIAHOVDEN ------------------------
 ### MODEL: decomp ~ w * n * g ---------------------------------------
 model.decomp.wng.int.lia <- teabag.df.new %>%
