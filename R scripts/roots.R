@@ -420,8 +420,8 @@ plot_roots_wng <- roots.df %>%
                        #linetype = warming,
                        shape = warming)
   ) +
-  geom_point(size = 4) + 
-  theme_minimal(base_size = 20) + 
+  geom_point(size = 2) + 
+  theme_minimal(base_size = 16) + 
   theme(legend.title = element_blank(),
         legend.position = "bottom", 
         legend.box = "horizontal") +
@@ -433,7 +433,7 @@ plot_roots_wng <- roots.df %>%
        x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)),
        y = bquote(Root~mass~(g/cm^3))) +
   facet_grid(origSiteID ~ grazing) +
-  geom_smooth(method = "lm", size = 2)
+  geom_smooth(method = "lm", size = 1)
 plot_roots_wng
 
 
