@@ -487,8 +487,8 @@ plot_agb_wng <- agb.df %>%
                        #linetype = warming,
                        shape = warming)
          ) +
-  geom_point(size = 4) + 
-  theme_minimal(base_size = 20) + 
+  geom_point(size = 2) + 
+  theme_minimal(base_size = 16) + 
   theme(legend.title = element_blank(),
         legend.position = "bottom", 
         legend.box = "horizontal") +
@@ -500,5 +500,5 @@ plot_agb_wng <- agb.df %>%
        x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)), 
        y = bquote(Biomass~(g~m^-2))) + 
   facet_grid(origSiteID ~ grazing) +
-  geom_smooth(method = "lm", size = 2)
+  geom_smooth(method = "lm", size = 1)
 plot_agb_wng
