@@ -483,16 +483,19 @@ plot_agb_wng <- agb.df %>%
   ggplot(mapping = aes(x = log(Namount_kg_ha_y +1), 
                        y = biomass_m2, 
                        color = warming,
+                       fill = warming,
                        #linetype = warming,
-                       shape = warming)) +
+                       shape = warming)
+         ) +
   geom_point(size = 4) + 
   theme_minimal(base_size = 20) + 
   theme(legend.title = element_blank(),
         legend.position = "bottom", 
         legend.box = "horizontal") +
   scale_color_manual(values = colors_w) + 
-  scale_linetype_manual(values = c("longdash", "solid")) + 
-  scale_shape_manual(values = c(1, 16)) + 
+  scale_fill_manual(values = colors_w) + 
+  scale_shape_manual(values = c(21, 25)) + 
+  #scale_linetype_manual(values = c("longdash", "solid")) + 
   labs(title = "Aboveground productivity", 
        x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)), 
        y = bquote(Biomass~(g~m^-2))) + 
