@@ -451,7 +451,7 @@ plot_soil_wng <- soil.df %>%
     (origSiteID == "Lia") ~ "Alpine",
     (origSiteID == "Joa") ~ "Sub-alpine")) %>% 
   filter(!grazing == "Natural") %>%
-  summarise(prop_org_mat = mean(prop_org_mat)) %>% 
+  summarise(prop_org_mat = sum(prop_org_mat)) %>% 
   ggplot(mapping = aes(x = log(Namount_kg_ha_y +1), 
                        y = prop_org_mat, 
                        color = warming,
