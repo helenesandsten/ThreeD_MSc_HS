@@ -58,35 +58,40 @@ teabag.df <- teabag.raw.df %>%
          mass_loss_g = weight_loss_g, 
          mass_loss_g = preburial_weight_g - post_burial_weight_g,
   # calculating proportion of mass loss   
-         mass_loss_proportion = post_burial_weight_g / preburial_weight_g)
+         mass_loss_proportion = 1 - (post_burial_weight_g / preburial_weight_g))
   
 
-depth_tb <- teabag.df %>% 
-  select(burial_depth_cm)
-
-mean_depth_tb <- mean(teabag.df$burial_depth_cm)
+# depth_tb <- teabag.df %>% select(burial_depth_cm)
+# mean_depth_tb <- mean(teabag.df$burial_depth_cm)
 
 
 ### NEW TEABAG INDEX 
-decomp_df <- teabag.df %>% 
+Hydrolysable_fraction_green <- 0.842
+Hydrolysable_fraction_red <- 0.552
+
+decomp.df <- teabag.df %>% 
   select(teabag_ID, tea_type, post_burial_weight_g, preburial_weight_g, incubation_time,
          origSiteID, destSiteID, destBlockID, origBlockID, warming, grazing, grazing_lvl,
          Namount_kg_ha_y, recover_date, burial_date) %>%
+  # rearranging data to have teabag pairs on same row for calculations
   pivot_wider(names_from = tea_type, 
               values_from = c(post_burial_weight_g, preburial_weight_g)) %>%
   mutate(incubation_time = as.numeric(recover_date - burial_date), 
+         # calculations for the teabag index
          fraction_decomposed_green = 1 - post_burial_weight_g_green/preburial_weight_g_green,
          fraction_remaining_green = post_burial_weight_g_green/preburial_weight_g_green,
          fraction_remaining_red = post_burial_weight_g_red/preburial_weight_g_red,
+         # stabilisation rate 
          S = 1 - (fraction_decomposed_green / Hydrolysable_fraction_green),
          predicted_labile_fraction_red = Hydrolysable_fraction_red * (1 - S),
+         # decomposition rate 
          k = log(predicted_labile_fraction_red / (fraction_remaining_red - (1 - predicted_labile_fraction_red))) / incubation_time)
 
 
 
 ### ------ MODELS FOR ALPINE / LIAHOVDEN ------------------------
 ### MODEL: decomp ~ w * n * g ---------------------------------------
-model.decomp.wng.int.lia <- teabag.df.new %>%
+model.decomp.wng.int.lia <- decomp.df %>%
   # removing grazing level N to reduce degrees of freedom
   filter(!grazing == "Natural") %>% 
   group_by(origSiteID) %>% 
@@ -115,7 +120,7 @@ model.decomp.wng.int.lia <- teabag.df.new %>%
 
 ###############################################################
 ### MODEL: decomp ~ w + n + g ---------------------------------------
-model.decomp.wng.add.lia <- teabag.df.new %>%
+model.decomp.wng.add.lia <- decomp.df %>%
   # removing grazing level N to reduce degrees of freedom
   filter(!grazing == "Natural") %>%
   group_by(origSiteID) %>% #
@@ -143,7 +148,7 @@ model.decomp.wng.add.lia <- teabag.df.new %>%
 
 ###############################################################
 ### MODEL: decomp ~ w * n + g ----------------------------------
-model.decomp.wng.intadd.lia <- teabag.df.new %>%
+model.decomp.wng.intadd.lia <- decomp.df %>%
   # removing grazing level N to reduce degrees of freedom
   filter(!grazing == "Natural") %>%
   group_by(origSiteID) %>% 
@@ -168,7 +173,7 @@ model.decomp.wng.intadd.lia <- teabag.df.new %>%
 
 ###############################################################
 ### MODEL: decomp ~ w + n * g ----------------------------------
-model.decomp.wng.addint.lia <- teabag.df.new %>%
+model.decomp.wng.addint.lia <- decomp.df %>%
   # removing grazing level N to reduce degrees of freedom
   filter(!grazing == "Natural") %>%
   group_by(origSiteID) %>% 
@@ -192,7 +197,7 @@ model.decomp.wng.addint.lia <- teabag.df.new %>%
 
 ###############################################################
 ### MODEL: decomp ~ w * g + n ----------------------------------
-model.decomp.wgn.intadd.lia <- teabag.df.new %>%
+model.decomp.wgn.intadd.lia <- decomp.df %>%
   # removing grazing level N to reduce degrees of freedom
   filter(!grazing == "Natural") %>%
   group_by(origSiteID) %>% 
@@ -232,7 +237,7 @@ model_comparison_decomp.lia <- compare_performance(
 # options(scipen = 100, digits = 4)
 
 ## running model with result and unnest to create output 
-output.model.decomp.lia <- teabag.df.new %>%
+output.model.decomp.lia <- decomp.df %>%
   # removing grazing level N to reduce degrees of freedom
   filter(!grazing == "Natural") %>%
   group_by(origSiteID) %>% 
@@ -267,7 +272,7 @@ clean_output.model.decomp.lia <- output.model.decomp.lia %>%
 
 ### ------ MODELS FOR SUB ALPINE / JOASETE -----------------------
 ### MODEL: decomp ~ w * n * g ---------------------------------------
-model.decomp.wng.int.joa <- teabag.df.new %>%
+model.decomp.wng.int.joa <- decomp.df %>%
   # removing grazing level N to reduce degrees of freedom
   filter(!grazing == "Natural") %>% 
   group_by(origSiteID) %>% 
@@ -296,7 +301,7 @@ model.decomp.wng.int.joa <- teabag.df.new %>%
 
 ###############################################################
 ### MODEL: decomp ~ w + n + g ---------------------------------------
-model.decomp.wng.add.joa <- teabag.df.new %>%
+model.decomp.wng.add.joa <- decomp.df %>%
   # removing grazing level N to reduce degrees of freedom
   filter(!grazing == "Natural") %>%
   group_by(origSiteID) %>% #
@@ -324,7 +329,7 @@ model.decomp.wng.add.joa <- teabag.df.new %>%
 
 ###############################################################
 ### MODEL: decomp ~ w * n + g ----------------------------------
-model.decomp.wng.intadd.joa <- teabag.df.new %>%
+model.decomp.wng.intadd.joa <- decomp.df %>%
   # removing grazing level N to reduce degrees of freedom
   filter(!grazing == "Natural") %>%
   group_by(origSiteID) %>% 
@@ -349,7 +354,7 @@ model.decomp.wng.intadd.joa <- teabag.df.new %>%
 
 ###############################################################
 ### MODEL: decomp ~ w + n * g ----------------------------------
-model.decomp.wng.addint.joa <- teabag.df.new %>%
+model.decomp.wng.addint.joa <- decomp.df %>%
   # removing grazing level N to reduce degrees of freedom
   filter(!grazing == "Natural") %>%
   group_by(origSiteID) %>% 
@@ -374,7 +379,7 @@ model.decomp.wng.addint.joa <- teabag.df.new %>%
 
 ###############################################################
 ### MODEL: decomp ~ w * g + n ----------------------------------
-model.decomp.wgn.intadd.joa <- teabag.df.new %>%
+model.decomp.wgn.intadd.joa <- decomp.df %>%
   # removing grazing level N to reduce degrees of freedom
   filter(!grazing == "Natural") %>%
   group_by(origSiteID) %>% 
@@ -412,7 +417,7 @@ model_comparison_decomp.joa <- compare_performance(
 # decomp ~ w * n + g
 options(scipen = 100, digits = 4)
 ## running model with result and unnest to create output
-output.model.decomp.joa <- teabag.df.new %>%
+output.model.decomp.joa <- decomp.df %>%
   # removing grazing level N to reduce degrees of freedom
   filter(!grazing == "Natural") %>%
   group_by(origSiteID) %>% #
@@ -449,7 +454,7 @@ clean_output.model.decomp.joa <- output.model.decomp.joa %>%
 
 ## figures ----------------------------------------------------
 ## decomposition plot from S-factor
-plot_decomp <- teabag.df.new %>% 
+plot_decomp <- decomp.df %>% 
   group_by(#tea_type, 
            origSiteID, warming, Namount_kg_ha_y, grazing) %>%
   mutate(origSiteID = case_when(
@@ -479,33 +484,151 @@ plot_decomp <- teabag.df.new %>%
 plot_decomp
 
 
-## OLD PLOT WITH TWO TEABAGS
-# plot_teabags <- teabag.df %>% 
-#   group_by(tea_type, origSiteID, warming, Namount_kg_ha_y, grazing) %>% 
-#   mutate(origSiteID = case_when(
-#     (origSiteID == "Lia") ~ "Alpine",
-#     (origSiteID == "Joa") ~ "Sub-alpine")) %>% 
-#   filter(!grazing == "Natural") %>% 
-#   ggplot(mapping = aes(x = log(Namount_kg_ha_y +1), 
-#                        y = mass_loss_proportion,
-#                        color = tea_type,
-#                        fill = tea_type,
-#                        linetype = warming,
-#                        shape = warming, 
-#                        alpha = 0.7)) +
-#   geom_point(size = 4) + 
-#   theme_minimal(base_size = 20) +
-#   theme(legend.title = element_blank(),
-#         legend.position = "bottom", 
-#         legend.box = "horizontal") + 
-#   scale_color_manual(values = colors_tea) + 
-#   scale_linetype_manual(values = c("longdash", "solid")) + 
-#   scale_shape_manual(values = c(1, 16)) +
-#   #scale_size_manual(values = 10) +
-#   labs(title = "Mass loss of teabags",
-#        x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)),
-#        y = bquote(Mass~loss~proportion)) +
-#   #geom_line() +
-#   geom_smooth(method = "lm", size = 2, fill = "grey") +
-#   facet_grid(origSiteID ~ grazing) 
-# plot_teabags
+plot_decomp_k_wng <- decomp.df %>% 
+  group_by(Namount_kg_ha_y, origSiteID, warming, grazing) %>% 
+  mutate(origSiteID = case_when(
+    (origSiteID == "Lia") ~ "Alpine",
+    (origSiteID == "Joa") ~ "Sub-alpine")) %>% 
+  filter(!grazing == "Natural") %>%
+  filter(!origSiteID == "Sub-alpine") %>%
+  ggplot(mapping = aes(x = log(Namount_kg_ha_y +1), 
+                       y = k, 
+                       color = warming,
+                       fill = warming,
+                       #linetype = warming,
+                       shape = warming)
+  ) +
+  geom_point(size = 2) + 
+  theme_minimal(base_size = 16) + 
+  theme(legend.title = element_blank(),
+        legend.position = "bottom", 
+        legend.box = "horizontal") +
+  scale_color_manual(values = colors_w) + 
+  scale_fill_manual(values = colors_w) + 
+  scale_shape_manual(values = c(21, 25)) + 
+  #scale_linetype_manual(values = c("longdash", "solid")) + 
+  labs(title = "Decomposition rate k", 
+       x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)), 
+       y = bquote(k)) + 
+  facet_grid(origSiteID ~ grazing) +
+  geom_smooth(method = "lm", size = 1)
+plot_decomp_k_wng 
+
+
+plot_decomp_s_wng <- decomp.df %>% 
+  group_by(Namount_kg_ha_y, origSiteID, warming, grazing) %>% 
+  mutate(origSiteID = case_when(
+    (origSiteID == "Lia") ~ "Alpine",
+    (origSiteID == "Joa") ~ "Sub-alpine")) %>% 
+  filter(!grazing == "Natural") %>%
+  #filter(!origSiteID == "Sub-alpine") %>%
+  ggplot(mapping = aes(x = log(Namount_kg_ha_y +1), 
+                       y = S, 
+                       color = warming,
+                       fill = warming,
+                       #linetype = warming,
+                       shape = warming)
+  ) +
+  geom_point(size = 2) + 
+  theme_minimal(base_size = 16) + 
+  theme(legend.title = element_blank(),
+        legend.position = "bottom", 
+        legend.box = "horizontal") +
+  scale_color_manual(values = colors_w) + 
+  scale_fill_manual(values = colors_w) + 
+  scale_shape_manual(values = c(21, 25)) + 
+  #scale_linetype_manual(values = c("longdash", "solid")) + 
+  labs(title = "Decomposition stabilisation factor S", 
+       x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)), 
+       y = bquote(Stabilisation~factor~(S))) + 
+  facet_grid(origSiteID ~ grazing) +
+  geom_smooth(method = "lm", size = 1)
+plot_decomp_s_wng 
+
+
+#source("R scripts/MSc_aesthetics.R")
+
+## MASS LOSS AMBIENT
+plot_teabags_amb <- teabag.df %>%
+  group_by(turfID, tea_type, origSiteID, warming, Namount_kg_ha_y, grazing) %>%
+  #filter(!turfID == "1 WN1M 84") %>%
+  mutate(origSiteID = case_when(
+    (origSiteID == "Lia") ~ "Alpine",
+    (origSiteID == "Joa") ~ "Sub-alpine")) %>%
+  filter(!grazing == "Natural") %>%
+  mutate(tea_w_color = case_when(
+    (tea_type == "green") ~ "Green tea",
+    (tea_type == "red") ~ "Rooibos tea")) %>%
+  # filter(!tea_w_color == "green_a" | !tea_w_color == "red_a") %>% 
+  filter(warming == "Ambient") %>% 
+  ggplot(mapping = aes(x = log(Namount_kg_ha_y +1),
+                       y = mass_loss_proportion,
+                       color = tea_w_color,
+                       fill = tea_w_color,
+                       linetype = warming,
+                       shape = warming)) +
+  geom_point(size = 3) +
+  guides(size = "none") +
+  theme_minimal(base_size = 16) +
+  theme(legend.title = element_blank(),
+        legend.position = "bottom",
+        legend.box = "horizontal") +
+  scale_color_manual(values = colors_tea_2) +
+  scale_fill_manual(values = colors_tea_2) + 
+  scale_shape_manual(values = 21) +
+  ylim(0.25, 1) +
+  labs(title = "Mass loss of teabags (ambient)",
+       x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)),
+       y = bquote(Mass~loss~proportion)) + 
+  # geom_line() +
+  geom_smooth(method = "lm") +
+  facet_grid(origSiteID ~ grazing)
+plot_teabags_amb
+
+
+## MASS LOSS WARMING
+plot_teabags_war <- teabag.df %>%
+  group_by(turfID, tea_type, origSiteID, warming, Namount_kg_ha_y, grazing) %>%
+  #filter(!turfID == "1 WN1M 84") %>%
+  mutate(origSiteID = case_when(
+    (origSiteID == "Lia") ~ "Alpine",
+    (origSiteID == "Joa") ~ "Sub-alpine")) %>%
+  filter(!grazing == "Natural") %>%
+  mutate(tea_w_color = case_when(
+    (tea_type == "green") ~ "Green tea",
+    (tea_type == "red") ~ "Rooibos tea")) %>%
+  # filter(!tea_w_color == "green_a" | !tea_w_color == "red_a") %>% 
+  filter(warming == "Warming") %>% 
+  ggplot(mapping = aes(x = log(Namount_kg_ha_y +1),
+                       y = mass_loss_proportion,
+                       color = tea_w_color,
+                       fill = tea_w_color,
+                       linetype = warming,
+                       shape = warming)) +
+  geom_point(size = 3) +
+  guides(size = "none") +
+  theme_minimal(base_size = 16) +
+  theme(legend.title = element_blank(),
+        legend.position = "bottom",
+        legend.box = "horizontal") +
+  scale_color_manual(values = colors_tea_2) +
+  scale_fill_manual(values = colors_tea_2) + 
+  scale_shape_manual(values = 25) +
+  ylim(0.25, 1) +
+  labs(title = "Mass loss of teabags (warming)",
+       x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)),
+       y = bquote(Mass~loss~proportion)) + 
+  # geom_line() +
+  geom_smooth(method = "lm") +
+  facet_grid(origSiteID ~ grazing)
+plot_teabags_war
+
+
+## checking strange datapoint
+## 1 WN1M 84 green is very low
+teabag.df %>% 
+  filter(origSiteID == "Lia",
+         grazing == "Medium",
+         mass_loss_proportion < 0.4,
+         tea_type == "green") %>% 
+  View()
