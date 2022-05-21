@@ -817,34 +817,34 @@ clean_output.model.decompS.joa <- output.model.decompS.joa %>%
 
 ## figures ----------------------------------------------------
 ## decomposition plot from S-factor
-plot_decomp <- decomp.df %>% 
-  group_by(#tea_type, 
-           origSiteID, warming, Namount_kg_ha_y, grazing) %>%
-  mutate(origSiteID = case_when(
-    (origSiteID == "Lia") ~ "Alpine",
-    (origSiteID == "Joa") ~ "Sub-alpine")) %>%
-  filter(!grazing == "Natural") %>%
-  ggplot(mapping = aes(x = log(Namount_kg_ha_y +1),
-                       y = S,
-                       color = warming,
-                       linetype = warming,
-                       shape = warming)) +
-  geom_point(size = 4) +
-  theme_minimal(base_size = 20) +
-  theme(legend.title = element_blank(),
-        legend.position = "bottom",
-        legend.box = "horizontal") +
-  scale_color_manual(values = colors_w) +
-  scale_linetype_manual(values = c("longdash", "solid")) +
-  scale_shape_manual(values = c(1, 16)) +
-  #scale_size_manual(values = 10) +
-  labs(title = "Decomposition",
-       x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)),
-       y = bquote(Stabilization~factor~(S))) +
-  #geom_line() +
-  geom_smooth(method = "lm", size = 2, fill = "grey") +
-  facet_grid(origSiteID ~ grazing)
-plot_decomp
+# plot_decomp <- decomp.df %>% 
+#   group_by(#tea_type, 
+#            origSiteID, warming, Namount_kg_ha_y, grazing) %>%
+#   mutate(origSiteID = case_when(
+#     (origSiteID == "Lia") ~ "Alpine",
+#     (origSiteID == "Joa") ~ "Sub-alpine")) %>%
+#   filter(!grazing == "Natural") %>%
+#   ggplot(mapping = aes(x = log(Namount_kg_ha_y +1),
+#                        y = S,
+#                        color = warming,
+#                        linetype = warming,
+#                        shape = warming)) +
+#   geom_point(size = 4) +
+#   theme_minimal(base_size = 20) +
+#   theme(legend.title = element_blank(),
+#         legend.position = "bottom",
+#         legend.box = "horizontal") +
+#   scale_color_manual(values = colors_w) +
+#   scale_linetype_manual(values = c("longdash", "solid")) +
+#   scale_shape_manual(values = c(1, 16)) +
+#   #scale_size_manual(values = 10) +
+#   labs(title = "Decomposition",
+#        x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)),
+#        y = bquote(Stabilization~factor~(S))) +
+#   #geom_line() +
+#   geom_smooth(method = "lm", size = 2, fill = "grey") +
+#   facet_grid(origSiteID ~ grazing)
+# plot_decomp
 
 
 plot_decomp_k_wng <- decomp.df %>% 
