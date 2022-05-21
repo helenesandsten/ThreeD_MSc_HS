@@ -90,6 +90,8 @@ decomp.df <- teabag.df %>%
 
 
 ### ------ MODELS FOR ALPINE / LIAHOVDEN ------------------------
+## k values from TBI
+
 ### MODEL: decomp ~ w * n * g ---------------------------------------
 model.decomp.wng.int.lia <- decomp.df %>%
   # removing grazing level N to reduce degrees of freedom
@@ -99,7 +101,7 @@ model.decomp.wng.int.lia <- decomp.df %>%
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
     model.decomp.wng.int.lia = map(data, # runs model in each litte dataset
-                                   ~ lm(S ~
+                                   ~ lm(k ~
                                           warming * Namount_kg_ha_y * grazing_lvl,
                                         data = .x)))#,
 #result.decomp.wng.int.lia = map(model.decomp.wng.int.lia, tidy)) #%>%
@@ -114,8 +116,6 @@ model.decomp.wng.int.lia <- decomp.df %>%
 
 ## check plots that are off: collinearity 
 ## exspected as the model has interaction terms
-#check_collinearity(model.decomp.wng.int.lia $ model.decomp.wng.int.lia[[1]])
-#plot(check_collinearity(model.decomp.wng.int.lia $ model.decomp.wng.int.lia[[1]])) 
 
 
 ###############################################################
@@ -128,7 +128,7 @@ model.decomp.wng.add.lia <- decomp.df %>%
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
     model.decomp.wng.add.lia = map(data, # runs model in each litte dataset
-                                   ~ lm(S ~
+                                   ~ lm(k ~
                                           warming + Namount_kg_ha_y + grazing_lvl,
                                         data = .x)))#,
 #result.decomp.wng.add.lia = map(model.decomp.wng.add.lia, tidy)) #%>%
@@ -156,7 +156,7 @@ model.decomp.wng.intadd.lia <- decomp.df %>%
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
     model.decomp.wng.intadd.lia = map(data, # runs model in each litte dataset
-                                      ~ lm(S ~
+                                      ~ lm(k ~
                                              warming * Namount_kg_ha_y + grazing_lvl,
                                            data = .x)))#,
 #result.decomp.wng.intadd.lia = map(model.decomp.wng.intadd.lia, tidy)) #%>%
@@ -181,7 +181,7 @@ model.decomp.wng.addint.lia <- decomp.df %>%
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
     model.decomp.wng.addint.lia = map(data, # runs model in each litte dataset
-                                      ~ lm(S ~
+                                      ~ lm(k ~
                                              warming + Namount_kg_ha_y * grazing_lvl,
                                            data = .x)))#,
 #result.decomp.wng.addint.lia = map(model.decomp.wng.addint.lia, tidy)) #%>%
@@ -205,7 +205,7 @@ model.decomp.wgn.intadd.lia <- decomp.df %>%
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
     model.decomp.wgn.intadd.lia = map(data, # runs model in each litte dataset
-                                      ~ lm(S ~
+                                      ~ lm(k ~
                                              warming * grazing_lvl + Namount_kg_ha_y,
                                            data = .x)))#,
 #result.decomp.wgn.intadd.lia = map(model.decomp.wgn.intadd.lia, tidy)) #%>%
@@ -233,8 +233,8 @@ model_comparison_decomp.lia <- compare_performance(
 #   plot(model_comparison_decomp.lia)
 
 ## making output of best model -----------------------------------
-## decomp ~ w * n + g 
-# options(scipen = 100, digits = 4)
+## decomp ~ w + n * g 
+ options(kcipen = 100, digits = 4)
 
 ## running model with result and unnest to create output 
 output.model.decomp.lia <- decomp.df %>%
@@ -244,12 +244,12 @@ output.model.decomp.lia <- decomp.df %>%
   filter(origSiteID == "Lia") %>% 
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
-    model.decomp.wng.intadd.lia = map(data, # runs model in each litte dataset
-                                      ~ lm(S ~
-                                             warming * Namount_kg_ha_y + grazing_lvl,
+    model.decomp.wng.addint.lia = map(data, # runs model in each litte dataset
+                                      ~ lm(k ~
+                                             warming + Namount_kg_ha_y * grazing_lvl,
                                            data = .x)),
-    result.decomp.wng.intadd.lia = map(model.decomp.wng.intadd.lia, tidy)) %>%
-  unnest(result.decomp.wng.intadd.lia) %>% # opens the nested dataframes
+    result.decomp.wng.addint.lia = map(model.decomp.wng.addint.lia, tidy)) %>%
+  unnest(result.decomp.wng.addint.lia) %>% # opens the nested dataframes
   select(origSiteID, term, estimate, std.error, statistic, p.value)
 # View()
 
@@ -271,56 +271,239 @@ clean_output.model.decomp.lia <- output.model.decomp.lia %>%
     (origSiteID == "Joa") ~ "Sub-alpine"))
 
 ### ------ MODELS FOR SUB ALPINE / JOASETE -----------------------
-### MODEL: decomp ~ w * n * g ---------------------------------------
-model.decomp.wng.int.joa <- decomp.df %>%
+# ### MODEL: decomp ~ w * n * g ---------------------------------------
+# model.decomp.wng.int.joa <- decomp.df %>%
+#   # removing grazing level N to reduce degrees of freedom
+#   filter(!grazing == "Natural") %>% 
+#   group_by(origSiteID) %>% 
+#   filter(origSiteID == "Joa") %>% 
+#   nest() %>% # makes little dataframes inside my data, closed
+#   mutate(
+#     model.decomp.wng.int.joa = map(data, # runs model in each litte dataset
+#                                    ~ lm(k ~
+#                                           warming * Namount_kg_ha_y * grazing_lvl,
+#                                         data = .x)))#,
+# #result.decomp.wng.int.joa = map(model.decomp.wng.int.joa, tidy)) #%>%
+# #unnest(result.decomp.wng.int.joa) #%>% # opens the nested dataframes
+# # View()
+# 
+# ### MODEL: decomp ~ w * n * g - check model --------------------
+# ## must run model code without result- and unnest-line for this to be useful
+# 
+# ## check assumptions 
+# #check_model(model.decomp.wng.int.joa $ model.decomp.wng.int.joa[[1]])
+# 
+# ## check plots that are off: collinearity 
+# ## exspected as the model has interaction terms
+# #check_collinearity(model.decomp.wng.int.joa $ model.decomp.wng.int.joa[[1]])
+# #plot(check_collinearity(model.decomp.wng.int.joa $ model.decomp.wng.int.joa[[1]])) 
+# 
+# 
+# ###############################################################
+# ### MODEL: decomp ~ w + n + g ---------------------------------------
+# model.decomp.wng.add.joa <- decomp.df %>%
+#   # removing grazing level N to reduce degrees of freedom
+#   filter(!grazing == "Natural") %>%
+#   group_by(origSiteID) %>% #
+#   filter(origSiteID == "Joa") %>% 
+#   nest() %>% # makes little dataframes inside my data, closed
+#   mutate(
+#     model.decomp.wng.add.joa = map(data, # runs model in each litte dataset
+#                                    ~ lm(k ~
+#                                           warming + Namount_kg_ha_y + grazing_lvl,
+#                                         data = .x)))#,
+# #result.decomp.wng.add.joa = map(model.decomp.wng.add.joa, tidy)) #%>%
+# #unnest(result.decomp.wng.add.joa) #%>% # opens the nested dataframes
+# # View()
+# 
+# ### MODEL: decomp ~ w + n + g - check model --------------------
+# ## must run model code without result- and unnest-line for this to be useful
+# 
+# ## check assumtions 
+# #check_model(model.decomp.wng.add.joa$model.decomp.wng.add.joa[[1]]) 
+# # all diagnostic plots looks good (green/blue) but 
+# # posterior predictive check is spiky and 
+# # normality of residuals is not normal at the right 
+# 
+# 
+# 
+# ###############################################################
+# ### MODEL: decomp ~ w * n + g ----------------------------------
+# model.decomp.wng.intadd.joa <- decomp.df %>%
+#   # removing grazing level N to reduce degrees of freedom
+#   filter(!grazing == "Natural") %>%
+#   group_by(origSiteID) %>% 
+#   filter(origSiteID == "Joa") %>% 
+#   nest() %>% # makes little dataframes inside my data, closed
+#   mutate(
+#     model.decomp.wng.intadd.joa = map(data, # runs model in each litte dataset
+#                                       ~ lm(k ~
+#                                              warming * Namount_kg_ha_y + grazing_lvl,
+#                                            data = .x)))#,
+# #result.decomp.wng.intadd.joa = map(model.decomp.wng.intadd.joa, tidy)) #%>%
+# #unnest(result.decomp.wng.intadd.joa) #%>% # opens the nested dataframes
+# # View()
+# 
+# ### MODEL: decomp ~ w * n + g - check model --------------------
+# 
+# ## check assumptions 
+# #check_model(model.decomp.wng.intadd.joa $ model.decomp.wng.intadd.joa[[1]])
+# ## all assumptions looks good 
+# 
+# 
+# 
+# ###############################################################
+# ### MODEL: decomp ~ w + n * g ----------------------------------
+# model.decomp.wng.addint.joa <- decomp.df %>%
+#   # removing grazing level N to reduce degrees of freedom
+#   filter(!grazing == "Natural") %>%
+#   group_by(origSiteID) %>% 
+#   filter(origSiteID == "Joa") %>% 
+#   nest() %>% # makes little dataframes inside my data, closed
+#   mutate(
+#     model.decomp.wng.addint.joa = map(data, # runs model in each litte dataset
+#                                       ~ lm(k ~
+#                                              warming + Namount_kg_ha_y * grazing_lvl,
+#                                            data = .x)))#,
+# #result.decomp.wng.addint.joa = map(model.decomp.wng.addint.joa, tidy)) #%>%
+# #unnest(result.decomp.wng.addint.joa) #%>% # opens the nested dataframes
+# # View()
+# 
+# ### MODEL: decomp ~ w + n * g - check model --------------------
+# 
+# ## check assumptions 
+# #check_model(model.decomp.wng.addint.joa $ model.decomp.wng.addint.joa[[1]])
+# ## looks good
+# 
+# 
+# 
+# ###############################################################
+# ### MODEL: decomp ~ w * g + n ----------------------------------
+# model.decomp.wgn.intadd.joa <- decomp.df %>%
+#   # removing grazing level N to reduce degrees of freedom
+#   filter(!grazing == "Natural") %>%
+#   group_by(origSiteID) %>% 
+#   filter(origSiteID == "Joa") %>% 
+#   nest() %>% # makes little dataframes inside my data, closed
+#   mutate(
+#     model.decomp.wgn.intadd.joa = map(data, # runs model in each litte dataset
+#                                       ~ lm(k ~
+#                                              warming * grazing_lvl + Namount_kg_ha_y,
+#                                            data = .x)))#,
+# #result.decomp.wgn.intadd.joa = map(model.decomp.wgn.intadd.joa, tidy)) #%>%
+# #unnest(result.decomp.wgn.intadd.joa) #%>% # opens the nested dataframes
+# # View()
+# 
+# ### MODEL: decomp ~ w * g + n - check model --------------------
+# 
+# ## check assumptions 
+# #check_model(model.decomp.wgn.intadd.joa $ model.decomp.wgn.intadd.joa[[1]])
+# 
+# ###############################################################
+# ### compare models SUB ALPINE / JOA ---------------------------------
+# model_comparison_decomp.joa <- compare_performance(
+#   model.decomp.wng.add.joa$model.decomp.wng.add.joa[[1]],         # w + n + g 
+#   model.decomp.wng.addint.joa$model.decomp.wng.addint.joa[[1]],   # w + n * g
+#   model.decomp.wng.intadd.joa$model.decomp.wng.intadd.joa[[1]],   # w * n + g
+#   model.decomp.wgn.intadd.joa$model.decomp.wgn.intadd.joa[[1]],   # w * g + n
+#   model.decomp.wng.int.joa$model.decomp.wng.int.joa[[1]]          # w * n * g
+# )
+# 
+# # plot.models.decomp.ng <-
+# #   plot(model_comparison_decomp.joa)
+# 
+# 
+# # making output of best model -----------------------------------
+# # decomp ~ w * n + g
+# options(kcipen = 100, digits = 4)
+# ## running model with result and unnest to create output
+# output.model.decomp.joa <- decomp.df %>%
+#   # removing grazing level N to reduce degrees of freedom
+#   filter(!grazing == "Natural") %>%
+#   group_by(origSiteID) %>% #
+#   filter(origSiteID == "Joa") %>% 
+#   nest() %>% # makes little dataframes inside my data, closed
+#   mutate(
+#     model.decomp.wng.add.joa = map(data, # runs model in each litte dataset
+#                                    ~ lm(k ~
+#                                           warming + Namount_kg_ha_y + grazing_lvl,
+#                                         data = .x)),
+#     result.decomp.wng.add.joa = map(model.decomp.wng.add.joa, tidy)) %>%
+#   unnest(result.decomp.wng.add.joa) %>% # opens the nested dataframes
+#   select(origSiteID, term, estimate, std.error, statistic, p.value)
+# # View()
+# 
+# ## making clean and readable output for table ---------------------
+# clean_output.model.decomp.joa <- output.model.decomp.joa %>%
+#   mutate(term = case_when(
+#     (term == "(Intercept)") ~ "Intercept (no N, no warming, no grazing)",
+#     (term == "warmingWarming") ~ "Warming",
+#     (term == "Namount_kg_ha_y") ~ "Nitrogen",
+#     (term == "grazing_lvl") ~ "Grazing",
+#     (term == "warmingWarming:Namount_kg_ha_y") ~ "Warming : Nitrogen",
+#     (term == "warmingWarming:grazing_lvl") ~ "Warming : Grazing",
+#     (term == "Namount_kg_ha_y:grazing_lvl") ~ "Nitrogen : Grazing",
+#     (term == "warmingWarming:Namount_kg_ha_y:grazing_lvl") ~
+#       "Warming : Nitrogen : Grazing"
+#   )) %>% 
+#   mutate(origSiteID = case_when(
+#     (origSiteID == "Lia") ~ "Alpine",
+#     (origSiteID == "Joa") ~ "Sub-alpine"))
+
+
+
+
+### ------ MODELS FOR ALPINE / LIAHOVDEN ------------------------
+## S values from TBI
+
+### MODEL: decompS ~ w * n * g ---------------------------------------
+model.decompS.wng.int.lia <- decomp.df %>%
   # removing grazing level N to reduce degrees of freedom
   filter(!grazing == "Natural") %>% 
   group_by(origSiteID) %>% 
-  filter(origSiteID == "Joa") %>% 
+  filter(origSiteID == "Lia") %>% 
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
-    model.decomp.wng.int.joa = map(data, # runs model in each litte dataset
-                                   ~ lm(S ~
-                                          warming * Namount_kg_ha_y * grazing_lvl,
-                                        data = .x)))#,
-#result.decomp.wng.int.joa = map(model.decomp.wng.int.joa, tidy)) #%>%
-#unnest(result.decomp.wng.int.joa) #%>% # opens the nested dataframes
+    model.decompS.wng.int.lia = map(data, # runs model in each litte dataset
+                                    ~ lm(S ~
+                                           warming * Namount_kg_ha_y * grazing_lvl,
+                                         data = .x)))#,
+#result.decompS.wng.int.lia = map(model.decompS.wng.int.lia, tidy)) #%>%
+#unnest(result.decompS.wng.int.lia) #%>% # opens the nested dataframes
 # View()
 
-### MODEL: decomp ~ w * n * g - check model --------------------
+### MODEL: decompS ~ w * n * g - check model --------------------
 ## must run model code without result- and unnest-line for this to be useful
 
 ## check assumptions 
-#check_model(model.decomp.wng.int.joa $ model.decomp.wng.int.joa[[1]])
+#check_model(model.decompS.wng.int.lia $ model.decompS.wng.int.lia[[1]])
 
 ## check plots that are off: collinearity 
 ## exspected as the model has interaction terms
-#check_collinearity(model.decomp.wng.int.joa $ model.decomp.wng.int.joa[[1]])
-#plot(check_collinearity(model.decomp.wng.int.joa $ model.decomp.wng.int.joa[[1]])) 
 
 
 ###############################################################
-### MODEL: decomp ~ w + n + g ---------------------------------------
-model.decomp.wng.add.joa <- decomp.df %>%
+### MODEL: decompS ~ w + n + g ---------------------------------------
+model.decompS.wng.add.lia <- decomp.df %>%
   # removing grazing level N to reduce degrees of freedom
   filter(!grazing == "Natural") %>%
   group_by(origSiteID) %>% #
-  filter(origSiteID == "Joa") %>% 
+  filter(origSiteID == "Lia") %>% 
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
-    model.decomp.wng.add.joa = map(data, # runs model in each litte dataset
-                                   ~ lm(S ~
-                                          warming + Namount_kg_ha_y + grazing_lvl,
-                                        data = .x)))#,
-#result.decomp.wng.add.joa = map(model.decomp.wng.add.joa, tidy)) #%>%
-#unnest(result.decomp.wng.add.joa) #%>% # opens the nested dataframes
+    model.decompS.wng.add.lia = map(data, # runs model in each litte dataset
+                                    ~ lm(S ~
+                                           warming + Namount_kg_ha_y + grazing_lvl,
+                                         data = .x)))#,
+#result.decompS.wng.add.lia = map(model.decompS.wng.add.lia, tidy)) #%>%
+#unnest(result.decompS.wng.add.lia) #%>% # opens the nested dataframes
 # View()
 
-### MODEL: decomp ~ w + n + g - check model --------------------
+### MODEL: decompS ~ w + n + g - check model --------------------
 ## must run model code without result- and unnest-line for this to be useful
 
 ## check assumtions 
-#check_model(model.decomp.wng.add.joa$model.decomp.wng.add.joa[[1]]) 
+#check_model(model.decompS.wng.add.lia$model.decompS.wng.add.lia[[1]]) 
 # all diagnostic plots looks good (green/blue) but 
 # posterior predictive check is spiky and 
 # normality of residuals is not normal at the right 
@@ -328,113 +511,114 @@ model.decomp.wng.add.joa <- decomp.df %>%
 
 
 ###############################################################
-### MODEL: decomp ~ w * n + g ----------------------------------
-model.decomp.wng.intadd.joa <- decomp.df %>%
+### MODEL: decompS ~ w * n + g ----------------------------------
+model.decompS.wng.intadd.lia <- decomp.df %>%
   # removing grazing level N to reduce degrees of freedom
   filter(!grazing == "Natural") %>%
   group_by(origSiteID) %>% 
-  filter(origSiteID == "Joa") %>% 
+  filter(origSiteID == "Lia") %>% 
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
-    model.decomp.wng.intadd.joa = map(data, # runs model in each litte dataset
-                                      ~ lm(S ~
-                                             warming * Namount_kg_ha_y + grazing_lvl,
-                                           data = .x)))#,
-#result.decomp.wng.intadd.joa = map(model.decomp.wng.intadd.joa, tidy)) #%>%
-#unnest(result.decomp.wng.intadd.joa) #%>% # opens the nested dataframes
+    model.decompS.wng.intadd.lia = map(data, # runs model in each litte dataset
+                                       ~ lm(S ~
+                                              warming * Namount_kg_ha_y + grazing_lvl,
+                                            data = .x)))#,
+#result.decompS.wng.intadd.lia = map(model.decompS.wng.intadd.lia, tidy)) #%>%
+#unnest(result.decompS.wng.intadd.lia) #%>% # opens the nested dataframes
 # View()
 
-### MODEL: decomp ~ w * n + g - check model --------------------
+### MODEL: decompS ~ w * n + g - check model --------------------
 
 ## check assumptions 
-#check_model(model.decomp.wng.intadd.joa $ model.decomp.wng.intadd.joa[[1]])
+#check_model(model.decompS.wng.intadd.lia $ model.decompS.wng.intadd.lia[[1]])
 ## all assumptions looks good 
 
 
 
 ###############################################################
-### MODEL: decomp ~ w + n * g ----------------------------------
-model.decomp.wng.addint.joa <- decomp.df %>%
+### MODEL: decompS ~ w + n * g ----------------------------------
+model.decompS.wng.addint.lia <- decomp.df %>%
   # removing grazing level N to reduce degrees of freedom
   filter(!grazing == "Natural") %>%
   group_by(origSiteID) %>% 
-  filter(origSiteID == "Joa") %>% 
+  filter(origSiteID == "Lia") %>% 
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
-    model.decomp.wng.addint.joa = map(data, # runs model in each litte dataset
-                                      ~ lm(S ~
-                                             warming + Namount_kg_ha_y * grazing_lvl,
-                                           data = .x)))#,
-#result.decomp.wng.addint.joa = map(model.decomp.wng.addint.joa, tidy)) #%>%
-#unnest(result.decomp.wng.addint.joa) #%>% # opens the nested dataframes
+    model.decompS.wng.addint.lia = map(data, # runs model in each litte dataset
+                                       ~ lm(S ~
+                                              warming + Namount_kg_ha_y * grazing_lvl,
+                                            data = .x)))#,
+#result.decompS.wng.addint.lia = map(model.decompS.wng.addint.lia, tidy)) #%>%
+#unnest(result.decompS.wng.addint.lia) #%>% # opens the nested dataframes
 # View()
 
-### MODEL: decomp ~ w + n * g - check model --------------------
+### MODEL: decompS ~ w + n * g - check model --------------------
 
 ## check assumptions 
-#check_model(model.decomp.wng.addint.joa $ model.decomp.wng.addint.joa[[1]])
-## looks good
+#check_model(model.decompS.wng.addint.lia $ model.decompS.wng.addint.lia[[1]])
 
 
 
 ###############################################################
-### MODEL: decomp ~ w * g + n ----------------------------------
-model.decomp.wgn.intadd.joa <- decomp.df %>%
+### MODEL: decompS ~ w * g + n ----------------------------------
+model.decompS.wgn.intadd.lia <- decomp.df %>%
   # removing grazing level N to reduce degrees of freedom
   filter(!grazing == "Natural") %>%
   group_by(origSiteID) %>% 
-  filter(origSiteID == "Joa") %>% 
+  filter(origSiteID == "Lia") %>% 
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
-    model.decomp.wgn.intadd.joa = map(data, # runs model in each litte dataset
-                                      ~ lm(S ~
-                                             warming * grazing_lvl + Namount_kg_ha_y,
-                                           data = .x)))#,
-#result.decomp.wgn.intadd.joa = map(model.decomp.wgn.intadd.joa, tidy)) #%>%
-#unnest(result.decomp.wgn.intadd.joa) #%>% # opens the nested dataframes
+    model.decompS.wgn.intadd.lia = map(data, # runs model in each litte dataset
+                                       ~ lm(S ~
+                                              warming * grazing_lvl + Namount_kg_ha_y,
+                                            data = .x)))#,
+#result.decompS.wgn.intadd.lia = map(model.decompS.wgn.intadd.lia, tidy)) #%>%
+#unnest(result.decompS.wgn.intadd.lia) #%>% # opens the nested dataframes
 # View()
 
-### MODEL: decomp ~ w * g + n - check model --------------------
+### MODEL: decompS ~ w * g + n - check model --------------------
 
 ## check assumptions 
-#check_model(model.decomp.wgn.intadd.joa $ model.decomp.wgn.intadd.joa[[1]])
+#check_model(model.decompS.wgn.intadd.lia $ model.decompS.wgn.intadd.lia[[1]])
+
 
 ###############################################################
-### compare models SUB ALPINE / JOA ---------------------------------
-model_comparison_decomp.joa <- compare_performance(
-  model.decomp.wng.add.joa$model.decomp.wng.add.joa[[1]],         # w + n + g 
-  model.decomp.wng.addint.joa$model.decomp.wng.addint.joa[[1]],   # w + n * g
-  model.decomp.wng.intadd.joa$model.decomp.wng.intadd.joa[[1]],   # w * n + g
-  model.decomp.wgn.intadd.joa$model.decomp.wgn.intadd.joa[[1]],   # w * g + n
-  model.decomp.wng.int.joa$model.decomp.wng.int.joa[[1]]          # w * n * g
+### compare models ALPINE / LIA ---------------------------------
+model_comparison_decompS.lia <- compare_performance(
+  model.decompS.wng.add.lia$model.decompS.wng.add.lia[[1]],         # w + n + g 
+  model.decompS.wng.addint.lia$model.decompS.wng.addint.lia[[1]],   # w + n * g
+  model.decompS.wng.intadd.lia$model.decompS.wng.intadd.lia[[1]],   # w * n + g
+  model.decompS.wgn.intadd.lia$model.decompS.wgn.intadd.lia[[1]],   # w * g + n
+  model.decompS.wng.int.lia$model.decompS.wng.int.lia[[1]]          # w * n * g
 )
 
-# plot.models.decomp.ng <-
-#   plot(model_comparison_decomp.joa)
 
+# plot.models.decompS.ng <-
+#   plot(model_comparison_decompS.lia)
 
-# making output of best model -----------------------------------
-# decomp ~ w * n + g
-options(scipen = 100, digits = 4)
-## running model with result and unnest to create output
-output.model.decomp.joa <- decomp.df %>%
+## making output of best model -----------------------------------
+## decompS ~ w + n * g 
+options(Scipen = 100, digits = 4)
+
+## running model with result and unnest to create output 
+output.model.decompS.lia <- decomp.df %>%
   # removing grazing level N to reduce degrees of freedom
   filter(!grazing == "Natural") %>%
-  group_by(origSiteID) %>% #
-  filter(origSiteID == "Joa") %>% 
+  group_by(origSiteID) %>% 
+  filter(origSiteID == "Lia") %>% 
   nest() %>% # makes little dataframes inside my data, closed
   mutate(
-    model.decomp.wng.add.joa = map(data, # runs model in each litte dataset
-                                   ~ lm(S ~
-                                          warming + Namount_kg_ha_y + grazing_lvl,
-                                        data = .x)),
-    result.decomp.wng.add.joa = map(model.decomp.wng.add.joa, tidy)) %>%
-  unnest(result.decomp.wng.add.joa) %>% # opens the nested dataframes
+    model.decompS.wng.add.lia = map(data, # runs model in each litte dataset
+                                    ~ lm(S ~
+                                           warming + Namount_kg_ha_y + grazing_lvl,
+                                         data = .x)),
+    result.decompS.wng.add.lia = map(model.decompS.wng.add.lia, tidy)) %>%
+  unnest(result.decompS.wng.add.lia) %>% # opens the nested dataframes
   select(origSiteID, term, estimate, std.error, statistic, p.value)
 # View()
 
 ## making clean and readable output for table ---------------------
-clean_output.model.decomp.joa <- output.model.decomp.joa %>%
+clean_output.model.decompS.lia <- output.model.decompS.lia %>%
   mutate(term = case_when(
     (term == "(Intercept)") ~ "Intercept (no N, no warming, no grazing)",
     (term == "warmingWarming") ~ "Warming",
@@ -450,6 +634,185 @@ clean_output.model.decomp.joa <- output.model.decomp.joa %>%
     (origSiteID == "Lia") ~ "Alpine",
     (origSiteID == "Joa") ~ "Sub-alpine"))
 
+### ------ MODELS FOR SUB ALPINE / JOASETE -----------------------
+### MODEL: decompS ~ w * n * g ---------------------------------------
+model.decompS.wng.int.joa <- decomp.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>%
+  group_by(origSiteID) %>%
+  filter(origSiteID == "Joa") %>%
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.decompS.wng.int.joa = map(data, # runs model in each litte dataset
+                                    ~ lm(S ~
+                                           warming * Namount_kg_ha_y * grazing_lvl,
+                                         data = .x)))#,
+#result.decompS.wng.int.joa = map(model.decompS.wng.int.joa, tidy)) #%>%
+#unnest(result.decompS.wng.int.joa) #%>% # opens the nested dataframes
+# View()
+
+### MODEL: decompS ~ w * n * g - check model --------------------
+## must run model code without result- and unnest-line for this to be useful
+
+## check assumptions
+#check_model(model.decompS.wng.int.joa $ model.decompS.wng.int.joa[[1]])
+
+## check plots that are off: collinearity
+## exspected as the model has interaction terms
+#check_collinearity(model.decompS.wng.int.joa $ model.decompS.wng.int.joa[[1]])
+#plot(check_collinearity(model.decompS.wng.int.joa $ model.decompS.wng.int.joa[[1]]))
+
+
+###############################################################
+### MODEL: decompS ~ w + n + g ---------------------------------------
+model.decompS.wng.add.joa <- decomp.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>%
+  group_by(origSiteID) %>% #
+  filter(origSiteID == "Joa") %>%
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.decompS.wng.add.joa = map(data, # runs model in each litte dataset
+                                    ~ lm(S ~
+                                           warming + Namount_kg_ha_y + grazing_lvl,
+                                         data = .x)))#,
+#result.decompS.wng.add.joa = map(model.decompS.wng.add.joa, tidy)) #%>%
+#unnest(result.decompS.wng.add.joa) #%>% # opens the nested dataframes
+# View()
+
+### MODEL: decompS ~ w + n + g - check model --------------------
+## must run model code without result- and unnest-line for this to be useful
+
+## check assumtions
+#check_model(model.decompS.wng.add.joa$model.decompS.wng.add.joa[[1]])
+# all diagnostic plots looks good (green/blue) but
+# posterior predictive check is spiky and
+# normality of residuals is not normal at the right
+
+
+
+###############################################################
+### MODEL: decompS ~ w * n + g ----------------------------------
+model.decompS.wng.intadd.joa <- decomp.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>%
+  group_by(origSiteID) %>%
+  filter(origSiteID == "Joa") %>%
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.decompS.wng.intadd.joa = map(data, # runs model in each litte dataset
+                                       ~ lm(S ~
+                                              warming * Namount_kg_ha_y + grazing_lvl,
+                                            data = .x)))#,
+#result.decompS.wng.intadd.joa = map(model.decompS.wng.intadd.joa, tidy)) #%>%
+#unnest(result.decompS.wng.intadd.joa) #%>% # opens the nested dataframes
+# View()
+
+### MODEL: decompS ~ w * n + g - check model --------------------
+
+## check assumptions
+#check_model(model.decompS.wng.intadd.joa $ model.decompS.wng.intadd.joa[[1]])
+## all assumptions looks good
+
+
+
+###############################################################
+### MODEL: decompS ~ w + n * g ----------------------------------
+model.decompS.wng.addint.joa <- decomp.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>%
+  group_by(origSiteID) %>%
+  filter(origSiteID == "Joa") %>%
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.decompS.wng.addint.joa = map(data, # runs model in each litte dataset
+                                       ~ lm(S ~
+                                              warming + Namount_kg_ha_y * grazing_lvl,
+                                            data = .x)))#,
+#result.decompS.wng.addint.joa = map(model.decompS.wng.addint.joa, tidy)) #%>%
+#unnest(result.decompS.wng.addint.joa) #%>% # opens the nested dataframes
+# View()
+
+### MODEL: decompS ~ w + n * g - check model --------------------
+
+## check assumptions
+#check_model(model.decompS.wng.addint.joa $ model.decompS.wng.addint.joa[[1]])
+## looks good
+
+
+
+###############################################################
+### MODEL: decompS ~ w * g + n ----------------------------------
+model.decompS.wgn.intadd.joa <- decomp.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>%
+  group_by(origSiteID) %>%
+  filter(origSiteID == "Joa") %>%
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.decompS.wgn.intadd.joa = map(data, # runs model in each litte dataset
+                                       ~ lm(S ~
+                                              warming * grazing_lvl + Namount_kg_ha_y,
+                                            data = .x)))#,
+#result.decompS.wgn.intadd.joa = map(model.decompS.wgn.intadd.joa, tidy)) #%>%
+#unnest(result.decompS.wgn.intadd.joa) #%>% # opens the nested dataframes
+# View()
+
+### MODEL: decompS ~ w * g + n - check model --------------------
+
+## check assumptions
+#check_model(model.decompS.wgn.intadd.joa $ model.decompS.wgn.intadd.joa[[1]])
+
+###############################################################
+### compare models SUB ALPINE / JOA ---------------------------------
+model_comparison_decompS.joa <- compare_performance(
+  model.decompS.wng.add.joa$model.decompS.wng.add.joa[[1]],         # w + n + g
+  model.decompS.wng.addint.joa$model.decompS.wng.addint.joa[[1]],   # w + n * g
+  model.decompS.wng.intadd.joa$model.decompS.wng.intadd.joa[[1]],   # w * n + g
+  model.decompS.wgn.intadd.joa$model.decompS.wgn.intadd.joa[[1]],   # w * g + n
+  model.decompS.wng.int.joa$model.decompS.wng.int.joa[[1]]          # w * n * g
+)
+
+# plot.models.decompS.ng <-
+#   plot(model_comparison_decompS.joa)
+
+
+# making output of best model -----------------------------------
+# decompS ~ w * n + g
+options(Scipen = 100, digits = 4)
+## running model with result and unnest to create output
+output.model.decompS.joa <- decomp.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>%
+  group_by(origSiteID) %>% #
+  filter(origSiteID == "Joa") %>%
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.decompS.wng.add.joa = map(data, # runs model in each litte dataset
+                                    ~ lm(S ~
+                                           warming + Namount_kg_ha_y + grazing_lvl,
+                                         data = .x)),
+    result.decompS.wng.add.joa = map(model.decompS.wng.add.joa, tidy)) %>%
+  unnest(result.decompS.wng.add.joa) %>% # opens the nested dataframes
+  select(origSiteID, term, estimate, std.error, statistic, p.value)
+# View()
+
+## making clean and readable output for table ---------------------
+clean_output.model.decompS.joa <- output.model.decompS.joa %>%
+  mutate(term = case_when(
+    (term == "(Intercept)") ~ "Intercept (no N, no warming, no grazing)",
+    (term == "warmingWarming") ~ "Warming",
+    (term == "Namount_kg_ha_y") ~ "Nitrogen",
+    (term == "grazing_lvl") ~ "Grazing",
+    (term == "warmingWarming:Namount_kg_ha_y") ~ "Warming : Nitrogen",
+    (term == "warmingWarming:grazing_lvl") ~ "Warming : Grazing",
+    (term == "Namount_kg_ha_y:grazing_lvl") ~ "Nitrogen : Grazing",
+    (term == "warmingWarming:Namount_kg_ha_y:grazing_lvl") ~
+      "Warming : Nitrogen : Grazing"
+  )) %>%
+  mutate(origSiteID = case_when(
+    (origSiteID == "Lia") ~ "Alpine",
+    (origSiteID == "Joa") ~ "Sub-alpine"))
 
 
 ## figures ----------------------------------------------------
@@ -626,9 +989,9 @@ plot_teabags_war
 
 ## checking strange datapoint
 ## 1 WN1M 84 green is very low
-teabag.df %>% 
-  filter(origSiteID == "Lia",
-         grazing == "Medium",
-         mass_loss_proportion < 0.4,
-         tea_type == "green") %>% 
-  View()
+# teabag.df %>% 
+#   filter(origSiteID == "Lia",
+#          grazing == "Medium",
+#          mass_loss_proportion < 0.4,
+#          tea_type == "green") %>% 
+#   View()
