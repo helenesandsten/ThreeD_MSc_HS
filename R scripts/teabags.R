@@ -578,7 +578,7 @@ plot_teabags_amb <- teabag.df %>%
   scale_shape_manual(values = 21) +
   ylim(0.25, 1) +
   labs(title = "Mass loss of teabags (ambient)",
-       x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)),
+       x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)), 
        y = bquote(Mass~loss~proportion)) + 
   # geom_line() +
   geom_smooth(method = "lm") +
