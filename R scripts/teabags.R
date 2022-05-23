@@ -58,7 +58,10 @@ teabag.df <- teabag.raw.df %>%
          mass_loss_g = weight_loss_g, 
          mass_loss_g = preburial_weight_g - post_burial_weight_g,
   # calculating proportion of mass loss   
-         mass_loss_proportion = 1 - (post_burial_weight_g / preburial_weight_g))
+         mass_loss_proportion = 1 - (post_burial_weight_g / preburial_weight_g)) %>% 
+  # removing grazing level N because it is too different from other 
+  # levels to be included in analysis
+  filter(!grazing == "Natural")
   
 
 # depth_tb <- teabag.df %>% select(burial_depth_cm)
@@ -86,6 +89,43 @@ decomp.df <- teabag.df %>%
          predicted_labile_fraction_red = Hydrolysable_fraction_red * (1 - S),
          # decomposition rate 
          k = log(predicted_labile_fraction_red / (fraction_remaining_red - (1 - predicted_labile_fraction_red))) / incubation_time)
+
+
+## Models will be fitted for each dataset 
+
+## proportion mass loss green tea
+## Making dataset for alpine site
+tea.green.alp.df <- teabag.df %>% 
+  filter(origSiteID == "Lia") 
+## Making dataset for sub-alpine site 
+tea.green.sub.df <- teabag.df %>% 
+  filter(origSiteID == "Joa")  
+
+## proportion mass loss rooibos tea
+## Making dataset for alpine site
+tea.red.alp.df <- teabag.df %>% 
+  filter(origSiteID == "Lia") 
+## Making dataset for sub-alpine site 
+tea.red.sub.df <- teabag.df %>% 
+  filter(origSiteID == "Joa")
+
+## decomposition rate 
+## Making dataset for alpine site
+decomp.k.alp.df <- decomp.df %>% 
+  filter(origSiteID == "Lia") 
+# ## Making dataset for sub-alpine site 
+# decomp.k.sub.df <- decomp.df %>% 
+#   filter(origSiteID == "Joa") 
+
+## stabilizations factor 
+## Making dataset for alpine site
+decomp.s.alp.df <- decomp.df %>% 
+  filter(!is.na(S)) %>% 
+  filter(origSiteID == "Lia") 
+## Making dataset for sub-alpine site 
+decomp.s.sub.df <- decomp.df %>% 
+  filter(!is.na(S)) %>% 
+  filter(origSiteID == "Joa") 
 
 
 
