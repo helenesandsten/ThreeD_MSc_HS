@@ -90,6 +90,17 @@ soil.df <- soil.raw.df %>%
   filter(!grazing == "Natural")
 
 
+## Models will be fitted for each dataset 
+## Making dataset for alpine site
+soil.alp.df <- soil.df %>% 
+  filter(origSiteID == "Lia") 
+
+## Making dataset for sub-alpine site 
+soil.sub.df <- soil.df %>% 
+  filter(origSiteID == "Joa") 
+
+
+
 ## analysis -------------------------------------------------------
 
 # ### ------ MODELS FOR ALPINE / LIAHOVDEN ------------------------
