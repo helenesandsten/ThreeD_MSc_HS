@@ -221,7 +221,7 @@ check_model(mod.tea.red.wg.add.sub) #
 ##################################################################
 ## models decomposition rate k and stabilization factor S ---------
 options(na.action = "na.fail") 
-
+##################################################################
 ## models for decomposition rate k (only for alpine site)
 ## models for alpine site 
 fit_models_decomp_k_alp <-
@@ -237,10 +237,14 @@ mod.decomp.k.g.alp <-
   lm(k ~ grazing_lvl, 
      data = decomp.k.alp.df)
 # checking model assumptions
-check_model(mod.decomp.k.g.alp) #
+check_model(mod.decomp.k.g.alp) # little off
 
 ## 3
-
+mod.decomp.k.ng.int.alp <- 
+  lm(k ~ Namount_kg_ha_y * grazing_lvl, 
+     data = decomp.k.alp.df)
+# checking model assumptions
+check_model(mod.decomp.k.ng.int.alp) # ok (-)
 
 
 ## models for sub-alpine site
@@ -248,35 +252,62 @@ check_model(mod.decomp.k.g.alp) #
 #   lm(k ~ warming * Namount_kg_ha_y * grazing_lvl, data = decomp.k.sub.df)
 # dredge(fit_models_decomp_k_sub, rank = "AICc", extra = "adjR^2")
 
-
+##################################################################
 ## models for stabilization factor S
-## models for alpine site 
+## models for alpine site --------------------------------- 
 fit_models_decomp_s_alp <-
-  lm(S ~ warming * Namount_kg_ha_y * grazing_lvl, data = decomp.s.alp.df)
+  lm(S ~ warming * Namount_kg_ha_y * grazing_lvl, 
+     data = decomp.s.alp.df)
 dredge(fit_models_decomp_s_alp, rank = "AICc", extra = "adjR^2")
 
 ## 1 
-
+mod.decomp.s.w.alp <-
+  lm(S ~ warming, 
+     data = decomp.s.alp.df)
+# checking model assumptions
+check_model(mod.decomp.s.w.alp) # off
 
 ## 2
-
+mod.decomp.s.wn.add.alp <-
+  lm(S ~ warming + Namount_kg_ha_y, 
+     data = decomp.s.alp.df)
+# checking model assumptions
+check_model(mod.decomp.s.wn.add.alp) # ok
 
 ## 3
+mod.decomp.s.wg.add.alp <-
+  lm(S ~ warming + grazing_lvl, 
+     data = decomp.s.alp.df)
+# checking model assumptions
+check_model(mod.decomp.s.wg.add.alp) # ok
 
-
-## models for sub-alpine site
+## models for sub-alpine site ---------------------------------
 fit_models_decomp_s_sub <-
-  lm(S ~ warming * Namount_kg_ha_y * grazing_lvl, data = decomp.s.sub.df)
+  lm(S ~ warming * Namount_kg_ha_y * grazing_lvl, 
+     data = decomp.s.sub.df)
 dredge(fit_models_decomp_s_sub, rank = "AICc", extra = "adjR^2")
 
 ## 1 
-
+mod.decomp.s.w.sub <- 
+  lm(S ~ warming, 
+     data = decomp.s.sub.df)
+# checking model assumptions
+check_model(mod.decomp.s.w.sub) # litte off
+  
 
 ## 2
-
+mod.decomp.s.wn.add.sub <- 
+  lm(S ~ warming + Namount_kg_ha_y, 
+     data = decomp.s.sub.df)
+# checking model assumptions
+check_model(mod.decomp.s.wn.add.sub) # ok 
 
 ## 3
-
+mod.decomp.s.wg.add.sub <- 
+  lm(S ~ warming + grazing_lvl, 
+     data = decomp.s.sub.df)
+# checking model assumptions
+check_model(mod.decomp.s.wg.add.sub) # ok 
 
 ##################################################################
 ##################################################################
