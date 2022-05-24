@@ -112,6 +112,7 @@ tea.red.sub.df <- teabag.df %>%
 ## decomposition rate 
 ## Making dataset for alpine site
 decomp.k.alp.df <- decomp.df %>% 
+  filter(!is.na(k)) %>% 
   filter(origSiteID == "Lia") 
 # ## Making dataset for sub-alpine site 
 # decomp.k.sub.df <- decomp.df %>% 
