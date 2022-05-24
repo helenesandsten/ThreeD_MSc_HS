@@ -30,6 +30,44 @@ mod.agb.wng.int.lia <-
 check_model(mod.agb.wng.int.lia) # ok 
 
 
+# making output of best model 
+# agb ~ w * n + g
+options(scipen = 100, digits = 4)
+## running model with result and unnest to create output
+output.model.agb.alp <- agb.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  filter(!grazing == "Natural") %>%
+  group_by(origSiteID) %>% #
+  filter(origSiteID == "Lia") %>%
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.agb.wng.int.alp = map(data, # runs model in each litte dataset
+                                ~ lm(biomass_m2 ~
+                                       warming * Namount_kg_ha_y * grazing_lvl,
+                                     data = .x)),
+result.agb.wng.int.alp = map(model.agb.wng.int.alp, tidy)) %>%
+unnest(result.agb.wng.int.alp) %>% # opens the nested dataframes
+  select(origSiteID, term, estimate, std.error, statistic, p.value)
+# View()
+
+## making clean and readable output for table ---------------------
+clean_output.model.agb.alp <- output.model.agb.alp %>%
+  mutate(term = case_when(
+    (term == "(Intercept)") ~ "Intercept (no N, no warming, no grazing)",
+    (term == "warmingWarming") ~ "Warming",
+    (term == "Namount_kg_ha_y") ~ "Nitrogen",
+    (term == "grazing_lvl") ~ "Grazing",
+    (term == "warmingWarming:Namount_kg_ha_y") ~ "Warming : Nitrogen",
+    (term == "warmingWarming:grazing_lvl") ~ "Warming : Grazing",
+    (term == "Namount_kg_ha_y:grazing_lvl") ~ "Nitrogen : Grazing",
+    (term == "warmingWarming:Namount_kg_ha_y:grazing_lvl") ~
+      "Warming : Nitrogen : Grazing"
+  )) %>%
+  mutate(origSiteID = case_when(
+    (origSiteID == "Lia") ~ "Alpine",
+    (origSiteID == "Joa") ~ "Sub-alpine"))
+
+
 ## models for sub-alpine site ------------------------------------- 
 fit_models_agb_sub <- 
   lm(biomass_m2 ~ warming * Namount_kg_ha_y * grazing_lvl, 
@@ -57,6 +95,40 @@ mod.agb.wng.int.sub <-
      data = agb.sub.df)
 # checking model assumptions 
 check_model(mod.agb.wng.int.sub) # looks ok 
+
+## running model with result and unnest to create output
+output.model.agb.sub <- agb.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  group_by(origSiteID) %>% #
+  filter(origSiteID == "Joa") %>%
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.agb.wng.int.sub = map(data, # runs model in each litte dataset
+                                ~ lm(biomass_m2 ~
+                                       warming * Namount_kg_ha_y * grazing_lvl,
+                                     data = .x)),
+    result.agb.wng.int.sub = map(model.agb.wng.int.sub, tidy)) %>%
+  unnest(result.agb.wng.int.sub) %>% # opens the nested dataframes
+  select(origSiteID, term, estimate, std.error, statistic, p.value)
+# View()
+
+## making clean and readable output for table ---------------------
+clean_output.model.agb.sub <- output.model.agb.sub %>%
+  mutate(term = case_when(
+    (term == "(Intercept)") ~ "Intercept (no N, no warming, no grazing)",
+    (term == "warmingWarming") ~ "Warming",
+    (term == "Namount_kg_ha_y") ~ "Nitrogen",
+    (term == "grazing_lvl") ~ "Grazing",
+    (term == "warmingWarming:Namount_kg_ha_y") ~ "Warming : Nitrogen",
+    (term == "warmingWarming:grazing_lvl") ~ "Warming : Grazing",
+    (term == "Namount_kg_ha_y:grazing_lvl") ~ "Nitrogen : Grazing",
+    (term == "warmingWarming:Namount_kg_ha_y:grazing_lvl") ~
+      "Warming : Nitrogen : Grazing"
+  )) %>%
+  mutate(origSiteID = case_when(
+    (origSiteID == "Lia") ~ "Alpine",
+    (origSiteID == "Joa") ~ "Sub-alpine"))
+
 
 ##################################################################
 ##################################################################
@@ -88,6 +160,37 @@ mod.roots.w.alp <-
 check_model(mod.roots.w.alp) # little off
 
 
+output.model.roots.alp <- roots.df %>%
+  # removing grazing level N to reduce degrees of freedom
+  group_by(origSiteID) %>% #
+  filter(origSiteID == "Lia") %>%
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.roots.wn.int.alp = map(data, # runs model in each litte dataset
+                                ~ lm(root_mass_cm3 ~ warming * Namount_kg_ha_y,
+                                     data = .x)),
+    result.roots.wn.int.alp = map(model.roots.wn.int.alp, tidy)) %>%
+  unnest(result.roots.wn.int.alp) %>% # opens the nested dataframes
+  select(origSiteID, term, estimate, std.error, statistic, p.value)
+# View()
+
+## making clean and readable output for table ---------------------
+clean_output.model.roots.alp <- output.model.roots.alp %>%
+  mutate(term = case_when(
+    (term == "(Intercept)") ~ "Intercept (no N, no warming, no grazing)",
+    (term == "warmingWarming") ~ "Warming",
+    (term == "Namount_kg_ha_y") ~ "Nitrogen",
+    (term == "grazing_lvl") ~ "Grazing",
+    (term == "warmingWarming:Namount_kg_ha_y") ~ "Warming : Nitrogen",
+    (term == "warmingWarming:grazing_lvl") ~ "Warming : Grazing",
+    (term == "Namount_kg_ha_y:grazing_lvl") ~ "Nitrogen : Grazing",
+    (term == "warmingWarming:Namount_kg_ha_y:grazing_lvl") ~
+      "Warming : Nitrogen : Grazing"
+  )) %>%
+  mutate(origSiteID = case_when(
+    (origSiteID == "Lia") ~ "Alpine",
+    (origSiteID == "Joa") ~ "Sub-alpine"))
+
 ## models for sub-alpine site ------------------------------------- 
 fit_models_roots_sub <- 
   lm(root_mass_cm3 ~ warming * Namount_kg_ha_y * grazing_lvl, 
@@ -114,6 +217,36 @@ mod.roots.wng.add.sub <-
 # checking model assumptions 
 check_model(mod.roots.wng.add.sub) # 
 
+output.model.roots.sub <- roots.df %>%
+group_by(origSiteID) %>% #
+  filter(origSiteID == "Joa") %>%
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.roots.ng.add.sub = map(data, # runs model in each litte dataset
+                                  ~ lm(root_mass_cm3 ~
+                                         Namount_kg_ha_y + grazing_lvl,
+                                       data = .x)),
+    result.roots.ng.add.sub = map(model.roots.ng.add.sub, tidy)) %>%
+  unnest(result.roots.ng.add.sub) %>% # opens the nested dataframes
+  select(origSiteID, term, estimate, std.error, statistic, p.value)
+# View()
+
+## making clean and readable output for table ---------------------
+clean_output.model.roots.sub <- output.model.roots.sub %>%
+  mutate(term = case_when(
+    (term == "(Intercept)") ~ "Intercept (no N, no warming, no grazing)",
+    (term == "warmingWarming") ~ "Warming",
+    (term == "Namount_kg_ha_y") ~ "Nitrogen",
+    (term == "grazing_lvl") ~ "Grazing",
+    (term == "warmingWarming:Namount_kg_ha_y") ~ "Warming : Nitrogen",
+    (term == "warmingWarming:grazing_lvl") ~ "Warming : Grazing",
+    (term == "Namount_kg_ha_y:grazing_lvl") ~ "Nitrogen : Grazing",
+    (term == "warmingWarming:Namount_kg_ha_y:grazing_lvl") ~
+      "Warming : Nitrogen : Grazing"
+  )) %>%
+  mutate(origSiteID = case_when(
+    (origSiteID == "Lia") ~ "Alpine",
+    (origSiteID == "Joa") ~ "Sub-alpine"))
 
 ##################################################################
 ##################################################################
@@ -121,7 +254,7 @@ check_model(mod.roots.wng.add.sub) #
 ### DECOMPOSITION ------------------------------------------------
 ## models for mass loss of tea -----------------------------------
 ##################################################################
-## models for mass loss of green tea
+## models for mass loss of green tea --------------------------
 ## models for alpine site 
 fit_models_tea_green_alp <- 
   lm(mass_loss_proportion ~ warming * Namount_kg_ha_y * grazing_lvl, 
@@ -170,7 +303,7 @@ mod.tea.green.wg.add.sub <-
 check_model(mod.tea.green.wg.add.sub) # little off
 
 ##################################################################
-## models for mass loss of rooibos tea
+## models for mass loss of rooibos tea --------------------------
 ## models for alpine site 
 fit_models_tea_red_alp <- 
   lm(mass_loss_proportion ~ warming * Namount_kg_ha_y * grazing_lvl, 
@@ -246,6 +379,37 @@ mod.decomp.k.ng.int.alp <-
 # checking model assumptions
 check_model(mod.decomp.k.ng.int.alp) # ok (-)
 
+## model output
+output.model.decomp.k.alp <- decomp.k.alp.df %>%
+  group_by(origSiteID) %>% #
+  filter(origSiteID == "Lia") %>%
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.decomp.k.ng.int.alp = map(data, # runs model in each litte dataset
+                                 ~ lm(k ~ Namount_kg_ha_y * grazing_lvl,
+                                      data = .x)),
+    result.decomp.k.ng.int.alp = map(model.decomp.k.ng.int.alp, tidy)) %>%
+  unnest(result.decomp.k.ng.int.alp) %>% # opens the nested dataframes
+  select(origSiteID, term, estimate, std.error, statistic, p.value)
+# View()
+
+## making clean and readable output for table ---------------------
+clean_output.model.decomp.k.alp <- output.model.decomp.k.alp %>%
+  mutate(term = case_when(
+    (term == "(Intercept)") ~ "Intercept (no N, no warming, no grazing)",
+    (term == "warmingWarming") ~ "Warming",
+    (term == "Namount_kg_ha_y") ~ "Nitrogen",
+    (term == "grazing_lvl") ~ "Grazing",
+    (term == "warmingWarming:Namount_kg_ha_y") ~ "Warming : Nitrogen",
+    (term == "warmingWarming:grazing_lvl") ~ "Warming : Grazing",
+    (term == "Namount_kg_ha_y:grazing_lvl") ~ "Nitrogen : Grazing",
+    (term == "warmingWarming:Namount_kg_ha_y:grazing_lvl") ~
+      "Warming : Nitrogen : Grazing"
+  )) %>%
+  mutate(origSiteID = case_when(
+    (origSiteID == "Lia") ~ "Alpine",
+    (origSiteID == "Joa") ~ "Sub-alpine"))
+
 
 ## models for sub-alpine site
 # fit_models_decomp_k_sub <-
@@ -281,6 +445,37 @@ mod.decomp.s.wg.add.alp <-
 # checking model assumptions
 check_model(mod.decomp.s.wg.add.alp) # ok
 
+## model output
+output.model.decomp.s.alp <- decomp.s.alp.df %>%
+  group_by(origSiteID) %>% #
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.decomp.s.wn.add.alp = map(data, # runs model in each litte dataset
+                                    ~ lm(S ~ warming + Namount_kg_ha_y,
+                                         data = .x)),
+    result.decomp.s.wn.add.alp = map(model.decomp.s.wn.add.alp, tidy)) %>%
+  unnest(result.decomp.s.wn.add.alp) %>% # opens the nested dataframes
+  select(origSiteID, term, estimate, std.error, statistic, p.value)
+# View()
+
+## making clean and readable output for table ---------------------
+clean_output.model.decomp.s.alp <- output.model.decomp.s.alp %>%
+  mutate(term = case_when(
+    (term == "(Intercept)") ~ "Intercept (no N, no warming, no grazing)",
+    (term == "warmingWarming") ~ "Warming",
+    (term == "Namount_kg_ha_y") ~ "Nitrogen",
+    (term == "grazing_lvl") ~ "Grazing",
+    (term == "warmingWarming:Namount_kg_ha_y") ~ "Warming : Nitrogen",
+    (term == "warmingWarming:grazing_lvl") ~ "Warming : Grazing",
+    (term == "Namount_kg_ha_y:grazing_lvl") ~ "Nitrogen : Grazing",
+    (term == "warmingWarming:Namount_kg_ha_y:grazing_lvl") ~
+      "Warming : Nitrogen : Grazing"
+  )) %>%
+  mutate(origSiteID = case_when(
+    (origSiteID == "Lia") ~ "Alpine",
+    (origSiteID == "Joa") ~ "Sub-alpine"))
+
+
 ## models for sub-alpine site ---------------------------------
 fit_models_decomp_s_sub <-
   lm(S ~ warming * Namount_kg_ha_y * grazing_lvl, 
@@ -308,6 +503,37 @@ mod.decomp.s.wg.add.sub <-
      data = decomp.s.sub.df)
 # checking model assumptions
 check_model(mod.decomp.s.wg.add.sub) # ok 
+
+
+## model output
+output.model.decomp.s.sub <- decomp.s.sub.df %>%
+  group_by(origSiteID) %>% #
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.decomp.s.wn.add.sub = map(data, # runs model in each litte dataset
+                                    ~ lm(S ~ warming + Namount_kg_ha_y,
+                                         data = .x)),
+    result.decomp.s.wn.add.sub = map(model.decomp.s.wn.add.sub, tidy)) %>%
+  unnest(result.decomp.s.wn.add.sub) %>% # opens the nested dataframes
+  select(origSiteID, term, estimate, std.error, statistic, p.value)
+# View()
+
+## making clean and readable output for table ---------------------
+clean_output.model.decomp.s.sub <- output.model.decomp.s.sub %>%
+  mutate(term = case_when(
+    (term == "(Intercept)") ~ "Intercept (no N, no warming, no grazing)",
+    (term == "warmingWarming") ~ "Warming",
+    (term == "Namount_kg_ha_y") ~ "Nitrogen",
+    (term == "grazing_lvl") ~ "Grazing",
+    (term == "warmingWarming:Namount_kg_ha_y") ~ "Warming : Nitrogen",
+    (term == "warmingWarming:grazing_lvl") ~ "Warming : Grazing",
+    (term == "Namount_kg_ha_y:grazing_lvl") ~ "Nitrogen : Grazing",
+    (term == "warmingWarming:Namount_kg_ha_y:grazing_lvl") ~
+      "Warming : Nitrogen : Grazing"
+  )) %>%
+  mutate(origSiteID = case_when(
+    (origSiteID == "Lia") ~ "Alpine",
+    (origSiteID == "Joa") ~ "Sub-alpine"))
 
 ##################################################################
 ##################################################################
@@ -341,6 +567,36 @@ mod.soil.wg.add.alp <-
 # checking model assumptions 
 check_model(mod.soil.wg.add.alp) # little off
 
+## model output
+output.model.soil.alp <- soil.alp.df %>%
+  group_by(origSiteID) %>% #
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.soil.wn.add.alp = map(data, # runs model in each litte dataset
+                                    ~ lm(prop_org_mat ~ warming + Namount_kg_ha_y,
+                                         data = .x)),
+    result.soil.wn.add.alp = map(model.soil.wn.add.alp, tidy)) %>%
+  unnest(result.soil.wn.add.alp) %>% # opens the nested dataframes
+  select(origSiteID, term, estimate, std.error, statistic, p.value)
+# View()
+
+## making clean and readable output for table ---------------------
+clean_output.model.soil.alp <- output.model.soil.alp %>%
+  mutate(term = case_when(
+    (term == "(Intercept)") ~ "Intercept (no N, no warming, no grazing)",
+    (term == "warmingWarming") ~ "Warming",
+    (term == "Namount_kg_ha_y") ~ "Nitrogen",
+    (term == "grazing_lvl") ~ "Grazing",
+    (term == "warmingWarming:Namount_kg_ha_y") ~ "Warming : Nitrogen",
+    (term == "warmingWarming:grazing_lvl") ~ "Warming : Grazing",
+    (term == "Namount_kg_ha_y:grazing_lvl") ~ "Nitrogen : Grazing",
+    (term == "warmingWarming:Namount_kg_ha_y:grazing_lvl") ~
+      "Warming : Nitrogen : Grazing"
+  )) %>%
+  mutate(origSiteID = case_when(
+    (origSiteID == "Lia") ~ "Alpine",
+    (origSiteID == "Joa") ~ "Sub-alpine"))
+
 
 ## models for sub-alpine site
 fit_models_soil_sub <-
@@ -368,4 +624,35 @@ mod.soil.wg.add.sub <-
      data = soil.sub.df)
 # checking model assumptions 
 check_model(mod.soil.wg.add.sub) # ok 
+
+
+## model output
+output.model.soil.sub <- soil.sub.df %>%
+  group_by(origSiteID) %>% #
+  nest() %>% # makes little dataframes inside my data, closed
+  mutate(
+    model.soil.wg.int.sub = map(data, # runs model in each litte dataset
+                                    ~ lm(prop_org_mat ~ warming * grazing_lvl,
+                                         data = .x)),
+    result.soil.wg.int.sub = map(model.soil.wg.int.sub, tidy)) %>%
+  unnest(result.soil.wg.int.sub) %>% # opens the nested dataframes
+  select(origSiteID, term, estimate, std.error, statistic, p.value)
+# View()
+
+## making clean and readable output for table ---------------------
+clean_output.model.soil.sub <- output.model.soil.sub %>%
+  mutate(term = case_when(
+    (term == "(Intercept)") ~ "Intercept (no N, no warming, no grazing)",
+    (term == "warmingWarming") ~ "Warming",
+    (term == "Namount_kg_ha_y") ~ "Nitrogen",
+    (term == "grazing_lvl") ~ "Grazing",
+    (term == "warmingWarming:Namount_kg_ha_y") ~ "Warming : Nitrogen",
+    (term == "warmingWarming:grazing_lvl") ~ "Warming : Grazing",
+    (term == "Namount_kg_ha_y:grazing_lvl") ~ "Nitrogen : Grazing",
+    (term == "warmingWarming:Namount_kg_ha_y:grazing_lvl") ~
+      "Warming : Nitrogen : Grazing"
+  )) %>%
+  mutate(origSiteID = case_when(
+    (origSiteID == "Lia") ~ "Alpine",
+    (origSiteID == "Joa") ~ "Sub-alpine"))
 
