@@ -19,15 +19,16 @@ options(na.action = "na.fail")
 fit_models_agb_alp <- 
   lm(biomass_m2 ~ warming * Namount_kg_ha_y * grazing_lvl, 
      data = agb.alp.df) 
+options(scipen = 100, digits = 4)
 dredge(fit_models_agb_alp, rank = "AICc", extra = c("R^2", "adjR^2")) 
 
 ## best models from dredge 
 ##1 , 2, 3
-mod.agb.wng.int.lia <- 
+mod.agb.wng.int.alp <- 
   lm(biomass_m2 ~ warming * Namount_kg_ha_y * grazing_lvl, 
      data = agb.alp.df)
 # checking model assumptions 
-check_model(mod.agb.wng.int.lia) # ok 
+check_model(mod.agb.wng.int.alp) # ok 
 
 
 # making output of best model 
@@ -72,6 +73,7 @@ clean_output.model.agb.alp <- output.model.agb.alp %>%
 fit_models_agb_sub <- 
   lm(biomass_m2 ~ warming * Namount_kg_ha_y * grazing_lvl, 
      data = agb.sub.df) 
+options(scipen = 100, digits = 4)
 dredge(fit_models_agb_sub, rank = "AICc", extra = c("R^2", "adjR^2")) 
 
 ## best models from dredge 
@@ -273,12 +275,7 @@ mod.tea.green.w.alp <-
 # checking model assumptions
 check_model(mod.tea.green.w.alp) # not good
 
-## 3
-mod.tea.green.n.alp <-
-  lm(mass_loss_proportion ~ Namount_kg_ha_y,
-     data = tea.green.alp.df)
-# checking model assumptions
-check_model(mod.tea.green.n.alp) # not good
+c
 
 
 ## models for sub-alpine site 
@@ -553,7 +550,8 @@ clean_output.model.decomp.s.sub <- output.model.decomp.s.sub %>%
 fit_models_soil_alp <-
   lm(prop_org_mat ~ warming * Namount_kg_ha_y * grazing_lvl, 
      data = soil.alp.df)
-dredge(fit_models_soil_alp, rank = "AICc", extra = "adjR^2")
+options(scipen = 100, digits = 4)
+dredge(fit_models_soil_alp, rank = "AICc", extra = c("R^2", "adjR^2"))
 
 ## 1 
 mod.soil.w.alp <-
@@ -611,8 +609,8 @@ clean_output.model.soil.alp <- output.model.soil.alp %>%
 fit_models_soil_sub <-
   lm(prop_org_mat ~ warming * Namount_kg_ha_y * grazing_lvl, 
      data = soil.sub.df)
-dredge(fit_models_soil_sub, rank = "AICc", extra = "adjR^2")
-
+options(scipen = 100, digits = 4)
+dredge(fit_models_soil_sub, rank = "AICc", extra = c("R^2", "adjR^2"))
 ## 1 
 mod.soil.w.sub <-
   lm(prop_org_mat ~ warming, 
