@@ -19,7 +19,7 @@ options(na.action = "na.fail")
 fit_models_agb_alp <- 
   lm(biomass_m2 ~ warming * Namount_kg_ha_y * grazing_lvl, 
      data = agb.alp.df) 
-dredge(fit_models_agb_alp, rank = "AICc", extra = "adjR^2") 
+dredge(fit_models_agb_alp, rank = "AICc", extra = c("R^2", "adjR^2")) 
 
 ## best models from dredge 
 ##1 , 2, 3
@@ -72,7 +72,7 @@ clean_output.model.agb.alp <- output.model.agb.alp %>%
 fit_models_agb_sub <- 
   lm(biomass_m2 ~ warming * Namount_kg_ha_y * grazing_lvl, 
      data = agb.sub.df) 
-dredge(fit_models_agb_sub, rank = "AICc", extra = "adjR^2") 
+dredge(fit_models_agb_sub, rank = "AICc", extra = c("R^2", "adjR^2")) 
 
 ## best models from dredge 
 ## 1 
@@ -139,7 +139,8 @@ clean_output.model.agb.sub <- output.model.agb.sub %>%
 fit_models_roots_alp <- 
   lm(root_mass_cm3 ~ warming * Namount_kg_ha_y * grazing_lvl, 
      data = roots.alp.df) 
-dredge(fit_models_roots_alp, rank = "AICc", extra = "adjR^2") 
+options(scipen = 100, digits = 4)
+dredge(fit_models_roots_alp, rank = "AICc", extra = c("R^2", "adjR^2")) 
 
 ## best models from dredge 
 ## 1 
@@ -195,7 +196,8 @@ clean_output.model.roots.alp <- output.model.roots.alp %>%
 fit_models_roots_sub <- 
   lm(root_mass_cm3 ~ warming * Namount_kg_ha_y * grazing_lvl, 
      data = roots.sub.df) 
-dredge(fit_models_roots_sub, rank = "AICc", extra = "adjR^2") 
+options(scipen = 100, digits = 4)
+dredge(fit_models_roots_sub, rank = "AICc", extra = c("R^2", "adjR^2"))
 
 ## 1 
 mod.roots.ng.add.sub <- 
@@ -259,8 +261,8 @@ clean_output.model.roots.sub <- output.model.roots.sub %>%
 fit_models_tea_green_alp <- 
   lm(mass_loss_proportion ~ warming * Namount_kg_ha_y * grazing_lvl, 
      data = tea.green.alp.df) 
-dredge(fit_models_tea_green_alp, rank = "AICc", extra = "adjR^2") 
-
+options(scipen = 100, digits = 4)
+dredge(fit_models_tea_green_alp, rank = "AICc", extra = c("R^2", "adjR^2"))
 ## 1
 ## no model
 
@@ -283,7 +285,9 @@ check_model(mod.tea.green.n.alp) # not good
 fit_models_tea_green_sub <- 
   lm(mass_loss_proportion ~ warming * Namount_kg_ha_y * grazing_lvl, 
      data = tea.green.sub.df) 
-dredge(fit_models_tea_green_sub, rank = "AICc", extra = "adjR^2")  
+options(scipen = 100, digits = 4)
+dredge(fit_models_tea_green_sub, rank = "AICc", extra = c("R^2", "adjR^2"))
+
 
 ## 1 
 mod.tea.green.w.sub <- 
@@ -308,7 +312,8 @@ check_model(mod.tea.green.wg.add.sub) # little off
 fit_models_tea_red_alp <- 
   lm(mass_loss_proportion ~ warming * Namount_kg_ha_y * grazing_lvl, 
      data = tea.red.alp.df) 
-dredge(fit_models_tea_red_alp, rank = "AICc", extra = "adjR^2") 
+options(scipen = 100, digits = 4)
+dredge(fit_models_tea_red_alp, rank = "AICc", extra = c("R^2", "adjR^2"))
 
 ## 1
 ## no model
@@ -332,7 +337,8 @@ check_model(mod.tea.red.n.alp) #
 fit_models_tea_red_sub <- 
   lm(mass_loss_proportion ~ warming * Namount_kg_ha_y * grazing_lvl, 
      data = tea.red.sub.df) 
-dredge(fit_models_tea_red_sub, rank = "AICc", extra = "adjR^2")  
+options(scipen = 100, digits = 4)
+dredge(fit_models_tea_red_sub, rank = "AICc", extra = c("R^2", "adjR^2"))
 
 ## 1
 mod.tea.red.w.sub <- 
@@ -360,7 +366,8 @@ options(na.action = "na.fail")
 fit_models_decomp_k_alp <-
   lm(k ~ warming * Namount_kg_ha_y * grazing_lvl, 
      data = decomp.k.alp.df)
-dredge(fit_models_decomp_k_alp, rank = "AICc", extra = "adjR^2")
+options(scipen = 100, digits = 4)
+dredge(fit_models_decomp_k_alp, rank = "AICc", extra = c("R^2", "adjR^2"))
 
 ## 1 
 ## no model
@@ -422,7 +429,8 @@ clean_output.model.decomp.k.alp <- output.model.decomp.k.alp %>%
 fit_models_decomp_s_alp <-
   lm(S ~ warming * Namount_kg_ha_y * grazing_lvl, 
      data = decomp.s.alp.df)
-dredge(fit_models_decomp_s_alp, rank = "AICc", extra = "adjR^2")
+options(scipen = 100, digits = 4)
+dredge(fit_models_decomp_s_alp, rank = "AICc", extra = c("R^2", "adjR^2"))
 
 ## 1 
 mod.decomp.s.w.alp <-
@@ -480,7 +488,8 @@ clean_output.model.decomp.s.alp <- output.model.decomp.s.alp %>%
 fit_models_decomp_s_sub <-
   lm(S ~ warming * Namount_kg_ha_y * grazing_lvl, 
      data = decomp.s.sub.df)
-dredge(fit_models_decomp_s_sub, rank = "AICc", extra = "adjR^2")
+options(scipen = 100, digits = 4)
+dredge(fit_models_decomp_s_sub, rank = "AICc", extra = c("R^2", "adjR^2"))
 
 ## 1 
 mod.decomp.s.w.sub <- 
