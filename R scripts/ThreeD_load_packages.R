@@ -13,6 +13,7 @@ library("knitr")
 library("kableExtra")
 library("targets")
 library("tarchetypes")
+library("MuMIn")
 
 #library("writexl")
 #devtools::install_github("Between-the-Fjords/dataDownloader")
