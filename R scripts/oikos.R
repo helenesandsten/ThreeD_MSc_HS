@@ -97,29 +97,32 @@ soil.df_NEW <- soil.df %>%
 par(bg="transparent")
 plot_soil_oikos <- soil.df_NEW %>% 
   group_by(Namount_kg_ha_y, origSiteID_new, warming, grazing) %>% 
-  filter(!grazing == "Natural") %>%
-  summarise(prop_org_mat = mean(prop_org_mat)) %>% 
+  # filter(!grazing == "Natural") %>%
+  # summarise(prop_org_mat = sum(prop_org_mat)) %>% 
   ggplot(mapping = aes(x = log(Namount_kg_ha_y +1), 
                        y = prop_org_mat, 
                        color = warming,
-                       linetype = warming,
+                       fill = warming,
+                       #linetype = warming,
                        shape = warming
   )) +
   geom_point(size = 4) + 
-  theme_minimal(base_size = 30) + 
+  #theme_void(base_size = 30) +
+  theme_minimal(base_size = 30) +
   theme(legend.title = element_blank(),
         legend.position = "none",
         panel.background = element_rect(fill = "transparent"),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(), # element_line(color = "hotpink"),
+        panel.grid.minor = element_blank(), # element_line(color = "blue"), 
         plot.background = element_rect(fill = "transparent", color = NA)) +
   scale_size(guide = "none") +
-  scale_color_manual(values = colors_w_oikos) + 
-  scale_linetype_manual(values = c("longdash", "solid")) + 
-  scale_shape_manual(values = c(15, 16)) + 
+  scale_color_manual(values = colors_oikos) + 
+  scale_fill_manual(values = colors_oikos) + 
+  scale_shape_manual(values = c(21, 25)) + 
+ # scale_linetype_manual(values = c("longdash", "solid")) + 
   labs(title = "", 
-       x = bquote(x), 
-       y = bquote(y)) + 
+       x = bquote(.), 
+       y = bquote(.)) + 
   facet_grid(origSiteID_new ~ grazing) +
   geom_smooth(method = "lm", size = 2) 
 plot_soil_oikos
