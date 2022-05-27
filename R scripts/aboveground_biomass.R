@@ -7,7 +7,6 @@ source("R scripts/MSc_aesthetics.R")
 ## importing data -----------------------------------
 agb.raw.df <- read_csv("Data/THREE-D_clean_biomass_2020-2021.csv")
 
-
 ## checking for missing biomass (forbs/graminoids)
 # agb.biomasscheck.df <- agb.raw.df %>%
 #   mutate(biomass_m2 = ((biomass / area_cm2) * 10000)) %>% 
@@ -70,6 +69,20 @@ agb.df <- agb.raw.df %>%
                                  (grazing == "Medium") ~ 2,
                                  (grazing == "Intensive") ~ 4)) 
 
+## checking plot for
+# check_agb <- agb.df %>%  
+#   group_by(origSiteID, grazing, biomass_m2, Nlevel, warming, turfID) %>% 
+#   select(origSiteID, grazing, biomass_m2, Nlevel, warming, turfID) %>% 
+#   summarise(biomass_m2 = sum(biomass_m2)) %>%
+#   filter(
+#     origSiteID == "Lia",
+#     grazing == "Control",
+#     Nlevel < 4,
+#     warming == "Warming"#,
+#     # turfID == "29 WN3C 106"
+#          ) 
+  
+
 
 ## Models will be fitted for each dataset 
 ## Making dataset for alpine site
@@ -88,12 +101,12 @@ agb.sub.df <- agb.df %>%
   
 
 ## plot aboveground biomass ~ w, n, g
-plot_agb <- agb.df %>% 
+plot_agb_cmi <- agb.df %>% 
   group_by(Namount_kg_ha_y, origSiteID, warming, grazing, Nlevel, turfID) %>% 
   mutate(origSiteID = case_when(
     (origSiteID == "Lia") ~ "Alpine",
     (origSiteID == "Joa") ~ "Sub-alpine")) %>% 
-  # filter(!grazing == "Natural") %>%
+  filter(!grazing == "Natural") %>%
   summarise(biomass_m2 = sum(biomass_m2)) %>% 
   ggplot(mapping = aes(x = log(Namount_kg_ha_y +1), 
                        y = biomass_m2, 
@@ -116,9 +129,9 @@ plot_agb <- agb.df %>%
        y = bquote(Biomass~(g~m^-2))) + 
   facet_grid(origSiteID ~ grazing) +
   geom_smooth(method = "lm", size = 1)
-plot_agb
+plot_agb_cmi
 
-plot_agb <- agb.df %>% 
+plot_agb_all <- agb.df %>% 
   group_by(Namount_kg_ha_y, origSiteID, warming, grazing, Nlevel, turfID) %>% 
   mutate(origSiteID = case_when(
     (origSiteID == "Lia") ~ "Alpine",
@@ -140,14 +153,16 @@ plot_agb <- agb.df %>%
   scale_color_manual(values = colors_w) + 
   scale_fill_manual(values = colors_w) + 
   scale_shape_manual(values = c(21, 25)) + 
+  #geom_hline(yintercept = 300, alpha = 0.5) +
   #scale_linetype_manual(values = c("longdash", "solid")) + 
   labs(title = "", 
        x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)), 
        y = bquote(Biomass~(g~m^-2))) + 
-  facet_grid(origSiteID ~ grazing) +
-  geom_smooth(method = "lm", size = 1)
-plot_agb_all
+  facet_grid(origSiteID ~ grazing) + 
+  geom_smooth(method = "lm", size = 1) 
+plot_agb_all 
 
+  
 # ggsave('plot_msc_agb.png', 
 #        plot_agb, 
 #        bg='transparent')
