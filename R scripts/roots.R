@@ -32,19 +32,22 @@ mutate(dateRIC_washed = ymd(dateRIC_washed),
                                  (grazing == "Intensive") ~ 4)) %>% 
   left_join(NitrogenDictionary, by = "Nlevel") %>% 
   mutate(Namount_kg_ha_y = log(Namount_kg_ha_y +1)) %>% 
-  mutate(days_buried = recover_date_2021 - burial_date) %>% 
-  # removing grazing level N because it is too different from other 
-  # levels to be included in analysis
-  filter(!grazing == "Natural")
+  mutate(days_buried = recover_date_2021 - burial_date) 
 
 
 ## Models will be fitted for each dataset 
 ## Making dataset for alpine site
 roots.alp.df <- roots.df %>% 
+  # removing grazing level N because it is too different from other 
+  # levels to be included in analysis
+  filter(!grazing == "Natural") %>% 
   filter(origSiteID == "Lia") 
 
 ## Making dataset for sub-alpine site 
 roots.sub.df <- roots.df %>% 
+  # removing grazing level N because it is too different from other 
+  # levels to be included in analysis
+  filter(!grazing == "Natural") %>% 
   filter(origSiteID == "Joa")   
 
 
@@ -68,7 +71,7 @@ plot_bgb <- roots.df %>%
                        shape = warming)
   ) +
   geom_point(size = 2) + 
-  theme_minimal(base_size = 16) + 
+  theme_minimal(base_size = 12) + 
   theme(legend.title = element_blank(),
         legend.position = "bottom", 
         legend.box = "horizontal") +
@@ -76,33 +79,15 @@ plot_bgb <- roots.df %>%
   scale_fill_manual(values = colors_w) + 
   scale_shape_manual(values = c(21, 25)) + 
   #scale_linetype_manual(values = c("longdash", "solid")) + 
-  labs(title = "Belowground productivity",
+  labs(title = "",
        x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)),
        y = bquote(Root~mass~(g/cm^3))) +
   facet_grid(origSiteID ~ grazing) +
   geom_smooth(method = "lm", size = 1)
 plot_bgb
 
-ggsave('plot_msc_bgb.png', 
-       plot_bgb, 
-       bg='transparent')
-
-# # plot roots ~ grazing
-# labels_g <- c("Control", "Intensive", "Medium", "Natural")
-# 
-# plot_roots_g <- roots.df %>%
-#   filter(warming == "Ambient") %>%
-#   filter(Nlevel == 1 & 2 & 3) %>%
-#   ggplot(mapping = aes(x = grazing, y = root_mass_g, fill = grazing)) +
-#   geom_boxplot() +
-#   theme_minimal(base_size = 20) +
-#   labs(title = "Effect of grazing on root growth",
-#        x = "Grazing", y = "Root mass (g)") +
-#   scale_x_discrete(labels = labels_g) +
-#   theme(legend.position = "none") +
-#   scale_fill_manual(values = colors_g)
-# plot_roots_g
-
-
+# ggsave('plot_msc_bgb.png', 
+#        plot_bgb, 
+#        bg='transparent')
 
 

@@ -84,10 +84,7 @@ soil.df <- soil.raw.df %>%
   filter(!drymass_4_87 < burnmass_1_550,
          !burnmass_1_550 < burnmass_2_950) %>% 
   mutate(prop_sample_left = burnmass_1_550 / drymass_4_87) %>% 
-  mutate(prop_org_mat = 1 - prop_sample_left) %>% 
-  # removing grazing level N because it is too different from other 
-  # levels to be included in analysis
-  filter(!grazing == "Natural")
+  mutate(prop_org_mat = 1 - prop_sample_left) 
 
 
 ## Models will be fitted for each dataset 
@@ -116,9 +113,9 @@ plot_soil <- soil.df %>%
                        fill = warming,
                        #linetype = warming,
                        shape = warming)
-  ) +
-  geom_point(size = 4) + 
-  theme_minimal(base_size = 20) + 
+  ) + 
+  geom_point(size = 2) + 
+  theme_minimal(base_size = 12) + 
   theme(legend.title = element_blank(),
         legend.position = "bottom", 
         legend.box = "horizontal") +
@@ -126,16 +123,16 @@ plot_soil <- soil.df %>%
   scale_fill_manual(values = colors_w) + 
   scale_shape_manual(values = c(21, 25)) + 
   #scale_linetype_manual(values = c("longdash", "solid")) + 
-  labs(title = "Proportion of soil organic matter", 
+  labs(title = "", 
        x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)), 
        y = bquote(Proportion~organic~material)) + 
   facet_grid(origSiteID ~ grazing) +
   geom_smooth(method = "lm", size = 1)
 plot_soil 
 
-ggsave('plot_msc_soil.png', 
-       plot_soil, 
-       bg='transparent')
+# ggsave('plot_msc_soil.png', 
+#        plot_soil, 
+#        bg='transparent')
 
 ## TRASH AND MESSY STUFF --------------
 # ## plot to see how the soil data is distributed between 1 and 0 
