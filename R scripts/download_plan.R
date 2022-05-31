@@ -6,7 +6,7 @@ source("R scripts/MSc_aesthetics.R")
 
 ## Data dowloaded from osf
 
-tranformation_plan <- list(
+download_plan <- list(
   ### ABOVEGROUND BIOMASS -------------------------------------
   
   ## import root biomass and fix it
