@@ -1,8 +1,6 @@
 ## transformation plan 
 
-# source("R scripts/ThreeD_load_packages.R")
-# source("R scripts/ThreeD_create_metadata.R")
-source("R scripts/download_plan.R")
+
 
 tranformation_plan <- list(
   
@@ -53,6 +51,9 @@ tranformation_plan <- list(
         name = agb.alp.df,
         command = {
           agb.alp.df <- agb.df %>% 
+            # removing grazing level N because it is too different from other 
+            # levels to be included in analysis
+            filter(!grazing == "Natural") %>% 
             filter(origSiteID == "Lia")
         }),
     
@@ -60,6 +61,9 @@ tranformation_plan <- list(
       name = agb.sub.df,
       command = {
         agb.sub.df <- agb.df %>% 
+          # removing grazing level N because it is too different from other 
+          # levels to be included in analysis
+          filter(!grazing == "Natural") %>% 
           filter(origSiteID == "Joa")
       }),
 
@@ -67,10 +71,59 @@ tranformation_plan <- list(
 
 # import root biomass and fix it
 tar_target(
-  name = roots_clean_df,
+  name = roots.df,
   command = {
+    roots.df <- roots.raw.df %>%
+      mutate(dateRIC_washed = ymd(dateRIC_washed),  
+             date_roots_dried = ymd(date_roots_dried), # change format to date
+             root_mass_g = total_mass_g - alutray_mass_g, 
+             root_mass_cm3 = (root_mass_g/(pi*(1.6)^2*RIC_length_cm))) %>% # calculate volume
+      mutate_if(is.character, as.factor) %>%
+      # deciding order of origSiteID, 1. Lia 2. Joa
+      mutate(grazing = recode(grazing, 
+                              "C" = "Control", "M" = "Medium",
+                              "I" = "Intensive","N" = "Natural"),
+             warming = recode(warming, 
+                              "A" = "Ambient", "W" = "Warming")) %>% 
+      mutate(origSiteID = factor(origSiteID, levels = c("Lia", "Joa")),
+             grazing = factor(grazing, 
+                              levels = c("C" = "Control", 
+                                         "M" = "Medium",
+                                         "I" = "Intensive",
+                                         "N" = "Natural"))) %>% 
+      # changing grazing into cont. variable too reduce degrees of freedom in models
+      mutate(grazing_lvl = case_when((grazing == "Control") ~ 0,
+                                     (grazing == "Medium") ~ 2,
+                                     (grazing == "Intensive") ~ 4)) %>% 
+      left_join(NitrogenDictionary, by = "Nlevel") %>% 
+      mutate(Namount_kg_ha_y = log(Namount_kg_ha_y +1)) %>% 
+      mutate(days_buried = recover_date_2021 - burial_date)  
 
-  }),
+  }), 
+
+tar_target(
+  name = roots.alp.df,
+  command = {
+    ## Making dataset for alpine site
+    roots.alp.df <- roots.df %>% 
+      # removing grazing level N because it is too different from other 
+      # levels to be included in analysis
+      filter(!grazing == "Natural") %>% 
+      filter(origSiteID == "Lia") 
+  }
+),
+
+tar_target(
+  name = roots.sub.df,
+  command = {
+    ## Making dataset for sub-alpine site 
+    roots.sub.df <- roots.df %>% 
+      # removing grazing level N because it is too different from other 
+      # levels to be included in analysis
+      filter(!grazing == "Natural") %>% 
+      filter(origSiteID == "Joa") 
+  }
+),
 
 
   ### TEABAG / DECOMPOSITION BIOMASS --------------------------------
@@ -160,10 +213,23 @@ tar_target(
     tea.green.alp.df <- teabag.df %>% 
       # removing grazing level N because it is too different from other 
       # levels to be included in analysis
-      filter(!grazing == "Natural") %<%
+      filter(!grazing == "Natural") %>% 
       filter(origSiteID == "Lia")
   }
 ), 
+
+tar_target(
+  name = tea.green.sub.df,
+  command = {
+    ## Making dataset for sub-alpine site 
+    tea.green.sub.df <- teabag.df %>% 
+      # removing grazing level N because it is too different from other 
+      # levels to be included in analysis
+      filter(!grazing == "Natural") %>% 
+      filter(origSiteID == "Joa") 
+  }
+),
+
 
 tar_target(
   name = tea.red.alp.df,
@@ -171,10 +237,11 @@ tar_target(
     tea.red.alp.df <- teabag.df %>% 
       # removing grazing level N because it is too different from other 
       # levels to be included in analysis
-      filter(!grazing == "Natural") %<%
+      filter(!grazing == "Natural") %>% 
       filter(origSiteID == "Lia") 
   }
 ),
+
 
 tar_target(
   name = tea.red.sub.df,
@@ -182,7 +249,7 @@ tar_target(
     tea.red.sub.df <- teabag.df %>% 
       # removing grazing level N because it is too different from other 
       # levels to be included in analysis
-      filter(!grazing == "Natural") %<%
+      filter(!grazing == "Natural") %>% 
       filter(origSiteID == "Joa")
   }
 ), 
