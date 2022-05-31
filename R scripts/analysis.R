@@ -35,7 +35,7 @@ check_model(mod.agb.wng.int.alp) # ok
 # agb ~ w * n + g
 options(scipen = 100, digits = 4)
 ## running model with result and unnest to create output
-output.model.agb.alp <- agb.df %>%
+output.model.agb.alp <- agb.alp.df %>%
   # removing grazing level N to reduce degrees of freedom
   filter(!grazing == "Natural") %>%
   group_by(origSiteID) %>% #
@@ -99,7 +99,7 @@ mod.agb.wng.int.sub <-
 check_model(mod.agb.wng.int.sub) # looks ok 
 
 ## running model with result and unnest to create output
-output.model.agb.sub <- agb.df %>%
+output.model.agb.sub <- agb.sub.df %>%
   # removing grazing level N to reduce degrees of freedom
   group_by(origSiteID) %>% #
   filter(origSiteID == "Joa") %>%
@@ -163,7 +163,7 @@ mod.roots.w.alp <-
 check_model(mod.roots.w.alp) # little off
 
 
-output.model.roots.alp <- roots.df %>%
+output.model.roots.alp <- roots.alp.df %>%
   # removing grazing level N to reduce degrees of freedom
   group_by(origSiteID) %>% #
   filter(origSiteID == "Lia") %>%
@@ -221,7 +221,7 @@ mod.roots.wng.add.sub <-
 # checking model assumptions 
 check_model(mod.roots.wng.add.sub) # 
 
-output.model.roots.sub <- roots.df %>%
+output.model.roots.sub <- roots.sub.df %>%
 group_by(origSiteID) %>% #
   filter(origSiteID == "Joa") %>%
   nest() %>% # makes little dataframes inside my data, closed
