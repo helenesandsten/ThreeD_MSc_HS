@@ -171,7 +171,7 @@ plot_teabags_green <- teabag.df %>%
                        shape = warming)
   ) +
   geom_point(size = 2) +
-  theme_minimal(base_size = 12) +
+  theme_minimal(base_size = 16) +
   theme(legend.title = element_blank(),
         legend.position = "bottom",
         legend.box = "horizontal") +
@@ -185,7 +185,7 @@ plot_teabags_green <- teabag.df %>%
   # geom_line() +
   geom_smooth(method = "lm") +
   facet_grid(origSiteID ~ grazing)
-plot_teabags_green
+#plot_teabags_green
 
 # ggsave('plot_msc_tb_green.png', 
 #        plot_teabags_green, 
@@ -213,7 +213,7 @@ plot_teabags_red <- teabag.df %>%
                        shape = warming)
   ) +
   geom_point(size = 2) + 
-  theme_minimal(base_size = 12) + 
+  theme_minimal(base_size = 16) + 
   theme(legend.title = element_blank(),
         legend.position = "bottom", 
         legend.box = "horizontal") +
@@ -227,14 +227,14 @@ plot_teabags_red <- teabag.df %>%
   # geom_line() +
   geom_smooth(method = "lm") +
   facet_grid(origSiteID ~ grazing) 
-plot_teabags_red
+#plot_teabags_red
 
 # ggsave('plot_msc_tb_red.png', 
 #        plot_teabags_red, 
 #        bg='transparent')
 
 ## PLOT DEOMPOSITION RATE k ---------------------------------
-plot_decomp_k <- decomp.df %>% 
+plot_decomp_k_all <- decomp.df %>% 
   group_by(Namount_kg_ha_y, origSiteID, warming, grazing) %>% 
   mutate(origSiteID = case_when(
     (origSiteID == "Lia") ~ "Alpine",
@@ -246,10 +246,9 @@ plot_decomp_k <- decomp.df %>%
                        color = warming,
                        fill = warming,
                        #linetype = warming,
-                       shape = warming)
-  ) +
+                       shape = warming)) +
   geom_point(size = 2) + 
-  theme_minimal(base_size = 12) + 
+  theme_minimal(base_size = 16) + 
   theme(legend.title = element_blank(),
         legend.position = "bottom", 
         legend.box = "horizontal") +
@@ -262,10 +261,77 @@ plot_decomp_k <- decomp.df %>%
        y = bquote(k)) + 
   facet_grid(origSiteID ~ grazing) +
   geom_smooth(method = "lm", size = 1)
-plot_decomp_k
+#plot_decomp_k_all
 
-# ggsave('plot_msc_dec_k.png', 
-#        plot_decomp_k, 
+# ggsave('plot_msc_dec_k_all.png',
+#        plot_decomp_k_all,
+#        bg='transparent')
+
+plot_decomp_k_cmi_alp <- decomp.df %>% 
+  group_by(Namount_kg_ha_y, origSiteID, warming, grazing) %>% 
+  mutate(origSiteID = case_when(
+    (origSiteID == "Lia") ~ "Alpine",
+    (origSiteID == "Joa") ~ "Sub-alpine")) %>% 
+  filter(!grazing == "Natural") %>%
+  filter(!origSiteID == "Sub-alpine") %>%
+  ggplot(mapping = aes(x = log(Namount_kg_ha_y +1), 
+                       y = k, 
+                       color = warming,
+                       fill = warming,
+                       #linetype = warming,
+                       shape = warming)) +
+  geom_point(size = 2) + 
+  theme_minimal(base_size = 16) + 
+  theme(legend.title = element_blank(),
+        legend.position = "bottom", 
+        legend.box = "horizontal") +
+  scale_color_manual(values = colors_w) + 
+  scale_fill_manual(values = colors_w) + 
+  scale_shape_manual(values = c(21, 25)) + 
+  #scale_linetype_manual(values = c("longdash", "solid")) + 
+  labs(title = "", 
+       x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)), 
+       y = bquote(k)) + 
+  facet_grid(origSiteID ~ grazing) +
+  geom_smooth(method = "lm", size = 1)
+#plot_decomp_k_cmi_alp
+
+# ggsave('plot_msc_dec_cmi_alp.png',
+#        plot_decomp_k_cmi_alp,
+#        bg='transparent')
+
+plot_decomp_k_all_sub <- decomp.df %>% 
+  group_by(Namount_kg_ha_y, origSiteID, warming, grazing) %>% 
+  mutate(origSiteID = case_when(
+    (origSiteID == "Lia") ~ "Alpine",
+    (origSiteID == "Joa") ~ "Sub-alpine")) %>% 
+  #filter(!grazing == "Natural") %>%
+  filter(!origSiteID == "Alpine") %>%
+  ggplot(mapping = aes(x = log(Namount_kg_ha_y +1), 
+                       y = k, 
+                       color = warming,
+                       fill = warming,
+                       #linetype = warming,
+                       shape = warming)) +
+  geom_point(size = 2) + 
+  theme_minimal(base_size = 16) + 
+  theme(legend.title = element_blank(),
+        legend.position = "bottom", 
+        legend.box = "horizontal") +
+  scale_color_manual(values = colors_w) + 
+  scale_fill_manual(values = colors_w) + 
+  scale_shape_manual(values = c(21, 25)) + 
+  #scale_linetype_manual(values = c("longdash", "solid")) + 
+  labs(title = "", 
+       x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)), 
+       y = bquote(k)) + 
+  ylim(0, 0.06) +
+  facet_grid(origSiteID ~ grazing) +
+  geom_smooth(method = "lm", size = 1)
+#plot_decomp_k_all_sub
+
+# ggsave('plot_msc_dec_all_sub.png',
+#        plot_decomp_k_all_sub,
 #        bg='transparent')
 
 ## PLOT STABILIZATIONS FACTOR S ALPINE  -------------------------
@@ -284,7 +350,7 @@ plot_decomp_s_alp <- decomp.df %>%
                        shape = warming)
   ) +
   geom_point(size = 2) + 
-  theme_minimal(base_size = 12) + 
+  theme_minimal(base_size = 16) + 
   theme(legend.title = element_blank(),
         legend.position = "bottom", 
         legend.box = "horizontal") +
@@ -298,11 +364,11 @@ plot_decomp_s_alp <- decomp.df %>%
   ylim(0, 0.7) +
   facet_grid(origSiteID ~ grazing) +
   geom_smooth(method = "lm", size = 1)
-plot_decomp_s_alp
+#plot_decomp_s_alp
 
-ggsave('plot_msc_apdx_dec_k.png',
-       plot_decomp_k,
-       bg='transparent')
+# ggsave('plot_msc_dec_s_alp.png',
+#        plot_decomp_s_alp,
+#        bg='transparent')
 
 ## PLOT STABILIZATIONS FACTOR S SUB-ALPINE  -------------------------
 plot_decomp_s_sub <- decomp.df %>% 
@@ -311,7 +377,7 @@ plot_decomp_s_sub <- decomp.df %>%
     (origSiteID == "Lia") ~ "Alpine",
     (origSiteID == "Joa") ~ "Sub-alpine")) %>% 
   #filter(!grazing == "Natural") %>%
-  filter(!origSiteID == "Sub-alpine") %>%
+  filter(!origSiteID == "Alpine") %>%
   ggplot(mapping = aes(x = log(Namount_kg_ha_y +1), 
                        y = S, 
                        color = warming,
@@ -320,7 +386,7 @@ plot_decomp_s_sub <- decomp.df %>%
                        shape = warming)
   ) +
   geom_point(size = 2) + 
-  theme_minimal(base_size = 12) + 
+  theme_minimal(base_size = 16) + 
   theme(legend.title = element_blank(),
         legend.position = "bottom", 
         legend.box = "horizontal") +
@@ -334,6 +400,8 @@ plot_decomp_s_sub <- decomp.df %>%
   ylim(0, 0.7) +
   facet_grid(origSiteID ~ grazing) +
   geom_smooth(method = "lm", size = 1)
-plot_decomp_s_sub
+#plot_decomp_s_sub
 
-
+# ggsave('plot_msc_dec_s_sub.png',
+#        plot_decomp_s_sub,
+#        bg='transparent')
