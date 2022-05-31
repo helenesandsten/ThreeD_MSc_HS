@@ -1,16 +1,8 @@
 ### figures plan 
 
-source("R scripts/analysis_plan.R")
-
 figure_plan <- list(
 
-  tar_target(
-    name = ,
-    command = {
-      
-    }),
-  
-  ### ABOVEGROUND BIOMASS -------------------------------------
+  ### ABOVEGROUND BIOMASS ------------------------------------- 
   tar_target(
     name = plot_agb_cmi,
     command = {
