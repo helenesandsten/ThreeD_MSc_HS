@@ -71,7 +71,7 @@ plot_bgb <- roots.df %>%
                        shape = warming)
   ) +
   geom_point(size = 2) + 
-  theme_minimal(base_size = 12) + 
+  theme_minimal(base_size = 16) + 
   theme(legend.title = element_blank(),
         legend.position = "bottom", 
         legend.box = "horizontal") +
