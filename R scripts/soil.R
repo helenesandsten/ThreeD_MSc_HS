@@ -115,7 +115,7 @@ plot_soil <- soil.df %>%
                        shape = warming)
   ) + 
   geom_point(size = 2) + 
-  theme_minimal(base_size = 12) + 
+  theme_minimal(base_size = 16) + 
   theme(legend.title = element_blank(),
         legend.position = "bottom", 
         legend.box = "horizontal") +
@@ -128,7 +128,7 @@ plot_soil <- soil.df %>%
        y = bquote(Proportion~organic~material)) + 
   facet_grid(origSiteID ~ grazing) +
   geom_smooth(method = "lm", size = 1)
-plot_soil 
+# plot_soil 
 
 # ggsave('plot_msc_soil.png', 
 #        plot_soil, 
