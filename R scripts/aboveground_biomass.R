@@ -89,14 +89,14 @@ agb.df <- agb.raw.df %>%
 agb.alp.df <- agb.df %>% 
   # removing grazing level N because it is too different from other 
   # levels to be included in analysis
-  filter(!grazing == "Natural") 
+  filter(!grazing == "Natural") %>% 
   filter(origSiteID == "Lia") 
 
 ## Making dataset for sub-alpine site 
 agb.sub.df <- agb.df %>% 
   # removing grazing level N because it is too different from other 
   # levels to be included in analysis
-  filter(!grazing == "Natural") 
+  filter(!grazing == "Natural") %>% 
   filter(origSiteID == "Joa")   
   
 
@@ -116,7 +116,7 @@ plot_agb_cmi <- agb.df %>%
                        shape = warming)
          ) +
   geom_point(size = 2) + 
-  theme_minimal(base_size = 12) + 
+  theme_minimal(base_size = 16) + 
   theme(legend.title = element_blank(),
         legend.position = "bottom", 
         legend.box = "horizontal") +
@@ -146,7 +146,7 @@ plot_agb_all <- agb.df %>%
                        shape = warming)
   ) +
   geom_point(size = 2) + 
-  theme_minimal(base_size = 12) + 
+  theme_minimal(base_size = 16) + 
   theme(legend.title = element_blank(),
         legend.position = "bottom", 
         legend.box = "horizontal") +
