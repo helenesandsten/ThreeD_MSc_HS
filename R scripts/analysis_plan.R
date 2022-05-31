@@ -1,6 +1,6 @@
 # analysis plan 
 
-source("R scripts/transformation_plan.R")
+
 
 analysis_plan <- list(
   
@@ -8,21 +8,19 @@ analysis_plan <- list(
   tar_target(
     name = fit_models_agb_alp,
     command = {
-      fit_models_agb_alp <- 
-        lm(biomass_m2 ~ warming * Namount_kg_ha_y * grazing_lvl, 
-           data = agb.alp.df) 
-      options(scipen = 100, digits = 4)
-      dredge(fit_models_agb_alp, rank = "AICc", extra = c("R^2", "adjR^2")) 
+      fit_models_agb_alp <- lm(biomass_m2 ~ warming * Namount_kg_ha_y * grazing, data = agb.alp.df)
+      #dredge(fit_models_agb_alp, rank = "AICc", extra = c("R^2", "adjR^2"))
   }
 ),
+
 
 tar_target(
   name = mod.agb.wng.int.alp,
   command = {
-    mod.agb.wng.int.alp <- 
-      lm(biomass_m2 ~ warming * Namount_kg_ha_y * grazing_lvl, 
+    mod.agb.wng.int.alp <-
+      lm(biomass_m2 ~ warming * Namount_kg_ha_y * grazing_lvl,
          data = agb.alp.df)
-    # checking model assumptions 
+    # checking model assumptions
     check_model(mod.agb.wng.int.alp) # ok
   }
 ),
@@ -30,7 +28,7 @@ tar_target(
 tar_target(
   name = output.model.agb.alp,
   command = {
-    # making output of best model 
+    # making output of best model
     # agb ~ w * n + g
     options(scipen = 100, digits = 4)
     ## running model with result and unnest to create output
@@ -78,22 +76,22 @@ tar_target(
   name = fit_models_agb_sub,
   command = {
     ## models for sub-alpine site
-    fit_models_agb_sub <- 
-      lm(biomass_m2 ~ warming * Namount_kg_ha_y * grazing_lvl, 
-         data = agb.sub.df) 
-    options(scipen = 100, digits = 4)
-    dredge(fit_models_agb_sub, rank = "AICc", extra = c("R^2", "adjR^2"))
+    fit_models_agb_sub <-
+      lm(biomass_m2 ~ warming * Namount_kg_ha_y * grazing_lvl,
+         data = agb.sub.df)
+    # options(scipen = 100, digits = 4)
+    # dredge(fit_models_agb_sub, rank = "AICc", extra = c("R^2", "adjR^2"))
   }
 ),
 
 tar_target(
   name = mod.agb.g.sub,
   command = {
-    ## 1 
-    mod.agb.g.sub <- 
-      lm(biomass_m2 ~ grazing_lvl, 
+    ## 1
+    mod.agb.g.sub <-
+      lm(biomass_m2 ~ grazing_lvl,
          data = agb.sub.df)
-    # checking model assumptions 
+    # checking model assumptions
     check_model(mod.agb.g.sub) # not good
   }
 ),
@@ -101,11 +99,11 @@ tar_target(
 tar_target(
   name = mod.agb.wg.int.sub,
   command = {
-    ## 2 
-    mod.agb.wg.int.sub <- 
-      lm(biomass_m2 ~ warming * grazing_lvl, 
+    ## 2
+    mod.agb.wg.int.sub <-
+      lm(biomass_m2 ~ warming * grazing_lvl,
          data = agb.sub.df)
-    # checking model assumptions 
+    # checking model assumptions
     check_model(mod.agb.wg.int.sub) # looks ok
   }
 ),
@@ -113,11 +111,11 @@ tar_target(
 tar_target(
   name = mod.agb.wng.int.sub,
   command = {
-    ## 3 
-    mod.agb.wng.int.sub <- 
-      lm(biomass_m2 ~ warming * Namount_kg_ha_y * grazing_lvl, 
+    ## 3
+    mod.agb.wng.int.sub <-
+      lm(biomass_m2 ~ warming * Namount_kg_ha_y * grazing_lvl,
          data = agb.sub.df)
-    # checking model assumptions 
+    # checking model assumptions
     check_model(mod.agb.wng.int.sub) # looks ok
   }
 ),
@@ -169,23 +167,23 @@ tar_target(
 tar_target(
   name = fit_models_roots_alp,
   command = {
-    ## models for alpine site ------------------------------------- 
-    fit_models_roots_alp <- 
-      lm(root_mass_cm3 ~ warming * Namount_kg_ha_y * grazing_lvl, 
-         data = roots.alp.df) 
-    options(scipen = 100, digits = 4)
-    dredge(fit_models_roots_alp, rank = "AICc", extra = c("R^2", "adjR^2"))
+    ## models for alpine site -------------------------------------
+    fit_models_roots_alp <-
+      lm(root_mass_cm3 ~ warming * Namount_kg_ha_y * grazing_lvl,
+         data = roots.alp.df)
+    # options(scipen = 100, digits = 4)
+    # dredge(fit_models_roots_alp, rank = "AICc", extra = c("R^2", "adjR^2"))
   }
 ),
 
 tar_target(
   name = mod.roots.wn.int.alp,
   command = {
-    ## 2 
-    mod.roots.wn.int.alp <- 
-      lm(root_mass_cm3 ~ warming * Namount_kg_ha_y, 
+    ## 2
+    mod.roots.wn.int.alp <-
+      lm(root_mass_cm3 ~ warming * Namount_kg_ha_y,
          data = roots.alp.df)
-    # checking model assumptions 
+    # checking model assumptions
     check_model(mod.roots.wn.int.alp) # ok ---> best
   }
 ),
@@ -193,11 +191,11 @@ tar_target(
 tar_target(
   name = mod.roots.w.alp,
   command = {
-    ## 3 
-    mod.roots.w.alp <- 
-      lm(root_mass_cm3 ~ warming, 
+    ## 3
+    mod.roots.w.alp <-
+      lm(root_mass_cm3 ~ warming,
          data = roots.alp.df)
-    # checking model assumptions 
+    # checking model assumptions
     check_model(mod.roots.w.alp) # little off
   }
 ),
@@ -246,23 +244,23 @@ tar_target(
 tar_target(
   name = fit_models_roots_sub,
   command = {
-    ## models for sub-alpine site ------------------------------------- 
-    fit_models_roots_sub <- 
-      lm(root_mass_cm3 ~ warming * Namount_kg_ha_y * grazing_lvl, 
-         data = roots.sub.df) 
-    options(scipen = 100, digits = 4)
-    dredge(fit_models_roots_sub, rank = "AICc", extra = c("R^2", "adjR^2"))
+    ## models for sub-alpine site -------------------------------------
+    fit_models_roots_sub <-
+      lm(root_mass_cm3 ~ warming * Namount_kg_ha_y * grazing_lvl,
+         data = roots.sub.df)
+    # options(scipen = 100, digits = 4)
+    # dredge(fit_models_roots_sub, rank = "AICc", extra = c("R^2", "adjR^2"))
   }
 ),
 
 tar_target(
   name = mod.roots.ng.add.sub,
   command = {
-    ## 1 
-    mod.roots.ng.add.sub <- 
-      lm(root_mass_cm3 ~ Namount_kg_ha_y + grazing_lvl, 
+    ## 1
+    mod.roots.ng.add.sub <-
+      lm(root_mass_cm3 ~ Namount_kg_ha_y + grazing_lvl,
          data = roots.sub.df)
-    # checking model assumptions 
+    # checking model assumptions
     check_model(mod.roots.ng.add.sub) # ok
   }
 ),
@@ -270,10 +268,10 @@ tar_target(
 tar_target(
   name = mod.roots.n.sub,
   command = {
-    ## 2 
-    mod.roots.n.sub <- 
+    ## 2
+    mod.roots.n.sub <-
       lm(root_mass_cm3 ~ Namount_kg_ha_y, data = roots.sub.df)
-    # checking model assumptions 
+    # checking model assumptions
     check_model(mod.roots.n.sub) # ok
   }
 ),
@@ -281,12 +279,12 @@ tar_target(
 tar_target(
   name = mod.roots.wng.add.sub,
   command = {
-    ## 3 
-    mod.roots.wng.add.sub <- 
-      lm(root_mass_cm3 ~ warming + Namount_kg_ha_y + grazing_lvl, 
+    ## 3
+    mod.roots.wng.add.sub <-
+      lm(root_mass_cm3 ~ warming + Namount_kg_ha_y + grazing_lvl,
          data = roots.sub.df)
-    # checking model assumptions 
-    check_model(mod.roots.wng.add.sub) # 
+    # checking model assumptions
+    check_model(mod.roots.wng.add.sub) #
   }
 ),
 
@@ -335,12 +333,12 @@ tar_target(
 tar_target(
   name = fit_models_tea_green_alp,
   command = {
-    ## models for alpine site 
-    fit_models_tea_green_alp <- 
-      lm(mass_loss_proportion ~ warming * Namount_kg_ha_y * grazing_lvl, 
-         data = tea.green.alp.df) 
-    options(scipen = 100, digits = 4)
-    dredge(fit_models_tea_green_alp, rank = "AICc", extra = c("R^2", "adjR^2"))
+    ## models for alpine site
+    fit_models_tea_green_alp <-
+      lm(mass_loss_proportion ~ warming * Namount_kg_ha_y * grazing_lvl,
+         data = tea.green.alp.df)
+    # options(scipen = 100, digits = 4)
+    # dredge(fit_models_tea_green_alp, rank = "AICc", extra = c("R^2", "adjR^2"))
   }
 ),
 
@@ -371,10 +369,10 @@ tar_target(
 tar_target(
   name = fit_models_tea_green_sub,
   command = {
-    ## models for sub-alpine site 
-    fit_models_tea_green_sub <- 
-      lm(mass_loss_proportion ~ warming * Namount_kg_ha_y * grazing_lvl, 
-         data = tea.green.sub.df) 
+    ## models for sub-alpine site
+    fit_models_tea_green_sub <-
+      lm(mass_loss_proportion ~ warming * Namount_kg_ha_y * grazing_lvl,
+         data = tea.green.sub.df)
     options(scipen = 100, digits = 4)
     dredge(fit_models_tea_green_sub, rank = "AICc", extra = c("R^2", "adjR^2"))
   }
@@ -383,9 +381,9 @@ tar_target(
 tar_target(
   name = mod.tea.green.w.sub,
   command = {
-    ## 1 
-    mod.tea.green.w.sub <- 
-      lm(mass_loss_proportion ~ warming, 
+    ## 1
+    mod.tea.green.w.sub <-
+      lm(mass_loss_proportion ~ warming,
          data = tea.green.sub.df)
     # checking model assumptions
     check_model(mod.tea.green.w.sub) # not good
@@ -396,8 +394,8 @@ tar_target(
   name = mod.tea.green.wg.add.sub,
   command = {
     ## 3
-    mod.tea.green.wg.add.sub <- 
-      lm(mass_loss_proportion ~ warming + grazing_lvl, 
+    mod.tea.green.wg.add.sub <-
+      lm(mass_loss_proportion ~ warming + grazing_lvl,
          data = tea.green.sub.df)
     # checking model assumptions
     check_model(mod.tea.green.wg.add.sub) # little off
@@ -408,12 +406,12 @@ tar_target(
 tar_target(
   name = fit_models_tea_red_alp,
   command = {
-    ## models for alpine site 
-    fit_models_tea_red_alp <- 
-      lm(mass_loss_proportion ~ warming * Namount_kg_ha_y * grazing_lvl, 
-         data = tea.red.alp.df) 
-    options(scipen = 100, digits = 4)
-    dredge(fit_models_tea_red_alp, rank = "AICc", extra = c("R^2", "adjR^2"))
+    ## models for alpine site
+    fit_models_tea_red_alp <-
+      lm(mass_loss_proportion ~ warming * Namount_kg_ha_y * grazing_lvl,
+         data = tea.red.alp.df)
+    # options(scipen = 100, digits = 4)
+    # dredge(fit_models_tea_red_alp, rank = "AICc", extra = c("R^2", "adjR^2"))
   }
 ),
 
@@ -421,8 +419,8 @@ tar_target(
   name = mod.tea.red.w.alp,
   command = {
     ## 2
-    mod.tea.red.w.alp <- 
-      lm(mass_loss_proportion ~ warming, 
+    mod.tea.red.w.alp <-
+      lm(mass_loss_proportion ~ warming,
          data = tea.red.alp.df)
     # checking model assumptions
     check_model(mod.tea.red.w.alp) # not very good
@@ -433,8 +431,8 @@ tar_target(
   name = mod.tea.red.n.alp,
   command = {
     ## 3
-    mod.tea.red.n.alp <- 
-      lm(mass_loss_proportion ~ Namount_kg_ha_y, 
+    mod.tea.red.n.alp <-
+      lm(mass_loss_proportion ~ Namount_kg_ha_y,
          data = tea.red.alp.df)
     # checking model assumptions
     check_model(mod.tea.red.n.alp) #
@@ -444,12 +442,12 @@ tar_target(
 tar_target(
   name = fit_models_tea_red_sub,
   command = {
-    ## models for sub-alpine site 
-    fit_models_tea_red_sub <- 
-      lm(mass_loss_proportion ~ warming * Namount_kg_ha_y * grazing_lvl, 
-         data = tea.red.sub.df) 
-    options(scipen = 100, digits = 4)
-    dredge(fit_models_tea_red_sub, rank = "AICc", extra = c("R^2", "adjR^2"))
+    ## models for sub-alpine site
+    fit_models_tea_red_sub <-
+      lm(mass_loss_proportion ~ warming * Namount_kg_ha_y * grazing_lvl,
+         data = tea.red.sub.df)
+    # options(scipen = 100, digits = 4)
+    # dredge(fit_models_tea_red_sub, rank = "AICc", extra = c("R^2", "adjR^2"))
   }
 ),
 
@@ -457,8 +455,8 @@ tar_target(
   name = mod.tea.red.w.sub,
   command = {
     ## 1
-    mod.tea.red.w.sub <- 
-      lm(mass_loss_proportion ~ warming, 
+    mod.tea.red.w.sub <-
+      lm(mass_loss_proportion ~ warming,
          data = tea.red.sub.df)
     # checking model assumptions
     check_model(mod.tea.red.w.sub) # not good
@@ -469,8 +467,8 @@ tar_target(
   name = mod.tea.red.wg.add.sub,
   command = {
     ## 3
-    mod.tea.red.wg.add.sub <- 
-      lm(mass_loss_proportion ~ warming + grazing_lvl, 
+    mod.tea.red.wg.add.sub <-
+      lm(mass_loss_proportion ~ warming + grazing_lvl,
          data = tea.red.sub.df)
     # checking model assumptions
     check_model(mod.tea.red.wg.add.sub) #
@@ -482,12 +480,12 @@ tar_target(
   name = fit_models_decomp_k_alp,
   command = {
     ## models for decomposition rate k (only for alpine site)
-    ## models for alpine site 
+    ## models for alpine site
     fit_models_decomp_k_alp <-
-      lm(k ~ warming * Namount_kg_ha_y * grazing_lvl, 
+      lm(k ~ warming * Namount_kg_ha_y * grazing_lvl,
          data = decomp.k.alp.df)
-    options(scipen = 100, digits = 4)
-    dredge(fit_models_decomp_k_alp, rank = "AICc", extra = c("R^2", "adjR^2"))
+    # options(scipen = 100, digits = 4)
+    # dredge(fit_models_decomp_k_alp, rank = "AICc", extra = c("R^2", "adjR^2"))
   }
 ),
 
@@ -495,11 +493,11 @@ tar_target(
   name = mod.decomp.k.g.alp,
   command = {
     ## 2
-    mod.decomp.k.g.alp <- 
-      lm(k ~ grazing_lvl, 
+    mod.decomp.k.g.alp <-
+      lm(k ~ grazing_lvl,
          data = decomp.k.alp.df)
     # checking model assumptions
-    check_model(mod.decomp.k.g.alp) # little off 
+    check_model(mod.decomp.k.g.alp) # little off
   }
 ),
 
@@ -507,8 +505,8 @@ tar_target(
   name = mod.decomp.k.ng.int.alp,
   command = {
     ## 3
-    mod.decomp.k.ng.int.alp <- 
-      lm(k ~ Namount_kg_ha_y * grazing_lvl, 
+    mod.decomp.k.ng.int.alp <-
+      lm(k ~ Namount_kg_ha_y * grazing_lvl,
          data = decomp.k.alp.df)
     # checking model assumptions
     check_model(mod.decomp.k.ng.int.alp) # ok (-)
@@ -553,26 +551,26 @@ tar_target(
         (origSiteID == "Joa") ~ "Sub-alpine"))
   }
 ),
-# DEOMPOSITION - stabilization factor S ------------------------- 
+# DEOMPOSITION - stabilization factor S -------------------------
 tar_target(
   name = fit_models_decomp_s_alp,
   command = {
     ## models for stabilization factor S
     ## models for alpine site
     fit_models_decomp_s_alp <-
-      lm(S ~ warming * Namount_kg_ha_y * grazing_lvl, 
+      lm(S ~ warming * Namount_kg_ha_y * grazing_lvl,
          data = decomp.s.alp.df)
-    options(scipen = 100, digits = 4)
-    dredge(fit_models_decomp_s_alp, rank = "AICc", extra = c("R^2", "adjR^2"))
+    # options(scipen = 100, digits = 4)
+    # dredge(fit_models_decomp_s_alp, rank = "AICc", extra = c("R^2", "adjR^2"))
   }
 ),
 
 tar_target(
   name = mod.decomp.s.w.alp,
   command = {
-    ## 1 
+    ## 1
     mod.decomp.s.w.alp <-
-      lm(S ~ warming, 
+      lm(S ~ warming,
          data = decomp.s.alp.df)
     # checking model assumptions
     check_model(mod.decomp.s.w.alp) # off
@@ -584,7 +582,7 @@ tar_target(
   command = {
     ## 2
     mod.decomp.s.wn.add.alp <-
-      lm(S ~ warming + Namount_kg_ha_y, 
+      lm(S ~ warming + Namount_kg_ha_y,
          data = decomp.s.alp.df)
     # checking model assumptions
     check_model(mod.decomp.s.wn.add.alp) # ok
@@ -596,7 +594,7 @@ tar_target(
   command = {
     ## 3
     mod.decomp.s.wg.add.alp <-
-      lm(S ~ warming + grazing_lvl, 
+      lm(S ~ warming + grazing_lvl,
          data = decomp.s.alp.df)
     # checking model assumptions
     check_model(mod.decomp.s.wg.add.alp) # ok
@@ -646,19 +644,19 @@ tar_target(
   command = {
     ## models for sub-alpine site ---------------------------------
     fit_models_decomp_s_sub <-
-      lm(S ~ warming * Namount_kg_ha_y * grazing_lvl, 
+      lm(S ~ warming * Namount_kg_ha_y * grazing_lvl,
          data = decomp.s.sub.df)
-    options(scipen = 100, digits = 4)
-    dredge(fit_models_decomp_s_sub, rank = "AICc", extra = c("R^2", "adjR^2"))
+    # options(scipen = 100, digits = 4)
+    # dredge(fit_models_decomp_s_sub, rank = "AICc", extra = c("R^2", "adjR^2"))
   }
 ),
 
 tar_target(
   name = mod.decomp.s.w.sub,
   command = {
-    ## 1 
-    mod.decomp.s.w.sub <- 
-      lm(S ~ warming, 
+    ## 1
+    mod.decomp.s.w.sub <-
+      lm(S ~ warming,
          data = decomp.s.sub.df)
     # checking model assumptions
     check_model(mod.decomp.s.w.sub) # litte off
@@ -669,11 +667,11 @@ tar_target(
   name = mod.decomp.s.wn.add.sub,
   command = {
     ## 2
-    mod.decomp.s.wn.add.sub <- 
-      lm(S ~ warming + Namount_kg_ha_y, 
+    mod.decomp.s.wn.add.sub <-
+      lm(S ~ warming + Namount_kg_ha_y,
          data = decomp.s.sub.df)
     # checking model assumptions
-    check_model(mod.decomp.s.wn.add.sub) # ok 
+    check_model(mod.decomp.s.wn.add.sub) # ok
   }
 ),
 
@@ -681,11 +679,11 @@ tar_target(
   name = mod.decomp.s.wg.add.sub,
   command = {
     ## 3
-    mod.decomp.s.wg.add.sub <- 
-      lm(S ~ warming + grazing_lvl, 
+    mod.decomp.s.wg.add.sub <-
+      lm(S ~ warming + grazing_lvl,
          data = decomp.s.sub.df)
     # checking model assumptions
-    check_model(mod.decomp.s.wg.add.sub) # ok 
+    check_model(mod.decomp.s.wg.add.sub) # ok
   }
 ),
 
@@ -733,21 +731,21 @@ tar_target(
   command = {
     ## models for alpine site
     fit_models_soil_alp <-
-      lm(prop_org_mat ~ warming * Namount_kg_ha_y * grazing_lvl, 
+      lm(prop_org_mat ~ warming * Namount_kg_ha_y * grazing_lvl,
          data = soil.alp.df)
-    options(scipen = 100, digits = 4)
-    dredge(fit_models_soil_alp, rank = "AICc", extra = c("R^2", "adjR^2"))
+    # options(scipen = 100, digits = 4)
+    # dredge(fit_models_soil_alp, rank = "AICc", extra = c("R^2", "adjR^2"))
   }
 ),
 
 tar_target(
   name = mod.soil.w.alp,
   command = {
-    ## 1 
+    ## 1
     mod.soil.w.alp <-
-      lm(prop_org_mat ~ warming, 
+      lm(prop_org_mat ~ warming,
          data = soil.alp.df)
-    # checking model assumptions 
+    # checking model assumptions
     check_model(mod.soil.w.alp) # not good
   }
 ),
@@ -757,9 +755,9 @@ tar_target(
   command = {
     ## 2
     mod.soil.wn.add.alp <-
-      lm(prop_org_mat ~ warming + Namount_kg_ha_y, 
+      lm(prop_org_mat ~ warming + Namount_kg_ha_y,
          data = soil.alp.df)
-    # checking model assumptions 
+    # checking model assumptions
     check_model(mod.soil.wn.add.alp) # ok ---> best (?)
   }
 ),
@@ -769,9 +767,9 @@ tar_target(
   command = {
     ## 3
     mod.soil.wg.add.alp <-
-      lm(prop_org_mat ~ warming + grazing_lvl, 
+      lm(prop_org_mat ~ warming + grazing_lvl,
          data = soil.alp.df)
-    # checking model assumptions 
+    # checking model assumptions
     check_model(mod.soil.wg.add.alp) # little off
   }
 ),
@@ -819,21 +817,21 @@ tar_target(
   command = {
     ## models for sub-alpine site
     fit_models_soil_sub <-
-      lm(prop_org_mat ~ warming * Namount_kg_ha_y * grazing_lvl, 
+      lm(prop_org_mat ~ warming * Namount_kg_ha_y * grazing_lvl,
          data = soil.sub.df)
-    options(scipen = 100, digits = 4)
-    dredge(fit_models_soil_sub, rank = "AICc", extra = c("R^2", "adjR^2"))
+    # options(scipen = 100, digits = 4)
+    # dredge(fit_models_soil_sub, rank = "AICc", extra = c("R^2", "adjR^2"))
   }
 ),
 
 tar_target(
   name = mod.soil.w.sub,
   command = {
-    ## 1 
+    ## 1
     mod.soil.w.sub <-
-      lm(prop_org_mat ~ warming, 
+      lm(prop_org_mat ~ warming,
          data = soil.sub.df)
-    # checking model assumptions 
+    # checking model assumptions
     check_model(mod.soil.w.sub) # little off
   }
 ),
@@ -843,10 +841,10 @@ tar_target(
   command = {
     ## 2
     mod.soil.wg.int.sub <-
-      lm(prop_org_mat ~ warming * grazing_lvl, 
+      lm(prop_org_mat ~ warming * grazing_lvl,
          data = soil.sub.df)
-    # checking model assumptions 
-    check_model(mod.soil.wg.int.sub) # ok 
+    # checking model assumptions
+    check_model(mod.soil.wg.int.sub) # ok
   }
 ),
 
@@ -855,9 +853,9 @@ tar_target(
   command = {
     ## 3
     mod.soil.wg.add.sub <-
-      lm(prop_org_mat ~ warming + grazing_lvl, 
+      lm(prop_org_mat ~ warming + grazing_lvl,
          data = soil.sub.df)
-    # checking model assumptions 
+    # checking model assumptions
     check_model(mod.soil.wg.add.sub) # ok
   }
 ),
@@ -901,8 +899,6 @@ tar_target(
 )
 
 )
-
-
 
 
 # tar_target(
