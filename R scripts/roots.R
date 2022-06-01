@@ -61,7 +61,7 @@ plot_bgb <- roots.df %>%
   mutate(origSiteID = case_when(
     (origSiteID == "Lia") ~ "Alpine",
     (origSiteID == "Joa") ~ "Sub-alpine")) %>% 
-  filter(!grazing == "Natural") %>%
+  #filter(!grazing == "Natural") %>%
   summarise(root_mass_cm3 = mean(root_mass_cm3)) %>%
   ggplot(mapping = aes(x = log(Namount_kg_ha_y +1),
                        y = root_mass_cm3,
