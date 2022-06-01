@@ -334,6 +334,40 @@ plot_decomp_k_all_sub <- decomp.df %>%
 #        plot_decomp_k_all_sub,
 #        bg='transparent')
 
+
+
+## PLOT STABILIZATIONS FACTOR S   -------------------------
+plot_decomp_s <- decomp.df %>% 
+  group_by(Namount_kg_ha_y, origSiteID, warming, grazing) %>% 
+  mutate(origSiteID = case_when(
+    (origSiteID == "Lia") ~ "Alpine",
+    (origSiteID == "Joa") ~ "Sub-alpine")) %>% 
+  #filter(!grazing == "Natural") %>%
+  # filter(!origSiteID == "Sub-alpine") %>%
+  ggplot(mapping = aes(x = log(Namount_kg_ha_y +1), 
+                       y = S, 
+                       color = warming,
+                       fill = warming,
+                       #linetype = warming,
+                       shape = warming)
+  ) +
+  geom_point(size = 2) + 
+  theme_minimal(base_size = 16) + 
+  theme(legend.title = element_blank(),
+        legend.position = "bottom", 
+        legend.box = "horizontal") +
+  scale_color_manual(values = colors_w) + 
+  scale_fill_manual(values = colors_w) + 
+  scale_shape_manual(values = c(21, 25)) + 
+  #scale_linetype_manual(values = c("longdash", "solid")) + 
+  labs(title = "", 
+       x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)), 
+       y = bquote(Stabilisation~factor~(S))) + 
+  ylim(0, 0.7) +
+  facet_grid(origSiteID ~ grazing) +
+  geom_smooth(method = "lm", size = 1)
+plot_decomp_s
+
 ## PLOT STABILIZATIONS FACTOR S ALPINE  -------------------------
 plot_decomp_s_alp <- decomp.df %>% 
   group_by(Namount_kg_ha_y, origSiteID, warming, grazing) %>% 
