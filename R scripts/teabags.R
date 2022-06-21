@@ -181,15 +181,15 @@ plot_teabags_green <- teabag.df %>%
   ylim(0.25, 1) +
   labs(title = "",
        x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)),
-       y = bquote(Mass~loss~proportion)) +
+       y = bquote(Proportion~mass~loss~(green~tea))) +
   # geom_line() +
   geom_smooth(method = "lm") +
   facet_grid(origSiteID ~ grazing)
-#plot_teabags_green
+plot_teabags_green
 
-# ggsave('plot_msc_tb_green.png', 
-#        plot_teabags_green, 
-#        bg='transparent')
+ggsave('plot_msc_tb_green.png',
+       plot_teabags_green,
+       bg='transparent', height = 6, width = 8)
 
 
 ## PLOT MASS LOSS ROOIBOS TEA ---------------------------------
@@ -220,18 +220,18 @@ plot_teabags_red <- teabag.df %>%
   scale_color_manual(values = colors_w) + 
   scale_fill_manual(values = colors_w) + 
   scale_shape_manual(values = c(21, 25)) + 
-  ylim(0.25, 1) +
+  ylim(0.25, 0.6) +
   labs(title = "",
        x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)),
-       y = bquote(Mass~loss~proportion)) + 
+       y = bquote(Proportion~mass~loss~(rooibos~tea))) + 
   # geom_line() +
   geom_smooth(method = "lm") +
   facet_grid(origSiteID ~ grazing) 
-#plot_teabags_red
-
-# ggsave('plot_msc_tb_red.png', 
-#        plot_teabags_red, 
-#        bg='transparent')
+# plot_teabags_red
+# 
+# ggsave('plot_msc_tb_red.png',
+#        plot_teabags_red,
+#        bg='transparent', height = 6, width = 8)
 
 ## PLOT DEOMPOSITION RATE k ---------------------------------
 plot_decomp_k_all <- decomp.df %>% 
@@ -291,43 +291,43 @@ plot_decomp_k_cmi_alp <- decomp.df %>%
   #scale_linetype_manual(values = c("longdash", "solid")) + 
   labs(title = "", 
        x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)), 
-       y = bquote(k)) + 
+       y = bquote(Decomposition~rate~(k))) + 
   facet_grid(origSiteID ~ grazing) +
   geom_smooth(method = "lm", size = 1)
-#plot_decomp_k_cmi_alp
-
-# ggsave('plot_msc_dec_cmi_alp.png',
+# plot_decomp_k_cmi_alp
+# 
+# ggsave('plot_msc_dec_k_cmi_alp.png',
 #        plot_decomp_k_cmi_alp,
-#        bg='transparent')
+#        bg='transparent', height = 4, width = 6)
 
-plot_decomp_k_all_sub <- decomp.df %>% 
-  group_by(Namount_kg_ha_y, origSiteID, warming, grazing) %>% 
-  mutate(origSiteID = case_when(
-    (origSiteID == "Lia") ~ "Alpine",
-    (origSiteID == "Joa") ~ "Sub-alpine")) %>% 
-  #filter(!grazing == "Natural") %>%
-  filter(!origSiteID == "Alpine") %>%
-  ggplot(mapping = aes(x = log(Namount_kg_ha_y +1), 
-                       y = k, 
-                       color = warming,
-                       fill = warming,
-                       #linetype = warming,
-                       shape = warming)) +
-  geom_point(size = 2) + 
-  theme_minimal(base_size = 16) + 
-  theme(legend.title = element_blank(),
-        legend.position = "bottom", 
-        legend.box = "horizontal") +
-  scale_color_manual(values = colors_w) + 
-  scale_fill_manual(values = colors_w) + 
-  scale_shape_manual(values = c(21, 25)) + 
-  #scale_linetype_manual(values = c("longdash", "solid")) + 
-  labs(title = "", 
-       x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)), 
-       y = bquote(k)) + 
-  ylim(0, 0.06) +
-  facet_grid(origSiteID ~ grazing) +
-  geom_smooth(method = "lm", size = 1)
+# plot_decomp_k_all_sub <- decomp.df %>% 
+#   group_by(Namount_kg_ha_y, origSiteID, warming, grazing) %>% 
+#   mutate(origSiteID = case_when(
+#     (origSiteID == "Lia") ~ "Alpine",
+#     (origSiteID == "Joa") ~ "Sub-alpine")) %>% 
+#   #filter(!grazing == "Natural") %>%
+#   filter(!origSiteID == "Alpine") %>%
+#   ggplot(mapping = aes(x = log(Namount_kg_ha_y +1), 
+#                        y = k, 
+#                        color = warming,
+#                        fill = warming,
+#                        #linetype = warming,
+#                        shape = warming)) +
+#   geom_point(size = 2) + 
+#   theme_minimal(base_size = 16) + 
+#   theme(legend.title = element_blank(),
+#         legend.position = "bottom", 
+#         legend.box = "horizontal") +
+#   scale_color_manual(values = colors_w) + 
+#   scale_fill_manual(values = colors_w) + 
+#   scale_shape_manual(values = c(21, 25)) + 
+#   #scale_linetype_manual(values = c("longdash", "solid")) + 
+#   labs(title = "", 
+#        x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)), 
+#        y = bquote(k)) + 
+#   ylim(0, 0.06) +
+#   facet_grid(origSiteID ~ grazing) +
+#   geom_smooth(method = "lm", size = 1)
 #plot_decomp_k_all_sub
 
 # ggsave('plot_msc_dec_all_sub.png',
@@ -367,6 +367,10 @@ plot_decomp_s <- decomp.df %>%
   facet_grid(origSiteID ~ grazing) +
   geom_smooth(method = "lm", size = 1)
 plot_decomp_s
+
+ggsave('plot_msc_plot_decomp_s.png',
+       plot_decomp_s,
+       bg='transparent', height = 6, width = 8)
 
 ## PLOT STABILIZATIONS FACTOR S ALPINE  -------------------------
 plot_decomp_s_alp <- decomp.df %>% 

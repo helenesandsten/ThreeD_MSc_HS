@@ -125,14 +125,14 @@ plot_soil <- soil.df %>%
   #scale_linetype_manual(values = c("longdash", "solid")) + 
   labs(title = "", 
        x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)), 
-       y = bquote(Proportion~organic~material)) + 
+       y = bquote(Proportion~soil~organic~material)) + 
   facet_grid(origSiteID ~ grazing) +
   geom_smooth(method = "lm", size = 1)
-# plot_soil 
+plot_soil
 
-# ggsave('plot_msc_soil.png', 
-#        plot_soil, 
-#        bg='transparent')
+# ggsave('plot_msc_soil.png',
+#        plot_soil,
+#        bg='transparent', height = 6, width = 8)
 
 ## TRASH AND MESSY STUFF --------------
 # ## plot to see how the soil data is distributed between 1 and 0 

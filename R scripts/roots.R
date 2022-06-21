@@ -34,6 +34,11 @@ mutate(dateRIC_washed = ymd(dateRIC_washed),
   mutate(Namount_kg_ha_y = log(Namount_kg_ha_y +1)) %>% 
   mutate(days_buried = recover_date_2021 - burial_date) 
 
+## calculating average RIC depth per site 
+ric_depth.df <- roots.df %>% 
+  select(origSiteID, destSiteID, warming, grazing, Namount_kg_ha_y, RIC_length_cm) %>% 
+  group_by(destSiteID) %>%
+  summarise(mean_ric_depth = mean(RIC_length_cm))
 
 ## Models will be fitted for each dataset 
 ## Making dataset for alpine site
@@ -62,7 +67,7 @@ plot_bgb <- roots.df %>%
     (origSiteID == "Lia") ~ "Alpine",
     (origSiteID == "Joa") ~ "Sub-alpine")) %>% 
   #filter(!grazing == "Natural") %>%
-  summarise(root_mass_cm3 = mean(root_mass_cm3)) %>%
+  # summarise(root_mass_cm3 = sum(root_mass_cm3)) %>% 
   ggplot(mapping = aes(x = log(Namount_kg_ha_y +1),
                        y = root_mass_cm3,
                        color = warming,
@@ -81,13 +86,13 @@ plot_bgb <- roots.df %>%
   #scale_linetype_manual(values = c("longdash", "solid")) + 
   labs(title = "",
        x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)),
-       y = bquote(Root~mass~(g/cm^3))) +
+       y = bquote(Belowground~biomass~(g~cm^-3))) +
   facet_grid(origSiteID ~ grazing) +
   geom_smooth(method = "lm", size = 1)
 plot_bgb
 
-# ggsave('plot_msc_bgb.png', 
-#        plot_bgb, 
-#        bg='transparent')
+ggsave('plot_msc_bgb.png',
+       plot_bgb,
+       bg='transparent', height = 6, width = 8)
 
 

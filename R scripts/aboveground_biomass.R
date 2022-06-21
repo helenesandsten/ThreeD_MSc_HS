@@ -126,41 +126,46 @@ plot_agb_cmi <- agb.df %>%
   #scale_linetype_manual(values = c("longdash", "solid")) + 
   labs(title = "", 
        x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)), 
-       y = bquote(Biomass~(g~m^-2))) + 
+       y = bquote(Aboveground~biomass~(g~m^-2))) + 
   facet_grid(origSiteID ~ grazing) +
   geom_smooth(method = "lm", size = 1)
 plot_agb_cmi
 
-plot_agb_all <- agb.df %>% 
-  group_by(Namount_kg_ha_y, origSiteID, warming, grazing, Nlevel, turfID) %>% 
-  mutate(origSiteID = case_when(
-    (origSiteID == "Lia") ~ "Alpine",
-    (origSiteID == "Joa") ~ "Sub-alpine")) %>% 
-  # filter(!grazing == "Natural") %>%
-  summarise(biomass_m2 = sum(biomass_m2)) %>% 
-  ggplot(mapping = aes(x = log(Namount_kg_ha_y +1), 
-                       y = biomass_m2, 
-                       color = warming,
-                       fill = warming,
-                       #linetype = warming,
-                       shape = warming)
-  ) +
-  geom_point(size = 2) + 
-  theme_minimal(base_size = 16) + 
-  theme(legend.title = element_blank(),
-        legend.position = "bottom", 
-        legend.box = "horizontal") +
-  scale_color_manual(values = colors_w) + 
-  scale_fill_manual(values = colors_w) + 
-  scale_shape_manual(values = c(21, 25)) + 
-  #geom_hline(yintercept = 300, alpha = 0.5) +
-  #scale_linetype_manual(values = c("longdash", "solid")) + 
-  labs(title = "", 
-       x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)), 
-       y = bquote(Biomass~(g~m^-2))) + 
-  facet_grid(origSiteID ~ grazing) + 
-  geom_smooth(method = "lm", size = 1) 
-plot_agb_all 
+# ggsave('plot_msc_abg.png',
+#        plot_agb_cmi,
+#        bg='transparent', height = 6, width = 6)
+
+
+# plot_agb_all <- agb.df %>% 
+#   group_by(Namount_kg_ha_y, origSiteID, warming, grazing, Nlevel, turfID) %>% 
+#   mutate(origSiteID = case_when(
+#     (origSiteID == "Lia") ~ "Alpine",
+#     (origSiteID == "Joa") ~ "Sub-alpine")) %>% 
+#   # filter(!grazing == "Natural") %>%
+#   summarise(biomass_m2 = sum(biomass_m2)) %>% 
+#   ggplot(mapping = aes(x = log(Namount_kg_ha_y +1), 
+#                        y = biomass_m2, 
+#                        color = warming,
+#                        fill = warming,
+#                        #linetype = warming,
+#                        shape = warming)
+#   ) +
+#   geom_point(size = 2) + 
+#   theme_minimal(base_size = 16) + 
+#   theme(legend.title = element_blank(),
+#         legend.position = "bottom", 
+#         legend.box = "horizontal") +
+#   scale_color_manual(values = colors_w) + 
+#   scale_fill_manual(values = colors_w) + 
+#   scale_shape_manual(values = c(21, 25)) + 
+#   #geom_hline(yintercept = 300, alpha = 0.5) +
+#   #scale_linetype_manual(values = c("longdash", "solid")) + 
+#   labs(title = "", 
+#        x = bquote(log(Nitrogen)~(kg~ha^-1~y^-1)), 
+#        y = bquote(Biomass~(g~m^-2))) + 
+#   facet_grid(origSiteID ~ grazing) + 
+#   geom_smooth(method = "lm", size = 1) 
+# plot_agb_all 
 
   
 # ggsave('plot_msc_agb.png', 
